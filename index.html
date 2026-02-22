@@ -1,9 +1,25 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KIMO TECH | Robot Workshop</title>
+
+<title>KIMO TECH | Arduino & Robotics Store Egypt</title>
+
+<meta name="description" content="KIMO TECH is a professional electronics and robotics store in Egypt. Buy Arduino, ESP32, Sensors, Motors and more with fast shipping.">
+
+<meta name="keywords" content="Arduino Egypt, Robotics Store Egypt, ESP32 Egypt">
+
+<meta name="author" content="KIMO TECH">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0ea5e9">
+
+<meta property="og:title" content="KIMO TECH | Arduino & Robotics Store Egypt">
+<meta property="og:description" content="Buy Arduino & Robotics parts in Egypt.">
+<meta property="og:image" content="https://kimo-techlab.com/images/logo.png">
+<meta property="og:url" content="https://kimo-techlab.com">
+<meta property="og:type" content="website">
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
@@ -446,7 +462,7 @@ const cartCount = document.getElementById("cart-count");
 function renderProducts(list){
   document.getElementById("productGrid").innerHTML =
     list.map((p,i)=>`
-      <div class="card" style="position:relative">
+      <div class="card" style="position:relative" onclick="openPopup(${i})">
         
         ${p.badge ? `<div class="badge">${p.badge}</div>` : ""}
 
@@ -455,7 +471,7 @@ function renderProducts(list){
         <div class="card-info">
           <h3>${p.name}</h3>
           <div class="price">${p.price} EGP</div>
-          <button class="add-btn" onclick="addToCart(${i})">
+          <button class="add-btn" onclick="event.stopPropagation(); addToCart(${i})">
             أضف للسلة
           </button>
         </div>
@@ -507,11 +523,56 @@ document.getElementById("cartBtn").onclick = function(){
   msg+=`\nالإجمالي: ${total} EGP`;
   window.open(`https://wa.me/201555735099?text=${encodeURIComponent(msg)}`);
 };
+/* ===== CART ===== */
+function addToCart(index){
+  cart.push(products[index]);
+  cartCount.innerText = cart.length;
+}
+
+document.getElementById("cartBtn").onclick = function(){
+  if(cart.length===0){
+    alert("السلة فاضية");
+    return;
+  }
+  let msg="طلب جديد من KIMO TECH:\n";
+  let total=0;
+  cart.forEach((p,i)=>{
+    msg+=`${i+1}- ${p.name} (${p.price} EGP)\n`;
+    total+=p.price;
+  });
+  msg+=`\nالإجمالي: ${total} EGP`;
+  window.open(`https://wa.me/201555735099?text=${encodeURIComponent(msg)}`);
+};
+
+/* ===== POPUP FUNCTIONS ===== */
+function openPopup(index){
+  const p = products[index];
+  document.getElementById("popupImg").src = p.img;
+  document.getElementById("popupTitle").innerText = p.name;
+  document.getElementById("popupDesc").innerText = p.use || "";
+  document.getElementById("popupPrice").innerText = p.price + " EGP";
+  document.getElementById("productPopup").style.display = "flex";
+}
+
+function closePopup(){
+  document.getElementById("productPopup").style.display = "none";
+}
+
 
 /* ===== INIT ===== */
 renderCategories();
 renderProducts(products);
-</script>
 
+</script>
+<!-- ===== PRODUCT POPUP ===== -->
+<div id="productPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:#fff; width:90%; max-width:500px; border-radius:20px; padding:25px; position:relative; text-align:center;">
+    <span onclick="closePopup()" style="position:absolute; top:10px; left:15px; cursor:pointer; font-weight:bold; font-size:18px;">✖</span>
+    <img id="popupImg" style="width:200px; margin-bottom:15px;">
+    <h2 id="popupTitle"></h2>
+    <p id="popupDesc" style="color:#555; margin:10px 0;"></p>
+    <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>
+  </div>
+</div>
 </body>
 </html>

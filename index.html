@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIMO TECH | Robot Workshop</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#0ea5e9;
+  --accent:#22c55e;
+  --dark:#020617;
+  --gray:#94a3b8;
+  --light:#f8fafc;
+}
+
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:var(--light);
+  overflow-x:hidden;
+}
+
+/* ===== Robot Watermark ===== */
+.robot-bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at center, rgba(125, 125, 125, 0.225), rgba(0, 0, 0, 0.893)),
+    url("images/robot-mark.png") no-repeat center;
+  background-size:72%;
+  opacity:0.75;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ===== Top Bar ===== */
+.top-bar{
+  background:var(--dark);
+  color:#fff;
+  text-align:center;
+  padding:10px;
+  font-weight:bold;
+  position:relative;
+  z-index:2;
+}
+
+/* ===== Header ===== */
+header{
+  background:#fff;
+  padding:22px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+.logo{
+  font-size:32px;
+  font-weight:900;
+}
+.logo span{color:var(--accent);}
+
+.search-box{flex:.45}
+.search-box input{
+  width:100%;
+  padding:14px 26px;
+  border-radius:40px;
+  border:2px solid #e5e7eb;
+  outline:none;
+}
+
+/* ===== Layout ===== */
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:35px 20px;
+  display:flex;
+  gap:30px;
+  position:relative;
+  z-index:2;
+}
+.sidebar{
+  width:260px;
+  background:#fff;
+  padding:28px;
+  border-radius:22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.06);
+}
+.sidebar h3{
+  border-bottom:2px solid #e5e7eb;
+  padding-bottom:12px;
+}
+.sidebar li{
+  list-style:none;
+  padding:14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.sidebar li:hover,
+.sidebar li.active{
+  background:var(--accent);
+  color:#fff;
+}
+
+.main{flex:1;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:28px;
+}
+
+/* ===== Card ===== */
+.card{
+  background:#fff;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+.card img{
+  width:100%;
+  height:210px;
+  object-fit:contain;
+  padding:22px;
+}
+.card-info{
+  padding:22px;
+  text-align:center;
+}
+.price{
+  font-size:1.4rem;
+  font-weight:900;
+  color:var(--accent);
+}
+.add-btn{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),#0284c7);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ===== Cart ===== */
+.cart-btn{
+  position:fixed;
+  left:32px;
+  bottom:32px;
+  background:var(--accent);
+  width:68px;
+  height:68px;
+  border-radius:22px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:28px;
+  color:#fff;
+  z-index:20;
+  cursor:pointer;
+}
+#cart-count{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  background:red;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  font-size:13px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* ===== Footer ===== */
+footer{
+  background:#000;
+  color:#fff;
+  padding:60px 8% 30px;
+  margin-top:80px;
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:40px;
+}
+.footer-bottom{
+  text-align:center;
+  margin-top:40px;
+  padding-top:20px;
+  border-top:1px solid #222;
+  color:#94a3b8;
+  font-size:14px;
+}
+
+@media(max-width:992px){
+  .sidebar{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<div class="robot-bg"></div>
+
+<div class="top-bar">
+🔧 KIMO TECH – إلكترونيات وروبوتات
+</div>
+
+<header>
+  <div class="logo">KIMO <span>TECH</span></div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="ابحث عن منتج...">
+  </div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <h3>التصنيفات</h3>
+    <ul id="categoryList"></ul>
+  </aside>
+
+  <main class="main">
+    <div class="grid" id="productGrid"></div>
+  </main>
+</div>
+
+<div class="cart-btn" id="cartBtn">
+🛒 <span id="cart-count">0</span>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h3>KIMO TECH</h3>
+      <p>أفضل جودة وأسرع خدمة توصيل في مصر.</p>
+    </div>
+    <div>
+      <h3>تواصل معنا</h3>
+      <p>📞 01555735099</p>
+      <p>📍 الإسكندرية، مصر</p>
+    </div>
+    <div>
+      <h3>ساعات العمل</h3>
+      <p>يوميًا من 10 ص حتى 10 م</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 KIMO TECH – All Rights Reserved
+  </div>
+</footer>
+
+<script>
+/* ===== PRODUCTS (أمثلة – ضع 225 مكانهم) ===== */
+const products = [
+
+
+
+/* ================= Arduino & Development Boards ================= */
+
+{ name:"Arduino UNO R3", price:450, cat:"Arduino", img:"images/arduino/arduino-uno.jpg", badge:"Original", use:"Main board for beginners and students" },
+{ name:"Arduino Uno Rev3 SMD", price:350, cat:"Arduino", img:"images/arduino/Arduino Uno Rev3 SMD.jpg", badge:"Compatible", use:"Budget friendly Arduino UNO" },
+{ name:"Arduino Nano Micro USB", price:280, cat:"Arduino", img:"images/arduino/Arduino Nano Micro USB.jpg", badge:"Best Seller", use:"Compact board for small projects" },
+{ name:"Arduino Nano Mini USB", price:270, cat:"Arduino", img:"images/arduino/Arduino Nano Mini USB.jpg", badge:"Popular", use:"Low cost Nano version" },
+{ name:"Arduino Mega2560 Rev3", price:1400, cat:"Arduino", img:"images/arduino/Arduino Mega2560 Rev3.jpg", badge:"Power", use:"Large projects with many I/O pins" },
+{ name:"arduino mega 2560 wifi esp8266", price:1600, cat:"Arduino", img:"images/arduino/arduino mega 2560 wifi esp8266.jpg", badge:"Compatible", use:"Budget Mega board" },
+{ name:"Arduino Pro Micro 5V 16M Mini", price:370, cat:"Arduino", img:"images/arduino/Arduino Pro Micro 5V 16M Mini.jpg", badge:"Mini", use:"Embedded and permanent projects" },
+{ name:"Arduino Pro Mini ATMEGA328P", price:300, cat:"Arduino", img:"images/arduino/Arduino Pro Mini ATMEGA328P.jpg", badge:"Low Power", use:"Battery powered projects" },
+{ name:"Arduino Leonardo", price:420, cat:"Arduino", img:"images/arduino/Arduino Leonardo.jpg", badge:"USB HID", use:"Keyboard and mouse emulation" },
+{ name:"Arduino UNO R4 WiFi board (Clone) Type-C", price:1250, cat:"Arduino", img:"images/arduino/Arduino UNO R4 WiFi board (Clone) Type-C.jpg", badge:"ARM", use:"High performance ARM projects" },
+
+{ name:"ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102", price:320, cat:"Arduino", img:"images/arduino/ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102.jpg", badge:"Pro", use:"WiFi & Bluetooth IoT projects" },
+{ name:"ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102 Type-C USB", price:380, cat:"Arduino", img:"images/arduino/ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102 Type-C USB.webp", badge:"IoT", use:"Advanced wireless applications" },
+{ name:"ESP8266 NodeMCU WiFi Micro USB", price:200, cat:"Arduino", img:"images/arduino/ESP8266 NodeMCU WiFi Micro USB.webp", badge:"WiFi", use:"ESP8266 based IoT projects" },
+{ name:"ESP8266 NodeMCU WiFi Type-C", price:250, cat:"Arduino", img:"images/arduino/ESP8266 NodeMCU WiFi Type-C.webp", badge:"Module", use:"Standalone WiFi solutions" },
+
+{ name:"Arduino CNC Shield V3", price:120, cat:"Arduino", img:"images/arduino/Arduino CNC Shield V3.webp", badge:"CNC", use:"CNC & GRBL projects" },
+{ name:"Motor Shield L293D", price:105, cat:"Arduino", img:"images/arduino/Motor Shield L293D.webp", badge:"Shield", use:"Drive DC motors easily" },
+{ name:"L298 Motor Driver Module", price:100, cat:"Arduino", img:"images/arduino/L298 Motor Driver Module.webp", badge:"Power", use:"High current motor control" },
+{ name:"Ethernet Shield W5100", price:600, cat:"Arduino", img:"images/arduino/Ethernet Shield W5100.webp", badge:"Network", use:"Wired internet projects" },
+
+
+/* ================= Sensors ================= */
+
+{ name:"Ultrasonic HC-SR04", price:65, cat:"Sensors", img:"images/sensors/Ultrasonic HC-SR04.webp", badge:"Popular", use:"Distance measurement & obstacle avoidance" },
+{ name:"Ultrasonic Sensor Holder", price:25, cat:"Sensors", img:"images/sensors/Ultrasonic Sensor Holder.webp", badge:"Waterproof", use:"Outdoor distance measurement" },
+
+{ name:"DHT11 Temperature & Humidity", price:110, cat:"Sensors", img:"images/sensors/DHT11 Temperature & Humidity.webp", badge:"Basic", use:"Basic temperature & humidity sensing" },
+{ name:"DHT22", price:250, cat:"Sensors", img:"images/sensors/DHT22.webp", badge:"Accurate", use:"High accuracy temp & humidity" },
+
+{ name:"IR Obstacle Sensor", price:50, cat:"Sensors", img:"images/sensors/IR Obstacle Sensor.webp", badge:"Student", use:"Line follower & obstacle robots" },
+{ name:"IR Line Tracking Sensor", price:50, cat:"Sensors", img:"images/sensors/IR Line Tracking Sensor.webp", badge:"Robot", use:"Line follower robots" },
+
+{ name:"IPR Motion Sensor HC-SR501", price:85, cat:"Sensors", img:"images/sensors/IPR Motion Sensor HC-SR501.webp", badge:"Motion", use:"Human motion detection" },
+{ name:"Mic Sound Sensor", price:55, cat:"Sensors", img:"images/sensors/Mic Sound Sensor.webp", badge:"Sound", use:"Sound detection projects" },
+
+{ name:"MQ-2 Gas Sensor", price:100, cat:"Sensors", img:"images/sensors/MQ-2 Gas Sensor.webp", badge:"Safety", use:"Gas & smoke detection" },
+{ name:"MQ-7 Carbon Monoxide Sensor", price:150, cat:"Sensors", img:"images/sensors/MQ-7 Carbon Monoxide Sensor.webp", badge:"CO", use:"Carbon monoxide detection" },
+{ name:"MQ-135 Air Quality Sensor", price:110, cat:"Sensors", img:"images/sensors/MQ-135 Air Quality Sensor.webp", badge:"Air", use:"Air quality monitoring" },
+
+{ name:"ldr_sensor_module", price:50, cat:"Sensors", img:"images/sensors/ldr_sensor_module.webp", badge:"Simple", use:"Light intensity detection" },
+{ name:"Flame Sensor Module", price:50, cat:"Sensors", img:"images/sensors/Flame Sensor Module.webp", badge:"Fire", use:"Flame & fire detection" },
+
+{ name:"BMP280 Pressure Sensor", price:100, cat:"Sensors", img:"images/sensors/BMP280 Pressure Sensor.webp", badge:"Barometer", use:"Pressure & altitude sensing" },
+{ name:"BME280 I2C Pressure Humidity Temperature Sensor Module", price:320, cat:"Sensors", img:"images/sensors/BME280 I2C Pressure Humidity Temperature Sensor Module.webp", badge:"3-in-1", use:"Environmental sensing" },
+
+{ name:"GY-521 MPU6050", price:200, cat:"Sensors", img:"images/sensors/GY-521 MPU6050.webp", badge:"Motion", use:"Gyro & accelerometer sensing" },
+
+{ name:"KY-035 Digital", price:50, cat:"Sensors", img:"images/sensors/KY-035 Digital.webp", badge:"Magnetic", use:"Magnetic field detection" },
+{ name:"Reed Switch Module", price:50, cat:"Sensors", img:"images/sensors/Reed Switch Module.webp", badge:"Switch", use:"Magnetic switch detection" },
+
+{ name:"Soil Moisture Sensor", price:60, cat:"Sensors", img:"images/sensors/Soil Moisture Sensor.webp", badge:"Smart Farm", use:"Soil moisture measurement" },
+{ name:"Rain Drop Sensor", price:70, cat:"Sensors", img:"images/sensors/Rain Drop Sensor.webp", badge:"Weather", use:"Rain detection projects" },
+
+{ name:"Pulse Heart Rate Sensor", price:200, cat:"Sensors", img:"images/sensors/Pulse Heart Rate Sensor.webp", badge:"Health", use:"Heart rate monitoring" },
+{ name:"Fingerprint Sensor R307", price:1250, cat:"Sensors", img:"images/sensors/Fingerprint Sensor R307.webp", badge:"Security", use:"Biometric identification" },
+
+{ name:"Color Sensor TCS3200", price:300, cat:"Sensors", img:"images/sensors/Color Sensor TCS3200.webp", badge:"Color", use:"Color detection & sorting" },
+{ name:"Load Cell 1kg", price:100, cat:"Sensors", img:"images/sensors/Load Cell 1kg.webp", badge:"Weight", use:"Weight measurement systems" },
+{ name:"hx711-load-cell-sensor", price:85, cat:"Sensors", img:"images/sensors/hx711-load-cell-sensor.webp", badge:"Amplifier", use:"Load cell signal amplification" },
+{ name:"Water Level Sensor", price:60, cat:"Sensors", img:"images/sensors/Water Level Sensor.webp", badge:"Level", use:"Water level detection" },
+
+                                    
+/* ================= Motors ================= */
+
+{ name:"SG90 Micro Servo 180 Degree", price:100, cat:"Motors", img:"images/motors/SG90 Micro Servo 180 Degree.webp", badge:"Best Seller", use:"Small robot arms & steering" },
+{ name:"MG90S Micro Servo Full Metal Gear 180 Degree", price:170, cat:"Motors", img:"images/motors/MG90S Micro Servo Full Metal Gear 180 Degree.webp", badge:"Metal Gear", use:"Stronger servo for robotics" },
+{ name:"MG90S Micro Servo Continuous Rotation 360 Degree", price:200, cat:"Motors", img:"images/motors/MG90S Micro Servo Continuous Rotation 360 Degree.webp", badge:"Metal Gear", use:"Stronger servo for robotics" },
+{ name:"MG996R Servo Motor Tower Pro 180 Degree", price:200, cat:"Motors", img:"images/motors/MG996R Servo Motor Tower Pro 180 Degree.webp", badge:"High Torque", use:"Heavy duty robot arms" },
+{ name:"MG996R Servo Motor Tower Pro 360 Degree", price:215, cat:"Motors", img:"images/motors/MG996R Servo Motor Tower Pro 360 Degree.webp", badge:"Pro", use:"High torque digital servo" },
+
+{ name:"DC Geared Wired Motor Dual Shaft 3-12VDC", price:70, cat:"Motors", img:"images/motors/DC Geared Wired Motor Dual Shaft 3-12VDC.webp", badge:"Basic", use:"Small robot cars" },
+{ name:"DC Motor DC Motor with Gear Box JGA25-370-12V-250RPM 8.8Kg-12V", price:350, cat:"Motors", img:"images/motors/DC Motor with Gear Box JGA25-370-12V-250RPM 8.8Kg.webp", badge:"Classic", use:"Robotics applications" },
+                                                                                              
+{ name:"28BYJ-48 Stepper Motor 5VDC 0.1A 0.03Nm", price:90, cat:"Motors", img:"images/motors/28BYJ-48 Stepper Motor 5VDC 0.1A 0.03Nm.webp", badge:"Stepper", use:"Precise step control" },
+{ name:"Stepper Motor NEMA17", price:500, cat:"Motors", img:"images/motors/Stepper Motor NEMA17.webp", badge:"CNC", use:"3D printer & CNC machines" },
+{ name:"Stepper Motor NEMA23", price:1300, cat:"Motors", img:"images/motors/Stepper Motor NEMA23.webp", badge:"Heavy Duty", use:"Large CNC applications" },
+
+{ name:"Vibration Motor", price:50, cat:"Motors", img:"images/motors/Vibration Motor.webp", badge:"Small", use:"Haptic feedback projects" },
+
+{ name:"Water Pump DC 5V", price:70, cat:"Motors", img:"images/motors/Water Pump DC 5V.webp", badge:"Pump", use:"Water circulation projects" },
+{ name:"Water Pump 12V", price:250, cat:"Motors", img:"images/motors/Water Pump 12V.webp", badge:"Pump", use:"Higher flow water systems" },
+
+{ name:"Push Type Linear Solenoid JF-0530B 12V 300mA 10mm 5N", price:250, cat:"Motors", img:"images/motors/Push Type Linear Solenoid JF-0530B 12V 300mA 10mm 5N.webp", badge:"Linear", use:"Linear motion automation" },
+{ name:"Push Type Linear Solenoid JF-0826B 12V 2A 10mm 20N", price:300, cat:"Motors", img:"images/motors/Push Type Linear Solenoid JF-0826B 12V 2A 10mm 20N.webp", badge:"Linear", use:"Linear motion automation" },
+
+/* ================= Motor Drivers ================= */
+
+{ name:"L9110S Dual Motor Driver", price:55, cat:"Drivers", img:"images/drivers/L9110S Dual Motor Driver.webp", badge:"Small", use:"Mini robot motor driver" },
+
+{ name:"TB6612FNG Motor Driver", price:120, cat:"Drivers", img:"images/drivers/TB6612FNG Motor Driver.webp", badge:"Efficient", use:"Low heat DC motor control" },
+{ name:"MX1508 Dual Motor Driver", price:100, cat:"Drivers", img:"images/drivers/MX1508 Dual Motor Driver.webp", badge:"Mini", use:"Compact motor driver boards" },
+
+{ name:"BTS7960 43A Motor Driver", price:650, cat:"Drivers", img:"images/drivers/BTS7960 43A Motor Driver.webp", badge:"High Power", use:"High current DC motors" },
+{ name:"IRF520 MOSFET DRIVER MODULE", price:70, cat:"Drivers", img:"images/drivers/IRF520 MOSFET DRIVER MODULE.webp", badge:"Monster", use:"Heavy duty motor control" },
+
+{ name:"A4988 Stepper Motor Driver 2A", price:95, cat:"Drivers", img:"images/drivers/A4988 Stepper Motor Driver 2A.webp", badge:"Stepper", use:"Stepper motor control" },
+{ name:"DRV8825 Stepper Driver", price:140, cat:"Drivers", img:"images/drivers/DRV8825 Stepper Driver.webp", badge:"Stepper", use:"High current stepper control" },
+
+{ name:"ULN2003 Stepper Driver Board", price:50, cat:"Drivers", img:"images/drivers/ULN2003 Stepper Driver Board.webp", badge:"Basic", use:"28BYJ-48 stepper motor driver" },
+
+{ name:"ESC 30A Brushless", price:500, cat:"Drivers", img:"images/drivers/ESC 30A Brushless.webp", badge:"RC", use:"Brushless motor control" },
+
+{ name:"DC Motor Speed Controller 10A", price:180, cat:"Drivers", img:"images/drivers/DC Motor Speed Controller 10A.webp", badge:"Speed", use:"PWM speed control" },
+{ name:"DC Motor Speed Controller 20A", price:400, cat:"Drivers", img:"images/drivers/DC Motor Speed Controller 20A.webp", badge:"Speed", use:"High current speed control" },
+
+/* ================= Communication Modules ================= */
+
+{ name:"Bluetooth Module HC-05", price:250, cat:"Communication", img:"images/communication/Bluetooth Module HC-05.webp", badge:"Popular", use:"Bluetooth communication with Arduino" },
+{ name:"Bluetooth Module HC-06", price:230, cat:"Communication", img:"images/communication/Bluetooth Module HC-06.webp", badge:"Basic", use:"Slave Bluetooth communication" },
+{ name:"Bluetooth HM-10 BLE", price:400, cat:"Communication", img:"images/communication/Bluetooth HM-10 BLE.webp", badge:"BLE", use:"Low energy Bluetooth projects" },
+
+{ name:"ESP8266 ESP-01 WiFi Module", price:140, cat:"Communication", img:"images/communication/ESP8266 ESP-01 WiFi Module.webp", badge:"WiFi", use:"Basic WiFi connectivity" },
+{ name:"ESP8266 ESP-12F Module", price:200, cat:"Communication", img:"images/communication/ESP8266 ESP-12E Module.webp", badge:"IoT", use:"Standalone WiFi applications" },
+{ name:"ESP8266 ESP-12F Module", price:200, cat:"Communication", img:"images/communication/ESP8266 ESP-12F Module.webp", badge:"IoT", use:"Standalone WiFi applications" },
+
+{ name:"NRF24L01+ 2.4GHz RF Transceiver Module", price:70, cat:"Communication", img:"images/communication/NRF24L01+ 2.4GHz RF Transceiver Module.webp", badge:"RF", use:"2.4GHz wireless communication" },
+{ name:"NRF24L01 Wireless Module With Antenna", price:260, cat:"Communication", img:"images/communication/NRF24L01 Wireless Module With Antenna.webp", badge:"Long Range", use:"Long distance RF communication" },
+{ name:"Adapter Board for NRF24L01 Wireless Module 3.3V", price:50, cat:"Communication", img:"images/communication/Adapter Board for NRF24L01 Wireless Module 3.3V.webp", badge:"Long Range", use:"Long distance RF communication" },
+
+
+{ name:"SIM800L GSM - GPRS Module + External Antenna", price:480, cat:"Communication", img:"images/communication/SIM800L GSM - GPRS Module + External Antenna.webp", badge:"GSM", use:"SMS & GPRS communication" },
+
+{ name:"Ublox NEO-6M GPS Module HW-542A", price:460, cat:"Communication", img:"images/communication/Ublox NEO-6M GPS Module HW-542A.webp", badge:"GPS", use:"Location & navigation projects" },
+{ name:"Ublox NEO-7m GPS Module HW-542B", price:500, cat:"Communication", img:"images/communication/Ublox NEO-7m GPS Module HW-542B.webp", badge:"Accurate", use:"High accuracy GPS tracking" },
+{ name:"Ublox NEO-6M GPS Module HW-539A11", price:600, cat:"Communication", img:"images/communication/Ublox NEO-6M GPS Module HW-539A11.webp", badge:"GPS", use:"Location & navigation projects" },
+{ name:"Ublox NEO-7m GPS Module HW-539B", price:625, cat:"Communication", img:"images/communication/Ublox NEO-7m GPS Module HW-539B.webp", badge:"Accurate", use:"High accuracy GPS tracking" },
+
+{ name:"Wireless RF Kit 433Mhz", price:80, cat:"Communication", img:"images/communication/Wireless RF Kit 433Mhz.webp", badge:"Basic", use:"Wireless data transmission" },
+{ name:"Wireless Transmitter & Receiver Board Module SYN115-SYN480R 433MHz", price:100, cat:"Communication", img:"images/communication/Wireless Transmitter & Receiver Board Module SYN115-SYN480R 433MHz.webp", badge:"Basic", use:"Wireless data reception" },
+{ name:"RXB6 433Mhz Superheterodyne Wireless Receiver Module", price:130, cat:"Communication", img:"images/communication/RXB6 433Mhz Superheterodyne Wireless Receiver Module.webp", badge:"Pair", use:"Simple RF communication" },
+
+
+
+/* ================= Displays & Interfaces ================= */
+
+{ name:"LCD 16x2 Blue", price:95, cat:"Displays", img:"images/displays/lcd-16x2-blue.webp", badge:"Classic", use:"Text display for Arduino projects" },
+{ name:"LCD 16x2 Green", price:95, cat:"Displays", img:"images/displays/lcd-16x2-green.webp", badge:"Classic", use:"Character display modules" },
+{ name:"LCD 20x4 Blue", price:180, cat:"Displays", img:"images/displays/lcd-20x4.webp", badge:"Large", use:"More characters display" },
+
+{ name:"I2C LCD 16x2 Module", price:130, cat:"Displays", img:"images/displays/i2c-lcd-16x2.webp", badge:"I2C", use:"LCD with reduced wiring" },
+{ name:"I2C LCD 20x4 Module", price:220, cat:"Displays", img:"images/displays/i2c-lcd-20x4.webp", badge:"I2C", use:"Large I2C character display" },
+
+{ name:"OLED Display 0.96 Inch (I2C)", price:180, cat:"Displays", img:"images/displays/oled-096.webp", badge:"Sharp", use:"High contrast small display" },
+{ name:"OLED Display 1.3 Inch", price:230, cat:"Displays", img:"images/displays/oled-13.webp", badge:"Clear", use:"Larger OLED screen" },
+
+{ name:"TFT LCD 1.8 Inch", price:260, cat:"Displays", img:"images/displays/tft-18.webp", badge:"Color", use:"Small color display" },
+{ name:"TFT LCD 2.4 Inch", price:420, cat:"Displays", img:"images/displays/tft-24.webp", badge:"Color", use:"Graphical color display" },
+{ name:"TFT LCD 3.2 Inch", price:580, cat:"Displays", img:"images/displays/tft-32.webp", badge:"Large", use:"Large graphical display" },
+{ name:"TFT LCD 3.5 Inch Touch", price:720, cat:"Displays", img:"images/displays/tft-35-touch.webp", badge:"Touch", use:"Touch screen interface" },
+
+{ name:"Nextion HMI 2.4 Inch", price:1250, cat:"Displays", img:"images/displays/nextion-24.webp", badge:"HMI", use:"Smart touchscreen display" },
+{ name:"Nextion HMI 3.2 Inch", price:1650, cat:"Displays", img:"images/displays/nextion-32.webp", badge:"HMI", use:"Advanced HMI interface" },
+
+{ name:"7-Segment Display (1 Digit)", price:15, cat:"Displays", img:"images/displays/7seg-1.webp", badge:"Basic", use:"Numeric display" },
+{ name:"7-Segment Display (4 Digit)", price:65, cat:"Displays", img:"images/displays/7seg-4.webp", badge:"Popular", use:"Counters & timers" },
+{ name:"TM1637 4-Digit Module", price:85, cat:"Displays", img:"images/displays/tm1637.webp", badge:"Module", use:"Easy 4-digit control" },
+
+{ name:"Matrix LED 8x8 Red", price:55, cat:"Displays", img:"images/displays/matrix-8x8.webp", badge:"Matrix", use:"Scrolling text & patterns" },
+{ name:"MAX7219 LED Matrix Module", price:120, cat:"Displays", img:"images/displays/max7219.webp", badge:"Driver", use:"LED matrix control" },
+
+{ name:"Keypad 4x4 Matrix", price:55, cat:"Keypads", img:"images/keypads/keypad-4x4.webp", badge:"Input", use:"Password & keypad input" },
+{ name:"Keypad 4x3 Matrix", price:45, cat:"Keypads", img:"images/keypads/keypad-4x3.webp", badge:"Input", use:"Basic keypad input" },
+
+{ name:"Capacitive Touch Sensor TTP223", price:25, cat:"Touch", img:"images/touch/ttp223.webp", badge:"Touch", use:"Touch button replacement" },
+{ name:"Resistive Touch Panel 3.5\"", price:160, cat:"Touch", img:"images/touch/resistive-35.webp", badge:"Touch", use:"Touch input for TFT screens" },
+{ name:"Capacitive Touch Panel 3.5\"", price:260, cat:"Touch", img:"images/touch/capacitive-35.webp", badge:"Touch", use:"Multi-touch interface" },
+
+];
+
+/* ===== CART ===== */
+let cart = [];
+const cartCount = document.getElementById("cart-count");
+
+/* ===== RENDER PRODUCTS ===== */
+function renderProducts(list){
+  document.getElementById("productGrid").innerHTML =
+    list.map((p,i)=>`
+      <div class="card" style="position:relative">
+        
+        ${p.badge ? `<div class="badge">${p.badge}</div>` : ""}
+
+        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300x220?text=No+Image'">
+
+        <div class="card-info">
+          <h3>${p.name}</h3>
+          <div class="price">${p.price} EGP</div>
+          <button class="add-btn" onclick="addToCart(${i})">
+            أضف للسلة
+          </button>
+        </div>
+      </div>
+    `).join("");
+}
+
+
+/* ===== CATEGORIES ===== */
+function renderCategories(){
+  const cats = ["الكل", ...new Set(products.map(p=>p.cat))];
+  document.getElementById("categoryList").innerHTML =
+    cats.map(c=>`
+      <li onclick="filterCategory('${c}', this)">
+        ${c}
+      </li>
+    `).join("");
+}
+
+function filterCategory(cat, el){
+  document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));
+  el.classList.add("active");
+  renderProducts(cat==="الكل" ? products : products.filter(p=>p.cat===cat));
+}
+
+/* ===== SEARCH ===== */
+document.getElementById("searchInput").addEventListener("keyup", function(){
+  const q = this.value.toLowerCase();
+  renderProducts(products.filter(p=>p.name.toLowerCase().includes(q)));
+});
+
+/* ===== CART ===== */
+function addToCart(index){
+  cart.push(products[index]);
+  cartCount.innerText = cart.length;
+}
+
+document.getElementById("cartBtn").onclick = function(){
+  if(cart.length===0){
+    alert("السلة فاضية");
+    return;
+  }
+  let msg="طلب جديد من KIMO TECH:\n";
+  let total=0;
+  cart.forEach((p,i)=>{
+    msg+=`${i+1}- ${p.name} (${p.price} EGP)\n`;
+    total+=p.price;
+  });
+  msg+=`\nالإجمالي: ${total} EGP`;
+  window.open(`https://wa.me/201555735099?text=${encodeURIComponent(msg)}`);
+};
+
+/* ===== INIT ===== */
+renderCategories();
+renderProducts(products);
+</script>
+
+</body>
+</html>

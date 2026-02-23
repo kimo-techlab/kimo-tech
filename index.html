@@ -278,6 +278,26 @@ footer{
     padding-bottom:80px;
   }
 }
+
+
+@media(max-width:768px){
+
+  .sidebar{
+    position:fixed;
+    top:0;
+    right:-100%;
+    height:100%;
+    width:75%;
+    background:#fff;
+    z-index:1000;
+    transition:.3s;
+    overflow-y:auto;
+  }
+
+  .sidebar.show-sidebar{
+    right:0;
+  }
+}
 /* ===== Mobile Fix ===== */
 @media(max-width:768px){
 
@@ -305,22 +325,32 @@ footer{
     padding:20px 12px;
   }
 
+ 
+   .card{
+    border-radius:16px;
+  }
   .card img{
-    height:170px;
-    padding:15px;
+    height:130px;
+    padding:10px;
   }
 
   .card-info{
-    padding:15px;
+    padding:10px;
+  }
+
+  .card-info h3{
+    font-size:14px;
+    min-height:38px;
   }
 
   .price{
-    font-size:1.2rem;
+    font-size:14px;
   }
 
   .add-btn{
-    padding:12px;
-    font-size:14px;
+    padding:8px;
+    font-size:13px;
+    border-radius:10px;
   }
 
   .cart-btn{

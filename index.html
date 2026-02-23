@@ -608,6 +608,20 @@ document.getElementById("searchInput").addEventListener("keyup", function(){
 
 
 
+function showAll(){
+  renderProducts(products);
+}
+
+function openCart(){
+  document.getElementById("cartBtn").click();
+}
+
+function toggleCategories(){
+  document.querySelector(".sidebar").classList.toggle("show-sidebar");
+}
+
+
+
 
 /* ===== CART ===== */
 function addToCart(index){

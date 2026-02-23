@@ -382,6 +382,9 @@ footer{
   <div onclick="toggleCategories()">📂<span>التصنيفات</span></div>
   <div onclick="openCart()">🛒<span>السلة</span></div>
 </div>
+
+<div id="overlay" onclick="toggleCategories()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:999;"></div>
+
 <body>
 
 <div class="robot-bg"></div>
@@ -647,6 +650,15 @@ function openCart(){
 
 function toggleCategories(){
   document.querySelector(".sidebar").classList.toggle("show-sidebar");
+
+function toggleCategories(){
+  document.querySelector(".sidebar").classList.toggle("show-sidebar");
+
+  const overlay = document.getElementById("overlay");
+  overlay.style.display =
+    overlay.style.display === "block" ? "none" : "block";
+}
+
 }
 
 

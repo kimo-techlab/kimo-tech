@@ -635,7 +635,9 @@ function renderCategories(){
   const cats = ["الكل", ...new Set(products.map(p=>p.cat))];
   document.getElementById("categoryList").innerHTML =
     cats.map(c=>`
-      <li onclick="filterCategory('${c}', this)">
+      <li data-cat="${c}">
+       ${c}
+       </li>
         ${c}
       </li>
     `).join("");

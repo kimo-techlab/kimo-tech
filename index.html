@@ -629,7 +629,17 @@ function renderCategories(){
 function filterCategory(cat, el){
   document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));
   el.classList.add("active");
+
   renderProducts(cat==="الكل" ? products : products.filter(p=>p.cat===cat));
+
+  // 👇 اقفل القائمة بعد الاختيار (للموبايل)
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("overlay");
+
+  if(window.innerWidth <= 768){
+    sidebar.classList.remove("show-sidebar");
+    if(overlay) overlay.style.display = "none";
+  }
 }
 
 /* ===== SEARCH ===== */

@@ -107,6 +107,36 @@ header{
   outline:none;
 }
 
+
+
+/* ===== تعديل التصنفات ===== */
+.top-controls{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.control-btn{
+  padding:8px 14px;
+  border-radius:10px;
+  background:#fff;
+  color:#2d3436;
+  border:2px solid #0984e3;
+  font-size:13px;
+  cursor:pointer;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
+  transition:.2s ease;
+}
+
+.control-btn:hover{
+  border-color:#22c55e;
+  box-shadow:0 6px 12px rgba(0,0,0,0.15);
+}
+
+.sort-small{
+  width:120px;
+}
 /* ===== تعديل الترتيب ===== */
 .sort-select{
   padding:10px 15px;
@@ -452,9 +482,13 @@ footer{
     font-size:10px;
     padding:4px 8px;
   }
-  .sort-select{
-  margin-top:0;
-  width:100%;
+
+.top-controls{
+  padding:0 5px;
+}
+
+.sort-small{
+  width:110px;
 }
 }
 </style>
@@ -493,13 +527,19 @@ footer{
  <main class="main">
  <h2 id="categoryTitle"></h2>
 
- <div style="margin-bottom:20px; text-align:left;">
- <select id="sortSelect" class="sort-select">
-  <option value="default">✨ ترتيب افتراضي</option>
-  <option value="low">📉 السعر: من الأقل للأعلى</option>
-  <option value="high">📈 السعر: من الأعلى للأقل</option>
-  <option value="new">🆕 الأحدث</option>
-</select>
+ <div class="top-controls">
+
+  <button class="control-btn" onclick="toggleCategories()">
+    📂 التصنيفات
+  </button>
+
+  <select id="sortSelect" class="control-btn sort-small">
+    <option value="default">✨ ترتيب</option>
+    <option value="low">📉 الأقل</option>
+    <option value="high">📈 الأعلى</option>
+    <option value="new">🆕 الأحدث</option>
+  </select>
+
 </div>
 
 <div class="grid" id="productGrid"></div>

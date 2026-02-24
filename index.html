@@ -647,15 +647,21 @@ function renderProducts(list){
 
 function renderCategories(){
   const cats = ["الكل", ...new Set(products.map(p=>p.cat))];
-
   const list = document.getElementById("categoryList");
-  list.innerHTML = cats.map(c => `
-    <li onclick="filterCategory('${c}', this)">
-      ${c}
-    </li>
-  `).join("");
-}
 
+  list.innerHTML = "";
+
+  cats.forEach(cat => {
+    const li = document.createElement("li");
+    li.textContent = cat;
+
+    li.addEventListener("click", function(){
+      filterCategory(cat, li);
+    });
+
+    list.appendChild(li);
+  });
+}
 
 function filterCategory(cat, el){
   document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));

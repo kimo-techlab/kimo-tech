@@ -723,12 +723,14 @@ products.forEach((p,i)=>{
   p.id = i;
 });
 
+let currentList = [...products];
 /* ===== CART ===== */
 let cart = [];
 const cartCount = document.getElementById("cart-count");
 
 /* ===== RENDER PRODUCTS ===== */
 function renderProducts(list){
+ currentList = [...list]; 
   const grid = document.getElementById("productGrid");
   grid.innerHTML = "";
 
@@ -760,7 +762,7 @@ function renderProducts(list){
 
 document.getElementById("sortSelect").addEventListener("change", function(){
 
-  let sorted = [...products];
+  let sorted = [...currentList];
 
   if(this.value === "low"){
     sorted.sort((a,b)=> a.price - b.price);

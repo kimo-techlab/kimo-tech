@@ -664,23 +664,34 @@ function renderCategories(){
 }
 
 function filterCategory(cat, el){
-  document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));
+
+  document.querySelectorAll(".sidebar li")
+    .forEach(li=>li.classList.remove("active"));
+
   el.classList.add("active");
 
-  const filtered = cat==="الكل" ? products : products.filter(p=>p.cat===cat);
+  let filtered;
+
+  if(cat === "الكل"){
+    filtered = products;
+  }else{
+    filtered = products.filter(p => 
+      p.cat.trim().toLowerCase() === cat.trim().toLowerCase()
+    );
+  }
 
   renderProducts(filtered);
 
-  // 👇 نعرض عنوان التصنيف
   const title = document.getElementById("categoryTitle");
   title.innerHTML = cat==="الكل"
     ? "عرض جميع المنتجات"
     : `عرض منتجات: <span style="color:var(--accent)">${cat}</span>`;
 
-  // 👇 قفل القائمة في الموبايل
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.getElementById("overlay");
-
+  if(window.innerWidth <= 768){
+    document.querySelector(".sidebar").classList.remove("show-sidebar");
+    document.getElementById("overlay").style.display = "none";
+  }
+}
   if(window.innerWidth <= 768){
     sidebar.classList.remove("show-sidebar");
     overlay.style.display = "none";

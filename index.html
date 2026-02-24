@@ -842,6 +842,8 @@ function addToCart(product){
   cart.push(product);
   cartCount.innerText = cart.length;
 
+  localStorage.setItem("cart", JSON.stringify(cart));
+
   const cartBtn = document.getElementById("cartBtn");
 
   cartBtn.classList.add("cart-animate");
@@ -863,7 +865,7 @@ document.getElementById("cartBtn").onclick = function(){
     total+=p.price;
   });
   msg+=`\nالإجمالي: ${total} EGP`;
-  window.open(`https://wa.me/201555735099?text=${encodeURIComponent(msg)}`);
+window.location.href = "checkout.html";
 };
 
 /* ===== POPUP FUNCTIONS ===== */

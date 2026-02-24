@@ -406,9 +406,10 @@ footer{
     <ul id="categoryList"></ul>
   </aside>
 
-  <main class="main">
-    <div class="grid" id="productGrid"></div>
-  </main>
+ <main class="main">
+  <h2 id="categoryTitle" style="margin-bottom:20px; font-weight:900;"></h2>
+  <div class="grid" id="productGrid"></div>
+ </main>
 </div>
 
 <div class="cart-btn" id="cartBtn">
@@ -630,15 +631,23 @@ function filterCategory(cat, el){
   document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));
   el.classList.add("active");
 
-  renderProducts(cat==="الكل" ? products : products.filter(p=>p.cat===cat));
+  const filtered = cat==="الكل" ? products : products.filter(p=>p.cat===cat);
 
-  // 👇 اقفل القائمة بعد الاختيار (للموبايل)
+  renderProducts(filtered);
+
+  // 👇 نعرض عنوان التصنيف
+  const title = document.getElementById("categoryTitle");
+  title.innerHTML = cat==="الكل"
+    ? "عرض جميع المنتجات"
+    : `عرض منتجات: <span style="color:var(--accent)">${cat}</span>`;
+
+  // 👇 قفل القائمة في الموبايل
   const sidebar = document.querySelector(".sidebar");
   const overlay = document.getElementById("overlay");
 
   if(window.innerWidth <= 768){
     sidebar.classList.remove("show-sidebar");
-    if(overlay) overlay.style.display = "none";
+    overlay.style.display = "none";
   }
 }
 
@@ -648,29 +657,33 @@ document.getElementById("searchInput").addEventListener("keyup", function(){
   renderProducts(products.filter(p=>p.name.toLowerCase().includes(q)));
 });
 
-
-
 function showAll(){
   renderProducts(products);
-}
 
+  document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
+
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("overlay");
+
+  sidebar.classList.remove("show-sidebar");
+  overlay.style.display = "none";
+}
 function openCart(){
   document.getElementById("cartBtn").click();
 }
 
 function toggleCategories(){
-  document.querySelector(".sidebar").classList.toggle("show-sidebar");
-
-function toggleCategories(){
-  document.querySelector(".sidebar").classList.toggle("show-sidebar");
-
+  const sidebar = document.querySelector(".sidebar");
   const overlay = document.getElementById("overlay");
-  overlay.style.display =
-    overlay.style.display === "block" ? "none" : "block";
-}
 
-}
+  sidebar.classList.toggle("show-sidebar");
 
+  if(sidebar.classList.contains("show-sidebar")){
+    overlay.style.display = "block";
+  }else{
+    overlay.style.display = "none";
+  }
+}
 
 
 

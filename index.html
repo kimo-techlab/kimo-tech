@@ -144,6 +144,21 @@ header{
 
 .main{flex:1;}
 
+#categoryTitle{
+  font-size:22px;
+  font-weight:900;
+  margin-bottom:25px;
+}
+
+@media(max-width:768px){
+  #categoryTitle{
+    font-size:18px;
+    text-align:center;
+    margin-bottom:15px;
+  }
+}
+
+
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
@@ -725,6 +740,12 @@ function closePopup(){
 
 /* ===== INIT ===== */
 renderCategories();
+setTimeout(()=>{
+  const firstCat = document.querySelector(".sidebar li");
+  if(firstCat){
+    firstCat.classList.add("active");
+  }
+},100);
 renderProducts(products);
 document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
 

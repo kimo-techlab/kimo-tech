@@ -631,17 +631,18 @@ function renderProducts(list){
 
 
 /* ===== CATEGORIES ===== */
+
 function renderCategories(){
   const cats = ["الكل", ...new Set(products.map(p=>p.cat))];
-  document.getElementById("categoryList").innerHTML =
-    cats.map(c=>`
-      <li data-cat="${c}">
-       ${c}
-       </li>
-        ${c}
-      </li>
-    `).join("");
+
+  const list = document.getElementById("categoryList");
+  list.innerHTML = cats.map(c => `
+    <li onclick="filterCategory('${c}', this)">
+      ${c}
+    </li>
+  `).join("");
 }
+
 
 function filterCategory(cat, el){
   document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));
@@ -741,12 +742,6 @@ function closePopup(){
 
 /* ===== INIT ===== */
 renderCategories();
-setTimeout(()=>{
-  const firstCat = document.querySelector(".sidebar li");
-  if(firstCat){
-    firstCat.classList.add("active");
-  }
-},100);
 renderProducts(products);
 document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
 

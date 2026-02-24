@@ -401,14 +401,7 @@ footer{
   <div onclick="openCart()">🛒<span>السلة</span></div>
 </div>
 
-<div id="overlay"
-     onclick="toggleCategories()"
-     style="display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,.4);
-            z-index:500;">
-</div>
+
 
 <div class="robot-bg"></div>
 
@@ -689,7 +682,6 @@ function filterCategory(cat, el){
 
   if(window.innerWidth <= 768){
     document.querySelector(".sidebar").classList.remove("show-sidebar");
-    document.getElementById("overlay").style.display = "none";
   }
 }
 
@@ -722,15 +714,7 @@ function openCart(){
 
 function toggleCategories(){
   const sidebar = document.querySelector(".sidebar");
-  const overlay = document.getElementById("overlay");
-
   sidebar.classList.toggle("show-sidebar");
-
-  if(sidebar.classList.contains("show-sidebar")){
-    overlay.style.display = "block";
-  }else{
-    overlay.style.display = "none";
-  }
 }
 
 

@@ -107,6 +107,33 @@ header{
   outline:none;
 }
 
+/* ===== تعديل الترتيب ===== */
+.sort-select{
+  padding:10px 15px;
+  border-radius:10px;
+  margin-top:-30px;
+  position:relative;
+  z-index:10;
+
+  background:#ffffff;
+  color:#2d3436;
+  border:2px solid #0984e3;
+
+  font-size:14px;
+  cursor:pointer;
+  outline:none;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
+  transition:.2s ease;
+}
+
+.sort-select:hover{
+  border-color:#0ea5e9;
+  box-shadow:0 6px 12px rgba(0,0,0,0.15);
+}
+
+.sort-select:focus{
+  border-color:#22c55e;
+}
 /* ===== Layout ===== */
 .container{
   max-width:1400px;
@@ -171,13 +198,18 @@ header{
   border-radius:22px;
   overflow:hidden;
   box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+    transition: all .3s ease;
 
+}
+.card:hover{
+  transform: translateY(-8px);
+  box-shadow:0 18px 40px rgba(0,0,0,.15);
+}
 .badge{
   position:absolute;
   top:12px;
   left:12px;
-  background:linear-gradient(135deg,#f59e0b,#ef4444);
+  background:linear-gradient(135deg,#1b0bf5,#17472ab7);
   color:#fff;
   padding:6px 12px;
   font-size:12px;
@@ -245,6 +277,18 @@ header{
   display:flex;
   justify-content:center;
   align-items:center;
+}
+
+@keyframes cartShake{
+  0%{ transform:rotate(0deg); }
+  25%{ transform:rotate(-10deg); }
+  50%{ transform:rotate(10deg); }
+  75%{ transform:rotate(-6deg); }
+  100%{ transform:rotate(0deg); }
+}
+
+.cart-animate{
+  animation: cartShake .4s ease;
 }
 
 /* ===== Footer ===== */
@@ -408,6 +452,10 @@ footer{
     font-size:10px;
     padding:4px 8px;
   }
+  .sort-select{
+  margin-top:0;
+  width:100%;
+}
 }
 </style>
 
@@ -443,8 +491,18 @@ footer{
   </aside>
 
  <main class="main">
-  <h2 id="categoryTitle" style="margin-bottom:20px; font-weight:900;"></h2>
-  <div class="grid" id="productGrid"></div>
+ <h2 id="categoryTitle"></h2>
+
+ <div style="margin-bottom:20px; text-align:left;">
+ <select id="sortSelect" class="sort-select">
+  <option value="default">✨ ترتيب افتراضي</option>
+  <option value="low">📉 السعر: من الأقل للأعلى</option>
+  <option value="high">📈 السعر: من الأعلى للأقل</option>
+  <option value="new">🆕 الأحدث</option>
+</select>
+</div>
+
+<div class="grid" id="productGrid"></div>
  </main>
 </div>
 
@@ -620,6 +678,11 @@ const products = [
 
 ];
 
+
+products.forEach((p,i)=>{
+  p.id = i;
+});
+
 /* ===== CART ===== */
 let cart = [];
 const cartCount = document.getElementById("cart-count");
@@ -655,6 +718,24 @@ function renderProducts(list){
   });
 }
 
+document.getElementById("sortSelect").addEventListener("change", function(){
+
+  let sorted = [...products];
+
+  if(this.value === "low"){
+    sorted.sort((a,b)=> a.price - b.price);
+  }
+
+  else if(this.value === "high"){
+    sorted.sort((a,b)=> b.price - a.price);
+  }
+
+  else if(this.value === "new"){
+    sorted.sort((a,b)=> b.id - a.id);
+  }
+
+  renderProducts(sorted);
+});
 
 /* ===== CATEGORIES ===== */
 
@@ -743,6 +824,14 @@ function toggleCategories(){
 function addToCart(product){
   cart.push(product);
   cartCount.innerText = cart.length;
+
+  const cartBtn = document.getElementById("cartBtn");
+
+  cartBtn.classList.add("cart-animate");
+
+  setTimeout(()=>{
+    cartBtn.classList.remove("cart-animate");
+  },400);
 }
 
 document.getElementById("cartBtn").onclick = function(){

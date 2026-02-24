@@ -394,7 +394,7 @@ footer{
 </head>
 
 <body>
-  
+
 <div class="bottom-nav">
   <div onclick="showAll()">🏠<span>الرئيسية</span></div>
   <div onclick="toggleCategories()">📂<span>التصنيفات</span></div>
@@ -613,23 +613,33 @@ const cartCount = document.getElementById("cart-count");
 
 /* ===== RENDER PRODUCTS ===== */
 function renderProducts(list){
-  document.getElementById("productGrid").innerHTML =
-    list.map((p,i)=>`
-      <div class="card" style="position:relative" onclick="openPopup(${i})">
-        
-        ${p.badge ? `<div class="badge">${p.badge}</div>` : ""}
+  const grid = document.getElementById("productGrid");
+  grid.innerHTML = "";
 
-        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300x220?text=No+Image'">
+  list.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.position = "relative";
 
-        <div class="card-info">
-          <h3>${p.name}</h3>
-          <div class="price">${p.price} EGP</div>
-          <button class="add-btn" onclick="event.stopPropagation(); addToCart(${i})">
-            أضف للسلة
-          </button>
-        </div>
+    card.onclick = () => openPopup(p);
+
+    card.innerHTML = `
+      ${p.badge ? `<div class="badge">${p.badge}</div>` : ""}
+      <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300x220?text=No+Image'">
+      <div class="card-info">
+        <h3>${p.name}</h3>
+        <div class="price">${p.price} EGP</div>
+        <button class="add-btn">أضف للسلة</button>
       </div>
-    `).join("");
+    `;
+
+    card.querySelector(".add-btn").onclick = (e)=>{
+      e.stopPropagation();
+      addToCart(p);
+    };
+
+    grid.appendChild(card);
+  });
 }
 
 
@@ -708,8 +718,8 @@ function toggleCategories(){
 
 
 /* ===== CART ===== */
-function addToCart(index){
-  cart.push(products[index]);
+function addToCart(product){
+  cart.push(product);
   cartCount.innerText = cart.length;
 }
 
@@ -729,12 +739,11 @@ document.getElementById("cartBtn").onclick = function(){
 };
 
 /* ===== POPUP FUNCTIONS ===== */
-function openPopup(index){
-  const p = products[index];
-  document.getElementById("popupImg").src = p.img;
-  document.getElementById("popupTitle").innerText = p.name;
-  document.getElementById("popupDesc").innerText = p.use || "";
-  document.getElementById("popupPrice").innerText = p.price + " EGP";
+function openPopup(product){
+  document.getElementById("popupImg").src = product.img;
+  document.getElementById("popupTitle").innerText = product.name;
+  document.getElementById("popupDesc").innerText = product.use || "";
+  document.getElementById("popupPrice").innerText = product.price + " EGP";
   document.getElementById("productPopup").style.display = "flex";
 }
 

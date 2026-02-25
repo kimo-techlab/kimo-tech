@@ -110,14 +110,13 @@ button:hover{
   <button onclick="submitOrder()">تأكيد الطلب ✅</button>
 </div>
 
-<!-- Firebase -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
+  apiKey: "YOUR_API_KEY",
   authDomain: "kimo-tech-store-962df.firebaseapp.com",
   projectId: "kimo-tech-store-962df",
   storageBucket: "kimo-tech-store-962df.firebasestorage.app",
@@ -134,18 +133,22 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 const summary = document.getElementById("orderSummary");
 let total = 0;
 
-cart.forEach(p=>{
-  total += p.price;
+if(cart.length === 0){
+  summary.innerHTML = "<p>السلة فارغة</p>";
+}else{
+  cart.forEach(p=>{
+    total += p.price;
 
-  summary.innerHTML += `
-    <div class="order-item">
-      <span>${p.name}</span>
-      <span>${p.price} EGP</span>
-    </div>
-  `;
-});
+    summary.innerHTML += `
+      <div class="order-item">
+        <span>${p.name}</span>
+        <span>${p.price} EGP</span>
+      </div>
+    `;
+  });
 
-summary.innerHTML += `<div class="total">الإجمالي: ${total} EGP</div>`;
+  summary.innerHTML += `<div class="total">الإجمالي: ${total} EGP</div>`;
+}
 
 /* ===== اظهار بيانات InstaPay ===== */
 
@@ -153,24 +156,25 @@ window.handlePaymentChange = function(){
   const payment = document.getElementById("paymentMethod").value;
   const box = document.getElementById("instaBox");
 
-  if(payment === "instapay"){
-    box.style.display = "block";
-  }else{
-    box.style.display = "none";
-  }
+  box.style.display = (payment === "instapay") ? "block" : "none";
 }
 
 /* ===== حفظ الطلب ===== */
 
 window.submitOrder = async function(){
 
-  const name = document.getElementById("customerName").value;
-  const phone = document.getElementById("customerPhone").value;
-  const address = document.getElementById("customerAddress").value;
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const address = document.getElementById("customerAddress").value.trim();
   const payment = document.getElementById("paymentMethod").value;
 
   if(!name || !phone || !address){
     alert("من فضلك املأ كل البيانات");
+    return;
+  }
+
+  if(phone.length < 10){
+    alert("رقم الموبايل غير صحيح");
     return;
   }
 
@@ -181,20 +185,24 @@ window.submitOrder = async function(){
 
   try{
 
-    await addDoc(collection(db, "orders"), {
+    const docRef = await addDoc(collection(db, "orders"), {
       customerName: name,
       phone: phone,
       address: address,
       paymentMethod: payment,
       items: cart,
       total: total,
-      createdAt: new Date()
+      status: "pending",
+      createdAt: serverTimestamp()
     });
 
-    alert("تم استلام طلبك بنجاح 🎉");
+    alert("تم استلام طلبك بنجاح 🎉\nرقم الطلب: " + docRef.id);
 
     localStorage.removeItem("cart");
-    window.location.href = "index.html";
+
+    setTimeout(()=>{
+      window.location.href = "index.html";
+    },1000);
 
   }catch(error){
     alert("حدث خطأ أثناء حفظ الطلب");

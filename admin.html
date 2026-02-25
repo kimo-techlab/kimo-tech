@@ -227,6 +227,24 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+import { getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+let currentRole = null;
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location.href = "admin-login.html";
+    return;
+  }
+
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+
+  if(userDoc.exists()){
+    currentRole = userDoc.data().role;
+  }
+});
+
 /* 🔐 حماية الصفحة */
 onAuthStateChanged(auth, (user) => {
   if (!user) {
@@ -239,11 +257,16 @@ onAuthStateChanged(auth, (user) => {
 /* ================= صوت الإشعار ================= */
 
 const audio = new Audio("notification.mp3");
+document.addEventListener("click", () => {
+  audio.play().then(()=> audio.pause());
+},{ once:true });
 
 onSnapshot(collection(db,"orders"), (snapshot)=>{
   snapshot.docChanges().forEach(change=>{
     if(change.type === "added"){
+
       audio.play();
+       showToast("طلب جديد وصل 🔥","success");
       loadOrders();
     }
   });
@@ -415,6 +438,7 @@ async function autoDeleteOldOrders(){
 autoDeleteOldOrders();
 loadOrders();
 
+showToast("التوست اشتغلت 🔥","success");
 
 document.getElementById("searchInput").addEventListener("keyup", loadOrders);
 
@@ -440,12 +464,14 @@ window.openOrderDetails = function(data,id){
     <hr>
     <strong>الإجمالي: ${data.total} EGP</strong>
 
-    <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button onclick="changeStatus('${id}','pending')">Pending</button>
-      <button onclick="changeStatus('${id}','shipped')">Shipped</button>
-      <button onclick="changeStatus('${id}','completed')">Completed</button>
-      <button onclick="printOrder()">🖨 طباعة</button>
-    </div>
+<div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
+  <button onclick="changeStatus('${id}','pending')">Pending</button>
+  <button onclick="changeStatus('${id}','shipped')">Shipped</button>
+  <button onclick="changeStatus('${id}','completed')">Completed</button>
+  <button onclick="printOrder()">🖨 طباعة</button>
+  ${currentRole === "owner" ? `<button onclick="deleteOrder('${id}')" style="background:#dc2626;color:#fff;">🗑 حذف</button>` : ``}
+</div>
+
   `;
 
   document.getElementById("orderPopup").style.display="flex";
@@ -472,6 +498,27 @@ window.changeStatus = async function(id,newStatus){
 
   }
 }
+
+
+import { deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+window.deleteOrder = async function(id){
+
+  if(!confirm("هل أنت متأكد من حذف الطلب؟")){
+    return;
+  }
+
+  try{
+    await deleteDoc(doc(db,"orders",id));
+    showToast("تم حذف الطلب 🗑","success");
+    closePopup();
+    loadOrders();
+  }catch(error){
+    console.error(error);
+    showToast("غير مسموح بالحذف ❌","error");
+  }
+}
+
 window.closePopup = function(){
   document.getElementById("orderPopup").style.display="none";
 }
@@ -550,8 +597,10 @@ function toggleTheme(){
 <div id="toastContainer"></div>
 
 <script>
-function showToast(message,type="success"){
-  const container = document.getElementById("toastContainer");
+
+window.showToast = function(message,type="success"){
+
+const container = document.getElementById("toastContainer");
 
   const toast = document.createElement("div");
   toast.className = "toast " + type;

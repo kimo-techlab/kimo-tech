@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login | KIMO TECH</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:#0f172a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.login-box{
+  background:#fff;
+  padding:40px;
+  border-radius:20px;
+  width:350px;
+  text-align:center;
+  box-shadow:0 15px 40px rgba(0,0,0,.2);
+}
+
+h2{
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:15px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:20px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:#fff;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  background:#16a34a;
+}
+
+.small{
+  font-size:12px;
+  color:#64748b;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>لوحة تحكم KIMO 👑</h2>
+
+  <input type="email" id="adminEmail" placeholder="البريد الإلكتروني">
+
+  <input type="password" id="adminPass" placeholder="كلمة المرور">
+
+  <button onclick="login()">دخول</button>
+
+  <div class="small">لو نسيت الباسورد غيره من Firebase</div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
+  authDomain: "kimo-tech-store-962df.firebaseapp.com",
+  projectId: "kimo-tech-store-962df",
+  appId: "1:845478890277:web:3cdd3328bde1b5b9dda8cc"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* لو المستخدم مسجل دخول بالفعل يدخل مباشرة */
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    window.location.href = "admin.html";
+  }
+});
+
+window.login = async function(){
+
+  const email = document.getElementById("adminEmail").value.trim();
+  const pass  = document.getElementById("adminPass").value.trim();
+
+  if(!email || !pass){
+    alert("من فضلك املأ البيانات");
+    return;
+  }
+
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+    window.location.href="admin.html";
+  }catch(err){
+    alert("بيانات غير صحيحة أو الحساب غير موجود");
+  }
+}
+
+</script>
+
+</body>
+</html>

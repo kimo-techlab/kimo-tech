@@ -72,6 +72,14 @@ button{
 button:hover{
   background:#0284c7;
 }
+
+.payment-box{
+  background:#f1f5f9;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:15px;
+  display:none;
+}
 </style>
 </head>
 
@@ -86,21 +94,44 @@ button:hover{
   <input type="tel" id="customerPhone" placeholder="رقم الموبايل">
   <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل">
 
-  <select id="paymentMethod">
+  <select id="paymentMethod" onchange="handlePaymentChange()">
     <option value="cash">الدفع عند الاستلام</option>
     <option value="vodafone">فودافون كاش</option>
-      <option value="instapay">InstaPay</option>
-
+    <option value="instapay">InstaPay</option>
   </select>
+
+  <div class="payment-box" id="instaBox">
+    📌 حول المبلغ على:<br>
+    💳 InstaPay: 01555735099<br>
+    👤 الاسم: KIMO TECH<br>
+    ثم اضغط تأكيد الطلب
+  </div>
 
   <button onclick="submitOrder()">تأكيد الطلب ✅</button>
 </div>
 
-<script>
+<!-- Firebase -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
+  authDomain: "kimo-tech-store-962df.firebaseapp.com",
+  projectId: "kimo-tech-store-962df",
+  storageBucket: "kimo-tech-store-962df.firebasestorage.app",
+  messagingSenderId: "845478890277",
+  appId: "1:845478890277:web:3cdd3328bde1b5b9dda8cc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ===== عرض المنتجات ===== */
+
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
 const summary = document.getElementById("orderSummary");
-
 let total = 0;
 
 cart.forEach(p=>{
@@ -116,7 +147,22 @@ cart.forEach(p=>{
 
 summary.innerHTML += `<div class="total">الإجمالي: ${total} EGP</div>`;
 
-function submitOrder(){
+/* ===== اظهار بيانات InstaPay ===== */
+
+window.handlePaymentChange = function(){
+  const payment = document.getElementById("paymentMethod").value;
+  const box = document.getElementById("instaBox");
+
+  if(payment === "instapay"){
+    box.style.display = "block";
+  }else{
+    box.style.display = "none";
+  }
+}
+
+/* ===== حفظ الطلب ===== */
+
+window.submitOrder = async function(){
 
   const name = document.getElementById("customerName").value;
   const phone = document.getElementById("customerPhone").value;
@@ -128,22 +174,35 @@ function submitOrder(){
     return;
   }
 
-  let msg = "طلب جديد من KIMO TECH:\n\n";
+  if(cart.length === 0){
+    alert("السلة فارغة");
+    return;
+  }
 
-  cart.forEach((p,i)=>{
-    msg += `${i+1}- ${p.name} (${p.price} EGP)\n`;
-  });
+  try{
 
-  msg += `\nالإجمالي: ${total} EGP\n`;
-  msg += `\nالاسم: ${name}\n`;
-  msg += `رقم الموبايل: ${phone}\n`;
-  msg += `العنوان: ${address}\n`;
-  msg += `طريقة الدفع: ${payment}`;
+    await addDoc(collection(db, "orders"), {
+      customerName: name,
+      phone: phone,
+      address: address,
+      paymentMethod: payment,
+      items: cart,
+      total: total,
+      createdAt: new Date()
+    });
 
-  window.open(`https://wa.me/201555735099?text=${encodeURIComponent(msg)}`);
+    alert("تم استلام طلبك بنجاح 🎉");
 
-  localStorage.removeItem("cart");
+    localStorage.removeItem("cart");
+    window.location.href = "index.html";
+
+  }catch(error){
+    alert("حدث خطأ أثناء حفظ الطلب");
+    console.error(error);
+  }
+
 }
+
 </script>
 
 </body>

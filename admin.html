@@ -151,8 +151,9 @@ select,input{
 
 <div style="display:flex;justify-content:space-between;align-items:center;">
   <h1>لوحة تحكم KIMO 👑</h1>
-  <button onclick="toggleTheme()" style="padding:8px 15px;border:none;border-radius:8px;cursor:pointer;">
-    🌙 Toggle Mode
+  <button onclick="logout()" 
+    style="padding:8px 15px;border:none;border-radius:8px;cursor:pointer;background:#5726dc;color:#fff;">
+    🚪 Logout
   </button>
 </div>
 
@@ -227,6 +228,13 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+import { signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+window.logout = async function(){
+  await signOut(auth);
+  window.location.href = "admin-login.html";
+}
+
 import { getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 let currentRole = null;
@@ -243,14 +251,15 @@ onAuthStateChanged(auth, async (user) => {
   if(userDoc.exists()){
     currentRole = userDoc.data().role;
   }
+     console.log("ROLE:", currentRole);
+
+  if(currentRole === "owner"){
+  autoDeleteOldOrders();
+}
+    loadOrders();
 });
 
-/* 🔐 حماية الصفحة */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "admin-login.html";
-  }
-});
+
 
 
 
@@ -267,7 +276,6 @@ onSnapshot(collection(db,"orders"), (snapshot)=>{
 
       audio.play();
        showToast("طلب جديد وصل 🔥","success");
-      loadOrders();
     }
   });
 });
@@ -435,10 +443,6 @@ async function autoDeleteOldOrders(){
   });
 }
 
-autoDeleteOldOrders();
-loadOrders();
-
-showToast("التوست اشتغلت 🔥","success");
 
 document.getElementById("searchInput").addEventListener("keyup", loadOrders);
 
@@ -488,7 +492,6 @@ window.changeStatus = async function(id,newStatus){
 
     showToast("تم تحديث حالة الطلب ✅","success");
 
-    loadOrders();
     closePopup();
 
   }catch(error){
@@ -500,7 +503,6 @@ window.changeStatus = async function(id,newStatus){
 }
 
 
-import { deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 window.deleteOrder = async function(id){
 
@@ -512,7 +514,6 @@ window.deleteOrder = async function(id){
     await deleteDoc(doc(db,"orders",id));
     showToast("تم حذف الطلب 🗑","success");
     closePopup();
-    loadOrders();
   }catch(error){
     console.error(error);
     showToast("غير مسموح بالحذف ❌","error");

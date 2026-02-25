@@ -335,71 +335,71 @@ function updateChart(revenue, pending, completed){
     }
   });
 }
-window.loadOrders = async function(){
+function loadOrders(){
 
-  const snapshot = await getDocs(collection(db,"orders"));
+  onSnapshot(collection(db,"orders"), (snapshot)=>{
 
-  const searchValue = document.getElementById("searchInput").value.toLowerCase();
-  const statusFilter = document.getElementById("statusFilter").value;
-  const fromDate = document.getElementById("fromDate").value;
-  const toDate = document.getElementById("toDate").value;
+    const searchValue = document.getElementById("searchInput").value.toLowerCase();
+    const statusFilter = document.getElementById("statusFilter").value;
+    const fromDate = document.getElementById("fromDate").value;
+    const toDate = document.getElementById("toDate").value;
 
-  let total=0;
-  let revenue=0;
-  let pending=0;
-  let completed=0;
+    let total=0;
+    let revenue=0;
+    let pending=0;
+    let completed=0;
 
-  const container=document.getElementById("ordersContainer");
-  container.innerHTML="";
+    const container=document.getElementById("ordersContainer");
+    container.innerHTML="";
 
-  snapshot.forEach(docSnap=>{
+    snapshot.forEach(docSnap=>{
 
-    const data=docSnap.data();
-    const id=docSnap.id;
+      const data=docSnap.data();
+      const id=docSnap.id;
 
-    if(
-  searchValue &&
-  !data.customerName.toLowerCase().includes(searchValue) &&
-  !data.phone.includes(searchValue)
-) return;
-    const status=data.status || "pending";
+      if(
+        searchValue &&
+        !data.customerName.toLowerCase().includes(searchValue) &&
+        !data.phone.includes(searchValue)
+      ) return;
 
-    let orderDate = data.createdAt ? data.createdAt.toDate() : null;
+      const status=data.status || "pending";
+      let orderDate = data.createdAt ? data.createdAt.toDate() : null;
 
-    if(statusFilter !== "all" && status !== statusFilter) return;
+      if(statusFilter !== "all" && status !== statusFilter) return;
+      if(fromDate && orderDate && orderDate < new Date(fromDate)) return;
+      if(toDate && orderDate && orderDate > new Date(toDate)) return;
 
-    if(fromDate && orderDate && orderDate < new Date(fromDate)) return;
-    if(toDate && orderDate && orderDate > new Date(toDate)) return;
+      total++;
 
-    total++;
+      if(status==="pending") pending++;
+      if(status==="completed"){
+        completed++;
+        revenue += data.total;
+      }
 
-    if(status==="pending") pending++;
-    if(status==="completed"){
-      completed++;
-      revenue += data.total;
-    }
+      const card=document.createElement("div");
+      card.className="order-card";
+      card.style.cursor="pointer";
+      card.onclick = () => openOrderDetails(data,id);
 
-    const card=document.createElement("div");
-    card.className="order-card";
-    card.style.cursor="pointer";
+      card.innerHTML=`
+        <div class="order-id">Order ID: ${id.slice(0,8).toUpperCase()}</div>
+        <strong>${data.customerName}</strong>
+        <div class="status ${status}">${status.toUpperCase()}</div>
+        <div>💰 ${data.total} EGP</div>
+      `;
 
-    card.onclick = () => openOrderDetails(data,id);
+      container.appendChild(card);
+    });
 
-card.innerHTML=`
-  <div class="order-id">Order ID: ${id.slice(0,8).toUpperCase()}</div>
-  <strong>${data.customerName}</strong>
-  <div class="status ${status}">${status.toUpperCase()}</div>
-  <div>💰 ${data.total} EGP</div>
-`;
+    animateCounter("totalOrders", total);
+    animateCounter("pendingCount", pending);
+    animateCounter("completedCount", completed);
+    animateCounter("totalRevenue", revenue);
+    updateChart(revenue, pending, completed);
 
-    container.appendChild(card);
   });
-
-animateCounter("totalOrders", total);
-animateCounter("pendingCount", pending);
-animateCounter("completedCount", completed);
-animateCounter("totalRevenue", revenue);
-updateChart(revenue, pending, completed);
 
 }
 

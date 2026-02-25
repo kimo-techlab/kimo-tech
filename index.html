@@ -898,24 +898,5 @@ document.getElementById("categoryTitle").innerHTML = "عرض جميع المنت
     <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>
   </div>
 </div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
-  authDomain: "kimo-tech-store-962df.firebaseapp.com",
-  projectId: "kimo-tech-store-962df",
-  storageBucket: "kimo-tech-store-962df.firebasestorage.app",
-  messagingSenderId: "845478890277",
-  appId: "1:845478890277:web:3cdd3328bde1b5b9dda8cc",
-  measurementId: "G-HTBVLP11HG"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-// نخليهم متاحين لباقي الكود
-window.db = db;
-window.collection = collection;
-window.addDoc = addDoc;
-</script>
 </body>
 </html>

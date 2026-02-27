@@ -151,12 +151,25 @@ select,input{
 
 <div style="display:flex;justify-content:space-between;align-items:center;">
   <h1>لوحة تحكم KIMO 👑</h1>
-  <button onclick="logout()" 
-    style="padding:8px 15px;border:none;border-radius:8px;cursor:pointer;background:#5726dc;color:#fff;">
-    🚪 Logout
-  </button>
+
 </div>
 
+
+<div style="display:flex;gap:10px;">
+  <a href="products-admin.html" 
+  style="padding:8px 15px;
+  background:#16a34a;
+  color:#fff;
+  border-radius:8px;
+  text-decoration:none;">
+  📦 إدارة المنتجات
+  </a>
+
+  <button onclick="logout()" 
+  style="padding:8px 15px;border:none;border-radius:8px;cursor:pointer;background:#5726dc;color:#fff;">
+  🚪 Logout
+  </button>
+</div>
 
 <div class="dashboard">
   <div class="card">
@@ -180,6 +193,8 @@ select,input{
   </div>
 </div>
 
+
+<div id="productsList"></div>
 <div class="filters">
     <input type="text" id="searchInput" placeholder="🔍 بحث عن العميل">
   <select id="statusFilter">
@@ -192,7 +207,7 @@ select,input{
   <input type="date" id="fromDate">
   <input type="date" id="toDate">
 
-  <button onclick="loadOrders()">فلترة</button>
+  <button onclick="renderOrders()">فلترة</button>
   <button onclick="exportExcel()">تصدير Excel</button>
 </div>
 
@@ -200,19 +215,24 @@ select,input{
 
 </div>
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="module">
+  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { 
   getFirestore,
   collection,
   getDocs,
-  doc,
+  addDoc,
   deleteDoc,
-  onSnapshot,
-  updateDoc
+  updateDoc,
+  doc,
+  serverTimestamp,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -238,7 +258,8 @@ window.logout = async function(){
 import { getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 let currentRole = null;
-
+let allOrders = [];
+let unsubscribe = null;
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -256,7 +277,21 @@ onAuthStateChanged(auth, async (user) => {
   if(currentRole === "owner"){
   autoDeleteOldOrders();
 }
-    loadOrders();
+unsubscribe = onSnapshot(collection(db,"orders"), (snapshot)=>{
+
+  allOrders = [];
+
+  snapshot.forEach(docSnap=>{
+    allOrders.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  renderOrders();
+
+
+});
 });
 
 
@@ -335,72 +370,67 @@ function updateChart(revenue, pending, completed){
     }
   });
 }
-function loadOrders(){
 
-  onSnapshot(collection(db,"orders"), (snapshot)=>{
+function renderOrders(){
 
-    const searchValue = document.getElementById("searchInput").value.toLowerCase();
-    const statusFilter = document.getElementById("statusFilter").value;
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
+  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+  const statusFilter = document.getElementById("statusFilter").value;
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
 
-    let total=0;
-    let revenue=0;
-    let pending=0;
-    let completed=0;
+  let total=0;
+  let revenue=0;
+  let pending=0;
+  let completed=0;
 
-    const container=document.getElementById("ordersContainer");
-    container.innerHTML="";
+  const container=document.getElementById("ordersContainer");
+  container.innerHTML="";
 
-    snapshot.forEach(docSnap=>{
+  allOrders.forEach(data=>{
 
-      const data=docSnap.data();
-      const id=docSnap.id;
+    const id = data.id;
 
-      if(
-        searchValue &&
-        !data.customerName.toLowerCase().includes(searchValue) &&
-        !data.phone.includes(searchValue)
-      ) return;
+    if(
+      searchValue &&
+      !data.customerName.toLowerCase().includes(searchValue) &&
+      !data.phone.includes(searchValue)
+    ) return;
 
-      const status=data.status || "pending";
-      let orderDate = data.createdAt ? data.createdAt.toDate() : null;
+    const status=data.status || "pending";
+    let orderDate = data.createdAt ? data.createdAt.toDate() : null;
 
-      if(statusFilter !== "all" && status !== statusFilter) return;
-      if(fromDate && orderDate && orderDate < new Date(fromDate)) return;
-      if(toDate && orderDate && orderDate > new Date(toDate)) return;
+    if(statusFilter !== "all" && status !== statusFilter) return;
+    if(fromDate && orderDate && orderDate < new Date(fromDate)) return;
+    if(toDate && orderDate && orderDate > new Date(toDate)) return;
 
-      total++;
+    total++;
 
-      if(status==="pending") pending++;
-      if(status==="completed"){
-        completed++;
-        revenue += data.total;
-      }
+    if(status==="pending") pending++;
+    if(status==="completed"){
+      completed++;
+      revenue += data.total;
+    }
 
-      const card=document.createElement("div");
-      card.className="order-card";
-      card.style.cursor="pointer";
-      card.onclick = () => openOrderDetails(data,id);
+    const card=document.createElement("div");
+    card.className="order-card";
+    card.style.cursor="pointer";
+    card.onclick = () => openOrderDetails(data,id);
 
-      card.innerHTML=`
-        <div class="order-id">Order ID: ${id.slice(0,8).toUpperCase()}</div>
-        <strong>${data.customerName}</strong>
-        <div class="status ${status}">${status.toUpperCase()}</div>
-        <div>💰 ${data.total} EGP</div>
-      `;
+    card.innerHTML=`
+      <div class="order-id">Order ID: ${id.slice(0,8).toUpperCase()}</div>
+      <strong>${data.customerName}</strong>
+      <div class="status ${status}">${status.toUpperCase()}</div>
+      <div>💰 ${data.total} EGP</div>
+    `;
 
-      container.appendChild(card);
-    });
-
-    animateCounter("totalOrders", total);
-    animateCounter("pendingCount", pending);
-    animateCounter("completedCount", completed);
-    animateCounter("totalRevenue", revenue);
-    updateChart(revenue, pending, completed);
-
+    container.appendChild(card);
   });
 
+  animateCounter("totalOrders", total);
+  animateCounter("pendingCount", pending);
+  animateCounter("completedCount", completed);
+  animateCounter("totalRevenue", revenue);
+  updateChart(revenue, pending, completed);
 }
 
 /* ================= تصدير Excel ================= */
@@ -444,8 +474,7 @@ async function autoDeleteOldOrders(){
 }
 
 
-document.getElementById("searchInput").addEventListener("keyup", loadOrders);
-
+document.getElementById("searchInput").addEventListener("keyup", renderOrders);
 window.openOrderDetails = function(data,id){
 
   let itemsHTML = "";
@@ -558,6 +587,7 @@ window.printOrder = function(){
   printWindow.print();
 }
 
+
 </script>
 <canvas id="salesChart" style="max-width:400px;margin:30px auto;"></canvas>
 
@@ -614,5 +644,13 @@ const container = document.getElementById("toastContainer");
   },3000);
 }
 </script>
+
+
+
+</button>
+
+</div>
+</div>
+
 </body>
 </html>

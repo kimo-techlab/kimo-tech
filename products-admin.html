@@ -385,6 +385,29 @@ function populateCategories(){
   });
 }
 
+
+window.updateOrder = async function(id, newOrder){
+
+  const orderNumber = Number(newOrder);
+
+  if(isNaN(orderNumber)){
+    showToast("رقم غير صحيح ❌","error");
+    return;
+  }
+
+  try{
+    await updateDoc(doc(db,"products",id),{
+      order: orderNumber
+    });
+
+    showToast("تم تحديث الترتيب ✅","success");
+
+  }catch(error){
+    console.error(error);
+    showToast("حصل خطأ ❌","error");
+  }
+}
+
 function renderProducts(list){
 
   const container = document.getElementById("productsContainer");

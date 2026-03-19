@@ -1,0 +1,14 @@
+{
+  "routes": [
+    {
+      "src": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.kimo-techlab.com"
+        }
+      ],
+      "dest": "/admin.html"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة المنتجات | KIMO TECH</title>
+<title>إدارة المشاريع | KIMO TECH</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
@@ -174,7 +174,7 @@ img{
 <body>
 
 <div class="container">
-<h1>📦 إدارة المنتجات</h1>
+<h1>🧠 إدارة المشاريع</h1>
 
 <div class="top-bar">
 <button class="back-btn" onclick="window.location.href='./admin.html'">
@@ -185,7 +185,7 @@ img{
     <select id="categoryFilter" class="search">
   <option value="all">كل التصنيفات</option>
 </select>
-    <button class="add-btn" onclick="openModal()">➕ إضافة منتج</button>
+    <button class="add-btn" onclick="openModal()">➕ إضافة مشروع</button>
   </div>
 </div>
 
@@ -199,20 +199,20 @@ img{
   <div>الحالة</div>
   <div>إجراءات</div>
 </div>
-  <div id="productsContainer"></div>
+  <div id="projectsContainer"></div>
 </div>
 </div>
 
 <!-- Modal -->
-<div class="modal" id="productModal">
+<div class="modal" id="projectModal">
   <div class="modal-content">
-<h3 id="modalTitle">إضافة منتج</h3>
+<h3 id="modalTitle">إضافة مشروع</h3>
 
-<input type="text" id="pName" placeholder="اسم المنتج">
+<input type="text" id="pName" placeholder="اسم مشروع">
 <input type="number" id="pPrice" placeholder="السعر">
 <input type="text" id="pCategory" placeholder="التصنيف">
 <input type="text" id="pImage" placeholder="رابط الصورة">
-<input type="text" id="pUse" placeholder="وصف قصير">
+<input type="text" id="pDesc" placeholder="الوصف">
 
 <select id="pBadge">
   <option value="">بدون Badge</option>
@@ -227,7 +227,7 @@ img{
   In Stock
 </label>
 
-<button class="add-btn" onclick="saveProduct()">حفظ</button>
+<button class="add-btn" onclick="saveProject()">حفظ</button>
 <button onclick="closeModal()">إلغاء</button>
 <hr>
 
@@ -283,15 +283,15 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let currentRole = null;
-let allProducts = [];
-document.getElementById("searchInput").addEventListener("keyup", filterProducts);
+let allprojects = [];
+document.getElementById("searchInput").addEventListener("keyup", filterprojects);
 
-function filterProducts(){
+function filterprojects(){
 
   const q = document.getElementById("searchInput").value.toLowerCase();
   const selectedCategory = document.getElementById("categoryFilter").value;
 
-  const filtered = allProducts.filter(p=>{
+  const filtered = allprojects.filter(p=>{
 
     const matchesSearch =
       p.name?.toLowerCase().includes(q) ||
@@ -304,10 +304,10 @@ function filterProducts(){
     return matchesSearch && matchesCategory;
   });
 
-  renderProducts(filtered);
+  renderprojects(filtered);
 }
 document.getElementById("categoryFilter").addEventListener("change", function(){
-  filterProducts();
+  filterprojects();
 });
 
 let editId = null;
@@ -336,42 +336,42 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  startProductsListener();
+  startprojectsListener();
 });
 
-/* ================= تحميل المنتجات ================= */
+/* ================= تحميل مشروع ================= */
 
-function startProductsListener(){
+function startprojectsListener(){
 
-  onSnapshot(collection(db,"products"), async snapshot=>{
+  onSnapshot(collection(db,"projects"), async snapshot=>{
 
-    allProducts = [];
+    allprojects = [];
 
     snapshot.forEach(docSnap=>{
-      allProducts.push({
+      allprojects.push({
         id: docSnap.id,
         ...docSnap.data()
       });
     });
 
     // 🔥 نحط order = 9999 للقديم (مرة واحدة)
-    for(const p of allProducts){
+    for(const p of allprojects){
       if(p.order === undefined){
-        await updateDoc(doc(db,"products",p.id),{
+        await updateDoc(doc(db,"projects",p.id),{
           order: 9999
         });
       }
     }
 
     // 🔥 هنا بقى الترتيب الصح
-    allProducts.sort((a,b)=>{
+    allprojects.sort((a,b)=>{
       if(a.order === b.order){
         return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
       }
       return (a.order || 9999) - (b.order || 9999);
     });
 
-    renderProducts(allProducts);
+    renderprojects(allprojects);
     populateCategories();
 
   });
@@ -380,7 +380,7 @@ function startProductsListener(){
 function populateCategories(){
   const select = document.getElementById("categoryFilter");
 
-  const categories = [...new Set(allProducts.map(p=>p.category).filter(Boolean))];
+  const categories = [...new Set(allprojects.map(p=>p.category).filter(Boolean))];
 
   select.innerHTML = `<option value="all">كل التصنيفات</option>`;
 
@@ -400,7 +400,7 @@ window.updateOrder = async function(id, newOrder){
   }
 
   try{
-    await updateDoc(doc(db,"products",id),{
+    await updateDoc(doc(db,"projects",id),{
       order: orderNumber
     });
 
@@ -412,9 +412,9 @@ window.updateOrder = async function(id, newOrder){
   }
 }
 
-function renderProducts(list){
+function renderprojects(list){
 
-  const container = document.getElementById("productsContainer");
+  const container = document.getElementById("projectsContainer");
   container.innerHTML = "";
 
   list.forEach(p=>{
@@ -431,7 +431,7 @@ function renderProducts(list){
   >
 </div>
     <div>
-      <img src="${p.image || 'https://via.placeholder.com/60'}"
+      <img src="${p.image || 'images/no-image.png'}"
       style="width:60px;height:60px;object-fit:cover;border-radius:10px;">
     </div>
 
@@ -461,12 +461,12 @@ function renderProducts(list){
 
 window.deleteProduct = async function(id){
   if(!confirm("متأكد من الحذف؟")) return;
-  await deleteDoc(doc(db,"products",id));
+  await deleteDoc(doc(db,"projects",id));
   showToast("تم الحذف");
 }
 
 window.toggleStock = async function(id,current){
-  await updateDoc(doc(db,"products",id),{
+  await updateDoc(doc(db,"projects",id),{
     inStock: !current
   });
   showToast("تم التحديث");
@@ -476,73 +476,73 @@ window.toggleStock = async function(id,current){
 
 
 window.editProduct = function(id){
-  const p = allProducts.find(x=>x.id===id);
+  const p = allprojects.find(x=>x.id===id);
   editId = id;
 
-  document.getElementById("modalTitle").innerText = "تعديل منتج";
+  document.getElementById("modalTitle").innerText = "تعديل مشروع";
 
   document.getElementById("pName").value = p.name || "";
   document.getElementById("pPrice").value = p.price || "";
   document.getElementById("pCategory").value = p.category || "";
   document.getElementById("pImage").value = p.image || "";
-  document.getElementById("pUse").value = p.use || "";
+document.getElementById("pDesc").value = p.description || "";
   document.getElementById("pBadge").value = p.badge || "";
   document.getElementById("pStock").checked = p.inStock ?? true;
 
-  document.getElementById("productModal").style.display = "flex";
+  document.getElementById("projectModal").style.display = "flex";
 }
 
 window.openModal = function(){
   editId = null;
-  document.getElementById("modalTitle").innerText = "إضافة منتج";
+  document.getElementById("modalTitle").innerText = "إضافة مشروع";
   resetForm();
-  document.getElementById("productModal").style.display = "flex";
+  document.getElementById("projectModal").style.display = "flex";
 }
 
 window.closeModal = function(){
   editId = null;
-  document.getElementById("productModal").style.display="none";
+  document.getElementById("projectModal").style.display="none";
 }
 
-window.saveProduct = async function(){
+window.saveProject = async function(){
 
   const name = document.getElementById("pName").value.trim();
   const price = Number(document.getElementById("pPrice").value);
   const category = document.getElementById("pCategory").value.trim();
   const image = document.getElementById("pImage").value.trim();
-  const use = document.getElementById("pUse").value.trim();
+  const description = document.getElementById("pDesc").value.trim();
   const badge = document.getElementById("pBadge").value.trim();
   const inStock = document.getElementById("pStock").checked;
 
-  if(!name || price <= 0){
+  if(!name)
+  {
     alert("الاسم والسعر مطلوبين");
     return;
   }
 
   try{
 
-    if(editId){
-      await updateDoc(doc(db,"products",editId),{
-        name,
-        price,
-        category,
-        image,
-        use,
-        badge,
-        inStock
-      });
+if(editId){
+  await updateDoc(doc(db,"projects",editId),{
+    name,
+    price,
+    category,
+    image,
+    description, // ✅ الصح
+    badge,
+    inStock
+  });
       showToast("تم التعديل ✅","success");
     }else{
-await addDoc(collection(db,"products"),{
+await addDoc(collection(db,"projects"),{
   name,
   price,
   category,
   image,
-  use,
-  description: use,
+  description, // ✅ الصح
   badge,
   inStock,
-  order: 9999, // 👈 الجديد
+  order: 9999,
   createdAt: serverTimestamp()
 });
       showToast("تمت الإضافة ✅","success");
@@ -563,35 +563,34 @@ window.bulkUpload = async function(){
   const raw = document.getElementById("bulkInput").value.trim();
 
   if(!raw){
-    alert("حط المنتجات الأول");
+    alert("حط المشروعات الأول");
     return;
   }
 
-  let products;
+  let projects;
 
   try{
-    products = eval(raw); // نحول النص لكود
+    projects = eval(raw); // نحول النص لكود
   }catch(err){
     alert("في مشكلة في الصيغة ❌");
     return;
   }
 
-  if(!Array.isArray(products)){
-    alert("لازم تبعت Array مش منتج واحد");
+  if(!Array.isArray(projects)){
+    alert("لازم تبعت Array مش مشروع واحد");
     return;
   }
 
   try{
 
-    for(const p of products){
+    for(const p of projects){
 
-     await addDoc(collection(db,"products"),{
+     await addDoc(collection(db,"projects"),{
   name: p.name,
   price: Number(p.price),
   category: p.cat || p.category || "",
-  image: p.img || "",
-  use: p.use || "",
-  description: p.use || "",
+  image: p.image || p.img || "",
+  description: p.description || "", // ✅ المهم
   badge: p.badge || "",
   inStock: true,
   order: 9999, // 👈 مهم
@@ -600,7 +599,7 @@ window.bulkUpload = async function(){
 
     }
 
-    showToast("تم رفع المنتجات 🔥","success");
+    showToast("تم رفع مشروع 🔥","success");
 
     document.getElementById("bulkInput").value = "";
 
@@ -614,9 +613,23 @@ function resetForm(){
   document.getElementById("pPrice").value = "";
   document.getElementById("pCategory").value = "";
   document.getElementById("pImage").value = "";
-  document.getElementById("pUse").value = "";
+  document.getElementById("pDesc").value = "";
   document.getElementById("pBadge").value = "";
   document.getElementById("pStock").checked = true;
+}
+
+
+window.showToast = function(message){
+
+const toast = document.getElementById("toast");
+
+toast.innerText = message;
+toast.style.display = "block";
+
+setTimeout(()=>{
+toast.style.display="none";
+},3000);
+
 }
 </script>
 

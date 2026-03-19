@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="shortcut icon" href="favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KIMO TECH LAB | Arduino & Robotics Store in Egypt</title>
+
+<link rel="icon" type="image/png" href="favicon.png">
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org/",
+ "@type": "Product",
+ "name": "Arduino Uno",
+ "image": "https://kimo-techlab.com/images/arduino.jpg",
+ "description": "Arduino Uno R3 board",
+ "brand": {
+   "@type": "Brand",
+   "name": "Arduino"
+ },
+ "offers": {
+   "@type": "Offer",
+   "priceCurrency": "EGP",
+   "price": "250",
+   "availability": "https://schema.org/InStock"
+ }
+}
+</script>
+
+<meta name="description" content="KIMO TECH LAB - Professional Arduino & Robotics Store in Egypt. Best prices on Arduino, Sensors, Motors, ESP32 and electronics components. Fast shipping in Alexandria and all Egypt.">
+
+<meta name="keywords" content="Arduino Egypt, Robotics Store Egypt, ESP32 Egypt">
+
+<meta name="author" content="KIMO TECH">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0ea5e9">
+
+<meta property="og:title" content="KIMO TECH | Arduino & Robotics Store Egypt">
+<meta property="og:description" content="Buy Arduino & Robotics parts in Egypt.">
+<meta property="og:image" content="https://kimo-techlab.com/images/logo.png">
+<meta property="og:url" content="https://kimo-techlab.com">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://kimo-techlab.com/">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#0ea5e9;
+  --accent:#22c55e;
+  --dark:#020617;
+  --gray:#94a3b8;
+  --light:#f8fafc;
+}
+
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:var(--light);
+  overflow-x:hidden;
+}
+
+/* ===== Robot Watermark ===== */
+.robot-bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at center, rgba(125, 125, 125, 0.225), rgba(0, 0, 0, 0.893)),
+    url("images/robot-mark.png") no-repeat center;
+  background-size:72%;
+  opacity:0.75;
+  pointer-events:none;
+  z-index:-1;
+}
+
+/* ===== Top Bar ===== */
+.top-bar{
+  background:var(--dark);
+  color:#fff;
+  text-align:center;
+  padding:10px;
+  font-weight:bold;
+  position:relative;
+  z-index:2;
+}
+
+/* ===== Header ===== */
+header{
+  background:#fff;
+  padding:22px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+.logo{
+  font-size:32px;
+  font-weight:900;
+}
+.logo span{color:var(--accent);}
+
+
+
+
+
+/* ===== تعديل التصنفات ===== */
+.top-controls{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.control-btn{
+  padding:8px 14px;
+  border-radius:10px;
+  background:#fff;
+  color:#2d3436;
+  border:2px solid #0984e3;
+  font-size:13px;
+  cursor:pointer;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
+  transition:.2s ease;
+}
+
+.control-btn:hover{
+  border-color:#22c55e;
+  box-shadow:0 6px 12px rgba(0,0,0,0.15);
+}
+
+.sort-small{
+  width:120px;
+}
+/* ===== تعديل الترتيب ===== */
+.sort-select{
+  padding:10px 15px;
+  border-radius:10px;
+  margin-top:-30px;
+  position:relative;
+  z-index:10;
+
+  background:#ffffff;
+  color:#2d3436;
+  border:2px solid #0984e3;
+
+  font-size:14px;
+  cursor:pointer;
+  outline:none;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
+  transition:.2s ease;
+}
+
+.sort-select:hover{
+  border-color:#0ea5e9;
+  box-shadow:0 6px 12px rgba(0,0,0,0.15);
+}
+
+.sort-select:focus{
+  border-color:#22c55e;
+}
+/* ===== Layout ===== */
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:35px 20px;
+  display:flex;
+  gap:30px;
+  position:relative;
+  z-index:2;
+}
+.sidebar{
+  width:260px;
+  background:#fff;
+  padding:28px;
+  border-radius:22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.06);
+}
+.sidebar h3{
+  border-bottom:2px solid #e5e7eb;
+  padding-bottom:12px;
+}
+.sidebar li{
+  list-style:none;
+  padding:14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.sidebar li:hover,
+.sidebar li.active{
+  background:var(--accent);
+  color:#fff;
+}
+
+.main{flex:1;}
+
+#categoryTitle{
+  font-size:22px;
+  font-weight:900;
+  margin-bottom:25px;
+}
+
+@media(max-width:768px){
+  #categoryTitle{
+    font-size:18px;
+    text-align:center;
+    margin-bottom:15px;
+  }
+}
+
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:28px;
+}
+
+/* ===== Card ===== */
+.card{
+  background:#fff;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+    transition: all .3s ease;
+
+}
+.card:hover{
+  transform: translateY(-8px);
+  box-shadow:0 18px 40px rgba(0,0,0,.15);
+}
+.badge{
+  position:absolute;
+  top:12px;
+  left:12px;
+  background:linear-gradient(135deg,#1b0bf5,#17472ab7);
+  color:#fff;
+  padding:6px 12px;
+  font-size:12px;
+  font-weight:bold;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.2);
+  z-index:2;
+  
+}
+
+.card img{
+  width:100%;
+  height:210px;
+  object-fit:contain;
+  padding:22px;
+}
+.card-info{
+  padding:22px;
+  text-align:center;
+}
+.price{
+  font-size:1.4rem;
+  font-weight:900;
+  color:var(--accent);
+}
+.add-btn{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),#0284c7);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+
+/* ===== Footer ===== */
+footer{
+  background:#000;
+  color:#fff;
+  padding:60px 8% 30px;
+  margin-top:80px;
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:40px;
+}
+.footer-bottom{
+  text-align:center;
+  margin-top:40px;
+  padding-top:20px;
+  border-top:1px solid #222;
+  color:#94a3b8;
+  font-size:14px;
+}
+
+
+
+
+@media(max-width:768px){
+
+
+
+  .bottom-nav div{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:20px;
+    cursor:pointer;
+  }
+
+  .bottom-nav span{
+    font-size:12px;
+    margin-top:4px;
+  }
+
+
+}
+
+
+@media(max-width:768px){
+
+  .sidebar{
+    position:fixed;
+    top:0;
+    right:-100%;
+    height:100%;
+    width:75%;
+    background:#fff;
+    z-index:2000;
+    transition:.3s;
+    overflow-y:auto;
+    box-shadow:-5px 0 20px rgba(0,0,0,.1);
+  }
+
+  .sidebar.show-sidebar{
+    right:0;
+  }
+}
+/* ===== Mobile Fix ===== */
+@media(max-width:768px){
+
+.grid{
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+  header{
+    flex-direction:column;
+    gap:12px;
+    padding:15px 5%;
+  }
+
+  .logo{
+    font-size:24px;
+    text-align:center;
+  }
+
+
+
+  .container{
+    padding:20px 12px;
+  }
+
+ 
+   .card{
+    border-radius:16px;
+  }
+  .card img{
+    height:130px;
+    padding:10px;
+  }
+
+  .card-info{
+    padding:10px;
+  }
+
+  .card-info h3{
+    font-size:14px;
+    min-height:38px;
+  }
+
+  .price{
+    font-size:14px;
+  }
+
+  .add-btn{
+    padding:8px;
+    font-size:13px;
+    border-radius:10px;
+  }
+
+
+
+  .robot-bg{
+    background-size:120%;
+    opacity:.4;
+  }
+
+    .badge{
+    font-size:10px;
+    padding:4px 8px;
+  }
+
+.top-controls{
+  padding:0 5px;
+}
+
+.sort-small{
+  width:110px;
+}
+}
+
+.project-page{
+max-width:900px;
+margin:auto;
+background:white;
+padding:40px;
+border-radius:20px;
+box-shadow:0 10px 40px rgba(0,0,0,.1);
+}
+
+.project-page img{
+width:100%;
+max-height:420px;
+object-fit:cover;
+border-radius:15px;
+margin-bottom:25px;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+.project-page h1{
+font-size:32px;
+margin-bottom:15px;
+}
+
+.project-page p{
+color:#64748b;
+font-size:18px;
+line-height:1.7;
+}
+
+.projects-btn{
+display:inline-block;
+margin-top:20px;
+padding:12px 30px;
+background:#22c55e;
+color:white;
+text-decoration:none;
+font-size:18px;
+border-radius:8px;
+transition:0.3s;
+}
+
+.projects-btn:hover{
+background:#16a34a;
+}
+
+
+/* ===== Navbar Layout ===== */
+.main-nav{
+  background:#020617;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 20px;
+  position:sticky;
+  top:0;
+  z-index:999;
+}
+
+/* links */
+.nav-left{
+  display:flex;
+  gap:25px;
+}
+
+.nav-left a{
+  color:#fff;
+  text-decoration:none;
+  font-weight:bold;
+  position:relative;
+  transition:.3s;
+}
+
+.nav-left a:hover{
+  color:#22c55e;
+}
+
+/* underline */
+.nav-left a::after{
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  right:0;
+  width:0%;
+  height:2px;
+  background:#22c55e;
+  transition:.3s;
+}
+
+.nav-left a:hover::after{
+  width:100%;
+}
+
+/* ===== Cart ===== */
+.nav-right{
+  background:#22c55e;
+  padding:8px 15px;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:18px;
+  position:relative;
+}
+
+#cart-count{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  background:red;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+}
+/* active link */
+.nav-link.active{
+  color:#22c55e;
+}
+
+.nav-link.active::after{
+  width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="main-nav">
+
+  <div class="nav-left">
+    <a href="index.html" class="nav-link">الرئيسية</a>
+    <a href="products.html" class="nav-link">المنتجات</a>
+    <a href="projects.html" class="nav-link">المشروعات</a>
+<a href="index.html#services" class="nav-link">الخدمات</a>
+<a href="index.html#why" class="nav-link">من نحن</a>
+<a href="index.html#contact" class="nav-link">تواصل معنا</a>
+  </div>
+
+  <div class="nav-right" id="cartBtn">
+    🛒 <span id="cart-count">0</span>
+  </div>
+
+</nav>
+
+<div class="robot-bg"></div>
+
+<div class="top-bar">
+🔧 KIMO TECH – إلكترونيات وروبوتات
+</div>
+
+<header>
+  <div class="logo">KIMO <span>TECH</span></div>
+
+</header>
+
+<div class="container">
+
+
+ <main class="main">
+
+ <div class="top-controls">
+<a href="projects.html" class="projects-btn">Our Projects</a>
+ </div>
+
+<div class="project-page">
+
+<img id="projectImage">
+
+<h1 id="projectTitle"></h1>
+
+<p id="projectDescription"></p>
+
+<a id="whatsappBtn" class="projects-btn" target="_blank">
+طلب المشروع
+</a>
+
+</div>
+
+</main>
+</div>
+
+
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h3>KIMO TECH</h3>
+      <p>أفضل جودة وأسرع خدمة توصيل في مصر.</p>
+    </div>
+    <div>
+      <h3>تواصل معنا</h3>
+      <p>📞 01555735099</p>
+      <p>📍 الإسكندرية، مصر</p>
+    </div>
+    <div>
+      <h3>ساعات العمل</h3>
+      <p>يوميًا من 10 ص حتى 10 م</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 KIMO TECH – All Rights Reserved
+  </div>
+</footer>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  getDocs,
+  query,
+  orderBy 
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIza....",
+  authDomain: "kimo-tech-store-962df.firebaseapp.com",
+  projectId: "kimo-tech-store-962df",
+  storageBucket: "kimo-tech-store-962df.firebasestorage.app",
+  messagingSenderId: "845478890277",
+  appId: "1:845478890277:web:3cdd3328bde1b5b9dda8cc"
+};
+
+
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+async function loadProject(){
+
+const docRef = doc(db,"projects",id);
+const snap = await getDoc(docRef);
+
+if(snap.exists()){
+
+const p = snap.data();
+
+document.getElementById("whatsappBtn").href =
+"https://wa.me/201555735099?text=" +
+encodeURIComponent("عاوز اطلب مشروع: " + p.name);
+
+document.getElementById("projectTitle").innerText = p.name;
+document.getElementById("projectImage").src = p.image || "images/no-image.png";
+document.getElementById("projectDescription").innerText = p.description;
+
+}else{
+
+// fallback لو المشروع مش في Firebase
+const localProjects = {
+pressure_device:{
+name:"Pressure Testing Device",
+image:"images/pressure-device.jpg",
+description:"Industrial pressure monitoring system using Raspberry Pi"
+},
+
+smart_train:{
+name:"Smart Train Safety",
+image:"images/train-ai.jpg",
+description:"AI system detects obstacles and stops the train"
+},
+
+iot_dashboard:{
+name:"Industrial IoT Dashboard",
+image:"images/dashboard.jpg",
+description:"SCADA dashboard for monitoring sensors"
+}
+};
+
+const p = localProjects[id];
+
+if(p){
+document.getElementById("projectTitle").innerText = p.name;
+document.getElementById("projectImage").src = p.image;
+document.getElementById("projectDescription").innerText = p.description;
+}
+
+}
+
+}
+
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+
+loadProject();
+
+const links = document.querySelectorAll(".nav-link");
+
+const currentPage = window.location.pathname.split("/").pop();
+
+links.forEach(link => {
+  const linkPage = link.getAttribute("href");
+
+  if(linkPage === currentPage){
+    link.classList.add("active");
+  }
+});
+</script>
+
+</div>
+</body>
+</html>

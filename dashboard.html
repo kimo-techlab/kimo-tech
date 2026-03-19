@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="shortcut icon" href="favicon.png">
+<title>إدارة الفواتير</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:linear-gradient(135deg,#1303fa,#fcfcfc);
+}
+
+.container{
+  max-width:1100px;
+  margin:40px auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:30px;
+  font-weight:900;
+}
+
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.add-btn{background:#16a34a;color:#fff;}
+.back-btn{background:#5726dc;color:#fff;}
+
+.table{
+  background:#ffffff;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+.table-header,
+.table-row{
+  display:grid;
+  grid-template-columns: 120px 1fr 120px 120px 150px;
+  padding:12px;
+  align-items:center;
+}
+
+.table-row:hover{
+  background:#f8fafc;
+  transform:scale(1.01);
+}
+
+.table-row{border-bottom:1px solid #eee;}
+.table-row:last-child{border-bottom:none;}
+
+.action-btn{
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  margin-left:5px;
+}
+
+.delete{background:#dc2626;color:#fff;}
+.view{background:#38bdf8;}
+
+.search{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  width:250px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>📄 إدارة الفواتير</h1>
+
+<div class="top-bar">
+<button class="back-btn" onclick="window.location.href='./admin.html'">
+⬅ رجوع
+</button>
+
+<input type="text" id="searchInput" class="search" placeholder="🔍 بحث">
+</div>
+
+<div class="table">
+
+<div class="table-header">
+  <div>Invoice</div>
+  <div>Customer</div>
+  <div>Total</div>
+  <div>Date</div>
+  <div>Actions</div>
+</div>
+
+<div id="invoiceContainer"></div>
+
+</div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { 
+  getFirestore, collection, onSnapshot, deleteDoc, doc 
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2fF2ZAa-Xb_zQcVSUdAERS-gLaFFROT",
+  authDomain: "kimo-tech-store-962df.firebaseapp.com",
+  projectId: "kimo-tech-store-962df",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allInvoices = [];
+
+onSnapshot(collection(db,"invoices"), snapshot=>{
+
+  allInvoices = [];
+
+  snapshot.forEach(docSnap=>{
+    allInvoices.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  renderInvoices(allInvoices);
+});
+
+// تأكد أن دالة renderInvoices تستخدم i.id بشكل صحيح
+function renderInvoices(list){
+  const container = document.getElementById("invoiceContainer");
+  container.innerHTML = "";
+  list.forEach(i => {
+    container.innerHTML += `
+      <div class="table-row">
+        <div>${i.number || '-'}</div>
+        <div>${i.customer || '-'}</div>
+        <div>${i.total || 0} EGP</div>
+        <div>${i.date || '-'}</div>
+        <div>
+          <button class="action-btn view" onclick="editInvoice('${i.id}')">Edit</button>
+          <button class="action-btn delete" onclick="deleteInvoice('${i.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+window.deleteInvoice = async function(id){
+  if(!confirm("متأكد من الحذف؟")) return;
+  await deleteDoc(doc(db,"invoices",id));
+}
+window.editInvoice = function(id){
+  localStorage.setItem("invoiceId", id);
+  window.location.href = "new_invoice.html";
+}
+
+document.getElementById("searchInput").addEventListener("input", e=>{
+
+  const val = e.target.value.toLowerCase();
+
+  const filtered = allInvoices.filter(i => {
+    return (
+      (i.customer || "").toLowerCase().includes(val) ||
+      (i.number || "").toLowerCase().includes(val) ||
+      (i.date || "").toLowerCase().includes(val)
+    );
+  });
+
+  renderInvoices(filtered);
+});
+</script>
+
+</body>
+</html>

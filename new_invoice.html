@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="shortcut icon" href="favicon.png">
+<title>إنشاء فاتورة | KIMO TECH</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="qrcode.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:linear-gradient(135deg,#1303fa,#fcfcfc);
+}
+
+.container{
+  max-width:1100px;
+  margin:40px auto;
+  padding:20px;
+}
+
+.box{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,.1);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.top-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:space-between;
+}
+
+input{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.add-btn{background:#16a34a;color:#fff;}
+.print-btn{background:#0ea5e9;color:#fff;}
+.whatsapp-btn{background:#22c55e;color:#fff;}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#0ea5e9;
+  color:white;
+}
+
+th,td{
+  padding:10px;
+  text-align:center;
+  border:1px solid #eee;
+}
+
+.results{
+  position:absolute;
+  background:white;
+  border:1px solid #ccc;
+  width:200px;
+  z-index:1000;
+}
+
+.results div{
+  padding:5px;
+  cursor:pointer;
+}
+
+.results div:hover{
+  background:#eee;
+}
+.back-btn{
+  background:#6366f1;
+  color:#fff;
+}
+</style>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA2fF2ZAa-Xb_zQcVSUdAERS-gLaFFROT",
+  authDomain: "kimo-tech-store-962df.firebaseapp.com",
+  projectId: "kimo-tech-store-962df",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
+</head>
+
+<body>
+
+<div class="container">
+<div class="box">
+
+<h2>📄 إنشاء فاتورة</h2>
+<div style="margin-bottom:15px;">
+  <button class="back-btn" onclick="goBack()">⬅ رجوع</button>
+</div>
+<div class="top-bar">
+<input id="customer" placeholder="اسم العميل">
+<input id="phone" placeholder="رقم الهاتف">
+<button class="add-btn" onclick="add()">➕ إضافة منتج</button>
+</div>
+
+<table id="table">
+<tr>
+<th>المنتج</th>
+<th>السعر</th>
+<th>الكمية</th>
+<th>الإجمالي</th>
+</tr>
+
+<tr>
+<td>
+<input class="product" oninput="searchProduct(this)">
+<div class="results"></div>
+</td>
+<td><input class="p" type="number"></td>
+<td><input class="q" type="number" value="1"></td>
+<td class="t">0</td>
+</tr>
+
+</table>
+
+<h3>الإجمالي: <span id="grand">0</span> EGP</h3>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+
+<button class="print-btn" onclick="printA4()">🖨️ A4</button>
+<button class="whatsapp-btn" onclick="sendWhatsApp()">📱 WhatsApp</button>
+<button class="whatsapp-btn" onclick="sendPDF()">📄 PDF</button>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+let selectedIndex = -1;
+
+
+
+function add(){
+let r=document.getElementById("table").insertRow();
+r.innerHTML=`
+<td>
+<input class="product" oninput="searchProduct(this)">
+<div class="results"></div>
+</td>
+<td><input class="p" type="number"></td>
+<td><input class="q" type="number" value="1"></td>
+<td class="t">0</td>
+`;
+}
+
+document.addEventListener("input",calc);
+
+function calc(){
+
+  console.log("Calc running");
+
+let q=document.querySelectorAll(".q");
+let p=document.querySelectorAll(".p");
+let t=document.querySelectorAll(".t");
+
+let g=0;
+
+for(let i=0;i<q.length;i++){
+let v=q[i].value*p[i].value;
+t[i].innerText=v;
+g+=v;
+}
+
+document.getElementById("grand").innerText=g;
+}
+
+function searchProduct(input){
+
+let text = input.value.toLowerCase();
+let results = input.parentElement.querySelector(".results");
+
+results.innerHTML="";
+selectedIndex = -1;
+
+if(text.length < 1) return;
+
+allProducts.forEach((d)=>{
+
+if(d.name && d.name.toLowerCase().includes(text)){
+
+let div=document.createElement("div");
+div.innerText=d.name+" - "+d.price+" EGP";
+
+div.onclick=function(){
+selectProduct(input, d);
+};
+
+results.appendChild(div);
+}
+});
+}
+function highlight(items){
+
+items.forEach(el => el.style.background="white");
+
+if(items[selectedIndex]){
+items[selectedIndex].style.background="#dfefff";
+}
+}
+
+
+let invoiceId = localStorage.getItem("invoiceId");
+if(invoiceId){
+document.querySelector("h2").innerText = "✏️ تعديل فاتورة";
+}
+function selectProduct(input, product){
+
+input.value = product.name;
+
+let row = input.closest("tr");
+row.querySelector(".p").value = product.price;
+
+calc();
+
+let results = input.parentElement.querySelector(".results");
+results.innerHTML="";
+}
+
+
+let invoice = "INV-"+Date.now();
+
+// استبدل دالة saveInvoice بالكامل بهذا الكود
+function saveInvoice(){
+  let rows = document.querySelectorAll("#table tr");
+  let items = [];
+  rows.forEach((row, index)=>{
+    if(index === 0) return; 
+    let name = row.querySelector(".product")?.value;
+    let price = row.querySelector(".p")?.value;
+    let qty = row.querySelector(".q")?.value;
+    if(name){ items.push({ name, price, qty }); }
+  });
+
+  let data = {
+    customer: document.getElementById("customer").value,
+    phone: document.getElementById("phone").value,
+    total: document.getElementById("grand").innerText,
+    date: new Date().toLocaleDateString(),
+    items: items
+  };
+
+  if(invoiceId){
+    // تحديث آمن: التأكد من وجود الوثيقة أولاً
+    db.collection("invoices").doc(invoiceId).set(data, { merge: true })
+      .then(() => alert("تم التحديث بنجاح ✅"))
+      .catch(e => console.error("خطأ في التحديث:", e));
+  } else {
+    data.number = "INV-" + Date.now(); 
+    db.collection("invoices").add(data).then(() => alert("تم الحفظ بنجاح ✅"));
+  }
+}
+
+// استبدل دالة loadInvoice بالكامل بهذا الكود
+async function loadInvoice(){
+  if(!invoiceId) return;
+  try {
+    let docRef = await db.collection("invoices").doc(invoiceId).get();
+    if(docRef.exists){
+      let data = docRef.data();
+      document.getElementById("customer").value = data.customer || "";
+      document.getElementById("phone").value = data.phone || "";
+      let table = document.getElementById("table");
+      while(table.rows.length > 1) { table.deleteRow(1); }
+      if(data.items){
+        data.items.forEach(item => {
+          let r = table.insertRow();
+          r.innerHTML = `
+            <td><input class="product" value="${item.name}" oninput="searchProduct(this)"><div class="results"></div></td>
+            <td><input class="p" type="number" value="${item.price}"></td>
+            <td><input class="q" type="number" value="${item.qty}"></td>
+            <td class="t">${item.price * item.qty}</td>
+          `;
+        });
+      }
+      calc();
+    }
+  } catch(e) { console.error("خطأ في تحميل البيانات:", e); }
+}
+
+
+
+
+function printA4(){
+  saveInvoice();
+  setTimeout(() => { 
+    window.print(); 
+    localStorage.removeItem("invoiceId"); // امسح الـ ID بعد الطباعة
+    location.reload(); // ريفرش للصفحة عشان تبدأ من جديد
+  }, 1000);
+}
+
+
+function sendWhatsApp(){
+  saveInvoice();
+  
+  let msg = `فاتورتك من Kimo Tech\nTotal: ${document.getElementById("grand").innerText} EGP`;
+  let phone = document.getElementById("phone").value.replace(/^0/,"20");
+  
+  // فتح رابط الواتساب
+  window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(msg));
+
+  // التصفير التلقائي بعد ثانية
+  setTimeout(() => { 
+    localStorage.removeItem("invoiceId"); 
+    location.reload(); 
+  }, 1000);
+}
+
+function sendPDF(){
+  saveInvoice();
+  
+  let element = document.querySelector(".box");
+  
+  // توليد وحفظ ملف PDF
+  html2pdf().from(element).save().then(() => {
+    // التصفير التلقائي بعد انتهاء التحميل
+    setTimeout(() => { 
+      localStorage.removeItem("invoiceId"); 
+      location.reload(); 
+    }, 1000);
+  });
+}
+
+
+
+let allProducts = [];
+
+async function loadProducts(){
+  try{
+    let snapshot = await db.collection("products").get();
+
+    snapshot.forEach(doc=>{
+      allProducts.push(doc.data());
+    });
+
+    console.log("Products Loaded:", allProducts);
+
+  }catch(e){
+    console.error("Error loading products:", e);
+  }
+}
+
+loadProducts();
+
+async function loadInvoice(){
+  if(!invoiceId) return;
+  let docRef = await db.collection("invoices").doc(invoiceId).get();
+  if(docRef.exists){
+    let data = docRef.data();
+    document.getElementById("customer").value = data.customer || "";
+    document.getElementById("phone").value = data.phone || "";
+
+    let table = document.getElementById("table");
+    // مسح الصفوف القديمة مع الحفاظ على العنوان
+    while(table.rows.length > 1) { table.deleteRow(1); }
+
+    if(data.items){
+      data.items.forEach(item => {
+        let r = table.insertRow();
+        r.innerHTML = `
+          <td>
+            <input class="product" value="${item.name}" oninput="searchProduct(this)">
+            <div class="results"></div>
+          </td>
+          <td><input class="p" type="number" value="${item.price}"></td>
+          <td><input class="q" type="number" value="${item.qty}"></td>
+          <td class="t">${item.price * item.qty}</td>
+        `;
+      });
+    }
+    calc(); // تحديث الإجمالي النهائي
+  }
+}
+
+loadInvoice();
+
+document.addEventListener("keydown", function(e){
+
+let current = document.activeElement;
+
+// ===== navigation فوق =====
+if(e.key === "Enter"){
+
+// اسم → رقم
+if(current.id === "customer"){
+  e.preventDefault();
+  document.getElementById("phone").focus();
+  return;
+}
+
+// رقم → جدول
+if(current.id === "phone"){
+  e.preventDefault();
+  document.querySelector(".product").focus();
+  return;
+}
+
+}
+
+// ===== لو في product input =====
+if(current.classList.contains("product")){
+
+let results = current.parentElement.querySelector(".results");
+let items = results.querySelectorAll("div");
+
+if(items.length){
+
+// ⬇️
+if(e.key === "ArrowDown"){
+e.preventDefault();
+
+selectedIndex++;
+if(selectedIndex >= items.length) selectedIndex = 0;
+
+highlight(items);
+}
+
+// ⬆️
+if(e.key === "ArrowUp"){
+e.preventDefault();
+
+selectedIndex--;
+if(selectedIndex < 0) selectedIndex = items.length - 1;
+
+highlight(items);
+}
+
+// ⏎ اختيار
+if(e.key === "Enter"){
+e.preventDefault();
+
+if(selectedIndex >= 0){
+items[selectedIndex].click();
+selectedIndex = -1;
+return;
+}
+}
+
+}
+
+}
+
+// ===== جدول الفاتورة =====
+if(e.key === "Enter"){
+
+let row = current.closest("tr");
+if(!row) return;
+
+let inputs = Array.from(row.querySelectorAll("input"));
+let index = inputs.indexOf(current);
+
+// جوه الصف
+if(index < inputs.length - 1){
+e.preventDefault();
+inputs[index + 1].focus();
+}
+
+// آخر خانة → صف جديد
+else{
+e.preventDefault();
+
+add();
+
+let table = document.getElementById("table");
+let newRow = table.rows[table.rows.length - 1];
+
+newRow.querySelector("input").focus();
+}
+
+}
+
+});
+function goBack(){
+  localStorage.removeItem("invoiceId"); // مسح الـ ID المخزن
+  window.location.href = "dashboard.html"; // الرجوع للوحة التحكم
+}
+</script>
+
+</body>
+</html>

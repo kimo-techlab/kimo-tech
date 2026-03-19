@@ -152,27 +152,39 @@ select,input{
 
 
 <div class="container">
-
 <div style="display:flex;justify-content:space-between;align-items:center;">
   <h1>لوحة تحكم KIMO 👑</h1>
-
 </div>
 
+<!-- 👇 الأزرار هنا -->
+<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;">
 
-<div style="display:flex;gap:10px;">
-  <a href="products-admin.html" 
-  style="padding:8px 15px;
-  background:#16a34a;
-  color:#fff;
-  border-radius:8px;
-  text-decoration:none;">
+  <a href="products-admin.html"
+  style="padding:8px 15px;background:#16a34a;color:#fff;border-radius:8px;text-decoration:none;">
   📦 إدارة المنتجات
   </a>
 
-  <button onclick="logout()" 
+  <a href="projects-admin.html"
+  style="padding:8px 15px;background:#0ea5e9;color:#fff;border-radius:8px;text-decoration:none;">
+  🧠 إدارة المشاريع
+  </a>
+
+  <!-- الجديد -->
+  <a href="new_invoice.html"
+  style="padding:8px 15px;background:#22c55e;color:#fff;border-radius:8px;text-decoration:none;">
+  📄 إنشاء فاتورة
+  </a>
+
+  <a href="dashboard.html"
+  style="padding:8px 15px;background:#f59e0b;color:#fff;border-radius:8px;text-decoration:none;">
+  📊 داشبورد الفواتير
+  </a>
+
+  <button onclick="logout()"
   style="padding:8px 15px;border:none;border-radius:8px;cursor:pointer;background:#5726dc;color:#fff;">
   🚪 Logout
   </button>
+
 </div>
 
 <div class="dashboard">
@@ -658,4 +670,3 @@ const container = document.getElementById("toastContainer");
 
 </body>
 </html>
-

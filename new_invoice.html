@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
-<title>إنشاء فاتورة | KIMO TECH</title>
+<title>Receipt</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -99,6 +99,109 @@ th,td{
   background:#6366f1;
   color:#fff;
 }
+@media print {
+
+  body{
+    background: white !important;
+  }
+
+  .container{
+    margin:0;
+    padding:0;
+  }
+
+  .box{
+    box-shadow:none;
+    border-radius:0;
+    width:100%;
+  }
+
+  button,
+  .back-btn,
+  .add-btn,
+  .whatsapp-btn,
+  .print-btn{
+    display:none !important;
+  }
+
+  input{
+    border:none;
+    text-align:center;
+  }
+
+  table{
+    font-size:14px;
+  }
+
+  h2{
+    margin-top:0;
+  }
+
+}
+@media print {
+
+  table, th, td{
+    border:1px solid black !important;
+  }
+
+  th{
+    background:#ddd !important;
+    color:black !important;
+  }
+
+}
+@media print {
+
+  html, body{
+    width:100%;
+    overflow:hidden;
+  }
+
+  .container{
+    width:100%;
+    margin:0;
+    padding:0;
+  }
+
+  .box{
+    width:100%;
+    margin:0;
+    padding:10px;
+  }
+
+  table{
+    width:100% !important;
+  }
+
+}
+@page {
+  size: A4;
+  margin: 10mm;
+}
+@media print {
+  *{
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+.invoice-header{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.logo{
+  width:250px;
+  object-fit:contain;
+}
+
+@media print {
+
+  .logo{
+    width:250px;
+    margin-bottom:10px;
+  }
+
+}
 </style>
 
 <!-- Firebase -->
@@ -124,7 +227,9 @@ const db = firebase.firestore();
 <div class="container">
 <div class="box">
 
-<h2>📄 إنشاء فاتورة</h2>
+<div class="invoice-header">
+  <img src="logo.png" class="logo">
+</div>
 <div style="margin-bottom:15px;">
   <button class="back-btn" onclick="goBack()">⬅ رجوع</button>
 </div>
@@ -293,32 +398,7 @@ function saveInvoice(){
   }
 }
 
-// استبدل دالة loadInvoice بالكامل بهذا الكود
-async function loadInvoice(){
-  if(!invoiceId) return;
-  try {
-    let docRef = await db.collection("invoices").doc(invoiceId).get();
-    if(docRef.exists){
-      let data = docRef.data();
-      document.getElementById("customer").value = data.customer || "";
-      document.getElementById("phone").value = data.phone || "";
-      let table = document.getElementById("table");
-      while(table.rows.length > 1) { table.deleteRow(1); }
-      if(data.items){
-        data.items.forEach(item => {
-          let r = table.insertRow();
-          r.innerHTML = `
-            <td><input class="product" value="${item.name}" oninput="searchProduct(this)"><div class="results"></div></td>
-            <td><input class="p" type="number" value="${item.price}"></td>
-            <td><input class="q" type="number" value="${item.qty}"></td>
-            <td class="t">${item.price * item.qty}</td>
-          `;
-        });
-      }
-      calc();
-    }
-  } catch(e) { console.error("خطأ في تحميل البيانات:", e); }
-}
+
 
 
 

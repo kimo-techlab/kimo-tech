@@ -51,11 +51,16 @@
   --light:#f8fafc;
 }
 
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:'Cairo',sans-serif;
   background:var(--light);
   overflow-x:hidden;
+  color:var(--dark);
 }
 
 /* ===== Robot Watermark ===== */
@@ -514,6 +519,7 @@ footer{
   gap:15px;
   padding:10px;
   scroll-behavior:smooth;
+  scroll-snap-type:x proximity;
 }
 
 /* يخفي السكرول شكله */
@@ -568,6 +574,7 @@ footer{
   flex-direction:column;
   justify-content:space-between;
   border-radius:14px;
+  scroll-snap-align:start;
 }
 
 .home-grid .card img{
@@ -1287,6 +1294,183 @@ html{
   color:#22c55e;
   font-weight:bold;
 }
+
+@media(max-width:768px){
+  .main-nav{
+    padding:12px;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    align-items:flex-start;
+  }
+
+  .nav-left{
+    width:100%;
+    order:2;
+    flex-wrap:nowrap;
+    gap:10px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    scrollbar-width:none;
+  }
+
+  .nav-left::-webkit-scrollbar{
+    display:none;
+  }
+
+  .nav-left a{
+    white-space:nowrap;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    font-size:14px;
+  }
+
+  .nav-right{
+    margin-inline-start:auto;
+    padding:10px 14px;
+  }
+
+  header{
+    position:static;
+    padding:16px 14px;
+    gap:10px;
+  }
+
+  .top-bar{
+    padding:9px 12px;
+    font-size:13px;
+  }
+
+  .search-box input{
+    padding:12px 18px;
+    font-size:14px;
+  }
+
+  .hero{
+    height:auto;
+    min-height:78vh;
+    padding:76px 16px 56px;
+    background-attachment:scroll;
+  }
+
+  .hero-content{
+    max-width:100%;
+    padding:0;
+  }
+
+  .hero h1{
+    font-size:32px;
+    line-height:1.35;
+  }
+
+  .hero p{
+    font-size:15px;
+    margin-bottom:22px;
+  }
+
+  .hero-buttons{
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .btn{
+    width:100%;
+    padding:13px 18px;
+  }
+
+  .main{
+    width:100%;
+  }
+
+  .section-header{
+    margin:24px 0 12px;
+    padding-inline:6px;
+  }
+
+  .section-header.center{
+    margin:28px 0 12px;
+  }
+
+  .section-header.center h2{
+    font-size:22px;
+    text-align:center;
+    line-height:1.4;
+  }
+
+  .section-header.center a{
+    font-size:13px;
+  }
+
+  .home-grid{
+    gap:12px;
+    padding:8px 6px 16px;
+  }
+
+  .home-grid .card{
+    min-width:78vw;
+    max-width:78vw;
+    aspect-ratio:auto;
+    min-height:320px;
+  }
+
+  .home-grid .card img{
+    height:140px;
+    padding:12px;
+    margin-top:4px;
+  }
+
+  .home-grid .card-info{
+    padding:12px;
+  }
+
+  .home-grid .card-info h3{
+    font-size:15px;
+    line-height:1.4;
+    min-height:auto;
+  }
+
+  .home-grid .price{
+    font-size:15px;
+  }
+
+  .home-grid .add-btn{
+    padding:10px;
+    font-size:13px;
+  }
+
+  .services,
+  .why-us,
+  .contact,
+  .map-section{
+    padding:56px 16px;
+  }
+
+  .services-grid,
+  .why-grid,
+  .contact-grid,
+  .counters,
+  .footer-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  .counter-box,
+  .service-card,
+  .why-card,
+  .contact-card{
+    padding:20px 18px;
+  }
+
+  .map-container iframe{
+    height:280px;
+  }
+
+  footer{
+    padding:44px 16px 24px;
+    margin-top:56px;
+  }
+}
 </style>
 
 </head>
@@ -1344,18 +1528,18 @@ html{
 
 </section>
 
- <main class="main">
+<main class="main">
 <div class="section-header center">
   <h2>🔥 أهم المنتجات</h2>
   <a href="products.html">عرض الكل</a>
 </div>
-</div><div class="home-grid" id="productGrid"></div>
+<div class="home-grid" id="productGrid"></div>
 
 <div class="section-header center">
   <h2>🚀 مشاريع مميزة</h2>
   <a href="projects.html">عرض الكل</a>
 </div>
-</div><div class="home-grid" id="projectGrid"></div>
+<div class="home-grid" id="projectGrid"></div>
 
 <section class="services" id="services">
 
@@ -1455,8 +1639,7 @@ html{
 </div>
 
 
- </main>
-</div>
+</main>
 
 <section class="contact" id="contact">
 

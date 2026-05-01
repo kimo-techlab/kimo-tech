@@ -51,11 +51,16 @@
   --light:#f8fafc;
 }
 
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:'Cairo',sans-serif;
   background:var(--light);
   overflow-x:hidden;
+  color:var(--dark);
 }
 
 /* ===== Robot Watermark ===== */
@@ -222,6 +227,18 @@ header{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
   gap:28px;
+}
+
+.empty-state{
+  grid-column:1/-1;
+  background:#fff;
+  padding:32px 20px;
+  border-radius:18px;
+  border:1px dashed #cbd5e1;
+  text-align:center;
+  color:#64748b;
+  font-weight:700;
+  box-shadow:0 10px 30px rgba(0,0,0,.04);
 }
 
 /* ===== Card ===== */
@@ -555,6 +572,137 @@ footer{
 .nav-link.active::after{
   width:100%;
 }
+
+@media(max-width:768px){
+  .main-nav{
+    padding:12px;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    align-items:flex-start;
+  }
+
+  .nav-left{
+    width:100%;
+    order:2;
+    gap:10px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:6px;
+    scrollbar-width:none;
+  }
+
+  .nav-left::-webkit-scrollbar{
+    display:none;
+  }
+
+  .nav-left a{
+    white-space:nowrap;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    font-size:14px;
+  }
+
+  .nav-right{
+    margin-inline-start:auto;
+    padding:10px 14px;
+  }
+
+  header{
+    position:static;
+    padding:16px 14px;
+    gap:10px;
+  }
+
+  .top-bar{
+    padding:9px 12px;
+    font-size:13px;
+  }
+
+  .search-box{
+    width:100%;
+  }
+
+  .search-box input{
+    padding:12px 18px;
+    font-size:14px;
+  }
+
+  .container{
+    display:block;
+    padding:20px 12px;
+  }
+
+  .sidebar{
+    width:min(82vw,320px);
+    padding:76px 20px 24px;
+    border-radius:0;
+  }
+
+  .main{
+    width:100%;
+  }
+
+  .top-controls{
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:stretch;
+    padding:0;
+  }
+
+  .top-controls > *{
+    flex:1 1 140px;
+  }
+
+  .sort-small{
+    width:auto;
+  }
+
+  .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+
+  .card{
+    border-radius:16px;
+  }
+
+  .card img{
+    height:132px;
+    padding:10px;
+  }
+
+  .card-info{
+    padding:10px;
+  }
+
+  .card-info h3{
+    font-size:14px;
+    line-height:1.4;
+    min-height:40px;
+  }
+
+  .price{
+    font-size:14px;
+  }
+
+  .add-btn{
+    padding:9px;
+    font-size:13px;
+    border-radius:10px;
+  }
+
+  footer{
+    padding:44px 16px 24px;
+    margin-top:56px;
+  }
+
+  .footer-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+}
 </style>
 
 </head>
@@ -670,11 +818,15 @@ const db = getFirestore(app);
 
 let allProducts = [];
 let currentList = [];
+let activeSearchQuery = "";
+const searchParams = new URLSearchParams(window.location.search);
+const initialSearchQuery = (searchParams.get("search") || "").trim();
 
 
 /* ===== CART ===== */
-let cart = [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 const cartCount = document.getElementById("cart-count");
+cartCount.innerText = cart.length;
 
 /* ===== RENDER PRODUCTS ===== */
 function renderProducts(list){
@@ -682,6 +834,15 @@ function renderProducts(list){
  
   const grid = document.getElementById("productGrid");
   grid.innerHTML = "";
+
+  if(list.length === 0){
+    grid.innerHTML = `
+      <div class="empty-state">
+        ${activeSearchQuery ? "لا توجد نتائج مطابقة لبحثك الآن" : "لا توجد منتجات متاحة الآن"}
+      </div>
+    `;
+    return;
+  }
 
   list.forEach(p => {
     const card = document.createElement("div");
@@ -749,6 +910,13 @@ function renderCategories(){
 }
 
 function filterCategory(cat, el){
+  activeSearchQuery = "";
+
+  if(searchInput){
+    searchInput.value = "";
+  }
+
+  updateSearchUrl("");
 
   document.querySelectorAll(".sidebar li")
     .forEach(li=>li.classList.remove("active"));
@@ -778,9 +946,74 @@ function filterCategory(cat, el){
 }
 
 /* ===== SEARCH ===== */
-document.getElementById("searchInput").addEventListener("keyup", function(){
-  const q = this.value.toLowerCase();
-renderProducts(allProducts.filter(p=>p.name.toLowerCase().includes(q)));
+const searchInput = document.getElementById("searchInput");
+
+function normalizeSearchText(value){
+  return String(value || "").toLowerCase().trim();
+}
+
+function updateSearchUrl(queryText){
+  const targetUrl = queryText
+    ? `products.html?search=${encodeURIComponent(queryText)}`
+    : "products.html";
+
+  window.history.replaceState({}, "", targetUrl);
+}
+
+function clearCategorySelection(){
+  document.querySelectorAll(".sidebar li")
+    .forEach(li => li.classList.remove("active"));
+}
+
+function applySearch(queryText, options = {}){
+  const { syncInput = true, syncUrl = false } = options;
+  const cleanQuery = queryText.trim();
+  activeSearchQuery = cleanQuery;
+
+  if(syncInput && searchInput){
+    searchInput.value = cleanQuery;
+  }
+
+  if(syncUrl){
+    updateSearchUrl(cleanQuery);
+  }
+
+  if(!cleanQuery){
+    renderProducts(allProducts);
+    document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
+    return;
+  }
+
+  clearCategorySelection();
+
+  const normalizedQuery = normalizeSearchText(cleanQuery);
+  const filtered = allProducts.filter((product) => {
+    const searchableText = [
+      product.name,
+      product.category,
+      product.use,
+      product.description
+    ]
+      .map(normalizeSearchText)
+      .join(" ");
+
+    return searchableText.includes(normalizedQuery);
+  });
+
+  renderProducts(filtered);
+  document.getElementById("categoryTitle").textContent =
+    `نتائج البحث عن: ${cleanQuery}`;
+}
+
+searchInput.addEventListener("input", function(){
+  applySearch(this.value, { syncInput:false, syncUrl:false });
+});
+
+searchInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    e.preventDefault();
+    applySearch(this.value, { syncInput:false, syncUrl:true });
+  }
 });
 
 
@@ -890,7 +1123,16 @@ async function loadProducts(){
   currentList = [...allProducts];
 
   renderCategories();
-  renderProducts(allProducts);
+
+  if(searchInput){
+    searchInput.value = initialSearchQuery;
+  }
+
+  if(initialSearchQuery){
+    applySearch(initialSearchQuery, { syncInput:false, syncUrl:false });
+  }else{
+    renderProducts(allProducts);
+  }
 }
 
 loadProducts();

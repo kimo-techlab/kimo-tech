@@ -181,30 +181,7 @@ header{
   position:relative;
   z-index:2;
 }
-.sidebar{
-  width:260px;
-  background:#fff;
-  padding:28px;
-  border-radius:22px;
-  box-shadow:0 12px 30px rgba(0,0,0,.06);
-}
-.sidebar h3{
-  border-bottom:2px solid #e5e7eb;
-  padding-bottom:12px;
-}
-.sidebar li{
-  list-style:none;
-  padding:14px;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:700;
-  margin-bottom:6px;
-}
-.sidebar li:hover,
-.sidebar li.active{
-  background:var(--accent);
-  color:#fff;
-}
+
 
 .main{flex:1;}
 
@@ -373,25 +350,7 @@ footer{
 }
 
 
-@media(max-width:768px){
 
-  .sidebar{
-    position:fixed;
-    top:0;
-    right:-100%;
-    height:100%;
-    width:75%;
-    background:#fff;
-    z-index:2000;
-    transition:.3s;
-    overflow-y:auto;
-    box-shadow:-5px 0 20px rgba(0,0,0,.1);
-  }
-
-  .sidebar.show-sidebar{
-    right:0;
-  }
-}
 /* ===== Mobile Fix ===== */
 @media(max-width:768px){
 
@@ -482,46 +441,6 @@ footer{
 }
 }
 
-/* ===== HOME CARDS SMALL ===== */
-.home-grid .card{
-  min-width:150px;
-  max-width:150px;
-  flex-shrink:0;
-  border-radius:14px;
-}
-
-.home-grid .card img{
-  height:100px;
-  padding:8px;
-}
-
-.home-grid .card-info{
-  padding:8px;
-}
-
-.home-grid .card-info h3{
-  font-size:12px;
-}
-
-.home-grid .price{
-  font-size:12px;
-}
-
-.home-grid .add-btn{
-  padding:5px;
-  font-size:11px;
-  border-radius:6px;
-}
-/* ===== HOME SCROLL (زي Jumia) ===== */
-.home-grid{
-  display:flex;
-  overflow-x:auto;
-  gap:15px;
-  padding:10px;
-  scroll-behavior:smooth;
-  scroll-snap-type:x proximity;
-}
-
 /* يخفي السكرول شكله */
 .home-grid::-webkit-scrollbar{
   height:6px;
@@ -529,17 +448,6 @@ footer{
 .home-grid::-webkit-scrollbar-thumb{
   background:#ccc;
   border-radius:10px;
-}
-.home-grid{
-  display:flex;
-  overflow-x:auto;
-}
-/* ===== تصغير الكروت ===== */
-.home-grid .card{
-  min-width:180px;
-  max-width:180px;
-  flex-shrink:0;
-  border-radius:16px;
 }
 
 .home-grid .card img{
@@ -567,6 +475,7 @@ footer{
 /* ===== كارت مربع ===== */
 .home-grid .card{
   min-width:350px;
+  flex-shrink:0;
   max-width:350px;
   aspect-ratio: 1 / 1; /* 🔥 ده السر */
   flex-shrink:0;
@@ -768,20 +677,7 @@ footer{
   position:relative;
 }
 
-#cart-count{
-  position:absolute;
-  top:-6px;
-  right:-6px;
-  background:red;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  font-size:11px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-}
+
 /* active link */
 .nav-link.active{
   color:#22c55e;
@@ -790,20 +686,7 @@ footer{
 .nav-link.active::after{
   width:100%;
 }
-/* ===== HERO ===== */
-.hero{
-  height:90vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  position:relative;
-  color:#fff;
 
-  background:
-    linear-gradient(rgba(2,6,23,0.8), rgba(2,6,23,0.8)),
-    url("https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80") center/cover;
-}
 
 /* المحتوى */
 .hero-content{
@@ -1170,37 +1053,8 @@ footer{
   font-weight:bold;
 }
 
-.map-section{
-  padding:60px 20px;
-  text-align:center;
-  background:#f1f5f9;
-}
 
-.map-section h2{
-  margin-bottom:20px;
-}
 
-/* container */
-.map-container{
-  max-width:1100px;
-  margin:auto;
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
-}
-
-/* iframe */
-.map-container iframe{
-  width:100%;
-  height:400px;
-  border:none;
-}
-/* ===== MAP ===== */
-.map-section{
-  padding:60px 20px;
-  text-align:center;
-  background:#f1f5f9;
-}
 
 .map-section h2{
   margin-bottom:20px;
@@ -1263,21 +1117,6 @@ html{
   color:#fff;
 }
 
-.grid-bg{
-  position:absolute;
-  inset:0;
-  background-image:
-    linear-gradient(rgba(34,197,94,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14,165,233,0.05) 1px, transparent 1px);
-  background-size:60px 60px;
-  animation: moveGrid 15s linear infinite;
-  z-index:1;
-}
-
-@keyframes moveGrid{
-  from{ transform:translateY(0); }
-  to{ transform:translateY(60px); }
-}
 
 #particles{
   position:absolute;
@@ -1295,62 +1134,343 @@ html{
   font-weight:bold;
 }
 
+.home-grid{
+  display:flex;
+  overflow-x:auto;
+  gap:15px;
+  padding:10px;
+  scroll-behavior:smooth;
+  scroll-snap-type:x proximity;
+}
+.robot-presenter{
+  position:absolute;
+  width:200px;
+  height:200px;
+  z-index:50;
+
+  border-radius:50%;
+  overflow:hidden;
+
+  box-shadow:0 0 30px rgba(14,165,233,.7);
+
+  mix-blend-mode: color-dodge;
+
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+
+  transition: all 1.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.robot-presenter video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.robot-presenter.active{
+  transform:translate(-50%,-50%) scale(1);
+  opacity:1;
+}
+
+@keyframes float{
+  0%{
+    transform:translate(-50%,-50%) translateY(0px);
+  }
+  50%{
+    transform:translate(-50%,-50%) translateY(-15px);
+  }
+  100%{
+    transform:translate(-50%,-50%) translateY(0px);
+  }
+}
+
+@keyframes glowPulse{
+  0%{ filter: drop-shadow(0 0 10px #0ea5e9); }
+  50%{ filter: drop-shadow(0 0 25px #22c55e); }
+  100%{ filter: drop-shadow(0 0 10px #0ea5e9); }
+}
+
+.robot-presenter.active video{
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.robot-presenter.active{
+  animation: float 4s ease-in-out infinite;
+}
+
+.product-cards-container{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
+}
+
+.product-card{
+  position:absolute;
+  width:260px;
+  background:rgba(2,6,23,.9);
+  border-radius:14px;
+  padding:15px;
+  color:#fff;
+
+  opacity:0;
+  transform:scale(.8);
+  transition:.6s;
+}
+
+.product-card.active{
+  opacity:1;
+  transform:scale(1);
+  box-shadow:0 0 20px #0ea5e9;
+}
+
+.main-header{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  z-index:9999;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  background:#020617;
+  color:#fff;
+  padding:12px 20px;
+
+  box-shadow:0 5px 20px rgba(0,0,0,.3);
+}
+
+/* LEFT */
+.header-left{
+  display:flex;
+  align-items:center;
+}
+
+.cart-box{
+  background:#22c55e;
+  width:50px;
+  height:50px;
+  border-radius:12px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:22px;
+  position:relative;
+  cursor:pointer;
+}
+
+#cart-count{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  background:red;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  font-size:12px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* CENTER */
+.header-center{
+  text-align:center;
+}
+
+.nav-links{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  margin-bottom:5px;
+}
+
+.nav-links a{
+  color:#fff;
+  text-decoration:none;
+  font-weight:bold;
+  position:relative;
+}
+
+.nav-links a.active{
+  color:#22c55e;
+}
+
+/* underline */
+.nav-links a::after{
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  right:0;
+  width:0%;
+  height:2px;
+  background:#22c55e;
+  transition:.3s;
+}
+
+.nav-links a:hover::after{
+  width:100%;
+}
+
+.brand{
+  font-size:14px;
+  color:#94a3b8;
+}
+
+/* RIGHT */
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.header-right input{
+  padding:8px 15px;
+  border-radius:20px;
+  border:none;
+  outline:none;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:900;
+}
+
+.logo span{
+  color:#22c55e;
+}
+body{
+  padding-top:100px;
+}
+
+.robot-presenter{
+  transition: all 1.5s cubic-bezier(0.4,0,0.2,1),
+              transform .3s linear;
+}
+.robot-presenter video{
+  filter: 
+    drop-shadow(0 0 10px #0ea5e9)
+    drop-shadow(0 0 20px #22c55e)
+    brightness(1.2)
+    contrast(1.1);
+}
+.robot-presenter::before{
+  content:"";
+  position:absolute;
+  inset:-20px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(14,165,233,0.4), transparent 70%);
+  z-index:-1;
+  filter: blur(20px);
+}
+
+
+.product-card{
+  opacity:0;
+  transform:scale(.5) translateY(30px);
+  transition:.6s ease;
+}
+
+.product-card.active{
+  opacity:1;
+  transform:scale(1) translateY(0);
+  box-shadow:0 0 25px #0ea5e9;
+}
+.product-card{
+  opacity:0;
+  transform:scale(.6) rotate(-5deg);
+  transition:.5s ease;
+}
+
+.product-card.active{
+  opacity:1;
+  transform:scale(1) rotate(0);
+}
+
 @media(max-width:768px){
-  .main-nav{
+  body{
+    padding-top:0;
+  }
+
+  .main-header{
+    position:sticky;
     padding:12px;
     gap:12px;
     flex-wrap:wrap;
-    justify-content:flex-start;
-    align-items:flex-start;
+    justify-content:center;
   }
 
-  .nav-left{
+  .header-left,
+  .header-center,
+  .header-right{
     width:100%;
+  }
+
+  .header-left{
+    justify-content:center;
+  }
+
+  .header-center{
     order:2;
-    flex-wrap:nowrap;
+    display:flex;
+    flex-direction:column;
     gap:10px;
+  }
+
+  .nav-links{
+    gap:10px;
+    justify-content:flex-start;
     overflow-x:auto;
-    padding-bottom:6px;
+    padding:0 2px 6px;
+    margin-bottom:0;
     scrollbar-width:none;
   }
 
-  .nav-left::-webkit-scrollbar{
+  .nav-links::-webkit-scrollbar{
     display:none;
   }
 
-  .nav-left a{
+  .nav-links a{
     white-space:nowrap;
     padding:10px 14px;
     border-radius:999px;
     background:rgba(255,255,255,.08);
-    font-size:14px;
   }
 
-  .nav-right{
-    margin-inline-start:auto;
-    padding:10px 14px;
+  .brand{
+    font-size:13px;
+    line-height:1.5;
+    text-align:center;
   }
 
-  header{
-    position:static;
-    padding:16px 14px;
+  .header-right{
+    order:3;
+    display:flex;
+    align-items:center;
     gap:10px;
   }
 
-  .top-bar{
-    padding:9px 12px;
-    font-size:13px;
+  .header-right input{
+    flex:1;
+    min-width:0;
+    padding:12px 16px;
+    font-size:14px;
   }
 
-  .search-box input{
-    padding:12px 18px;
-    font-size:14px;
+  .cart-box{
+    width:48px;
+    height:48px;
+    flex-shrink:0;
   }
 
   .hero{
     height:auto;
-    min-height:78vh;
-    padding:76px 16px 56px;
+    min-height:72vh;
+    padding:48px 16px;
     background-attachment:scroll;
   }
 
@@ -1366,17 +1486,17 @@ html{
 
   .hero p{
     font-size:15px;
-    margin-bottom:22px;
+    margin-bottom:18px;
   }
 
-  .hero-buttons{
-    flex-direction:column;
-    gap:10px;
+  .robot-presenter{
+    width:140px;
+    height:140px;
+    mix-blend-mode:normal;
   }
 
-  .btn{
-    width:100%;
-    padding:13px 18px;
+  .product-cards-container{
+    display:none;
   }
 
   .main{
@@ -1427,7 +1547,6 @@ html{
   .home-grid .card-info h3{
     font-size:15px;
     line-height:1.4;
-    min-height:auto;
   }
 
   .home-grid .price{
@@ -1477,58 +1596,75 @@ html{
 
 <body>
 
-<nav class="main-nav">
 
-  <div class="nav-left">
-    <a href="index.html" class="nav-link">الرئيسية</a>
-    <a href="products.html" class="nav-link">المنتجات</a>
-    <a href="projects.html" class="nav-link">المشروعات</a>
- <a href="index.html#services" class="nav-link">الخدمات</a>
-<a href="index.html#why" class="nav-link">من نحن</a>
-<a href="index.html#contact" class="nav-link">تواصل معنا</a>
 
+<header class="main-header">
+
+  <!-- LEFT: CART -->
+  <div class="header-left">
+    <div class="logo">KIMO <span>TECH</span></div>
   </div>
 
-  <div class="nav-right" id="cartBtn">
-    🛒 <span id="cart-count">0</span>
+  <!-- CENTER -->
+  <div class="header-center">
+    <div class="nav-links">
+      <a href="index.html" class="active">الرئيسية</a>
+      <a href="products.html">المنتجات</a>
+      <a href="projects.html">المشروعات</a>
+      <a href="#services">الخدمات</a>
+      <a href="#why">من نحن</a>
+      <a href="#contact">تواصل معنا</a>
+    </div>
+
+    <div class="brand">
+      🔧 KIMO TECH – إلكترونيات وروبوتات
+    </div>
   </div>
 
-</nav>
-
-<div class="robot-bg"></div>
-
-<div class="top-bar">
-🔧 KIMO TECH – إلكترونيات وروبوتات
-</div>
-
-<header>
-  <div class="logo">KIMO <span>TECH</span></div>
-  <div class="search-box">
+  <!-- RIGHT -->
+  <div class="header-right">
     <input type="text" id="searchInput" placeholder="ابحث عن منتج...">
+    <div class="cart-box" id="cartBtn">
+      🛒
+      <span id="cart-count">0</span>
+    </div>
+
   </div>
+
 </header>
 
 <section class="hero">
 
-  <div class="grid-bg"></div>
+
   <canvas id="particles"></canvas>
+<div id="robotPresenter" class="robot-presenter">
+  <video autoplay loop muted playsinline>
+    <source src="robotc.mp4" type="video/mp4">
+  </video>
+</div>
+
+<div class="product-cards-container">
+
+
+
+</div>
+
+
+
 
   <div class="hero-content">
     <h1>ابدأ مشروعك مع KIMO TECH</h1>
 
     <p>
-      <span id="typing" class="typing"></span>
+     <span id="typing" class="typing"></span>
     </p>
 
-    <div class="hero-buttons">
-      <a href="products.html" class="btn main-btn">تصفح المنتجات</a>
-      <a href="projects.html" class="btn outline-btn">شوف المشاريع</a>
-    </div>
+
   </div>
 
 </section>
 
-<main class="main">
+ <main class="main">
 <div class="section-header center">
   <h2>🔥 أهم المنتجات</h2>
   <a href="products.html">عرض الكل</a>
@@ -1793,35 +1929,55 @@ function renderProducts(list){
   });
 }
 
-/* ===== SORT ===== */
-const sortSelect = document.getElementById("sortSelect");
+function autoPresentProducts(){
 
-if(sortSelect){
-  sortSelect.addEventListener("change", function(){
+const cards = document.querySelectorAll(".product-card");
+  let i = 0;
 
-    let sorted = [...currentList];
+  function next(){
 
-    if(this.value === "low"){
-      sorted.sort((a,b)=> a.price - b.price);
-    }
-    else if(this.value === "high"){
-      sorted.sort((a,b)=> b.price - a.price);
-    }
-    else if(this.value === "new"){
-      sorted.sort((a,b)=> b.id - a.id);
-    }
+    if(i >= cards.length) return;
 
-    renderProducts(sorted);
-  });
+    const card = cards[i];
+
+    followCard(card);
+    speakFromCard(card);
+
+    card.style.boxShadow = "0 0 25px #0ea5e9";
+
+    setTimeout(()=>{
+      card.style.boxShadow = "";
+      i++;
+      next();
+    },4000);
+  }
+
+  next();
 }
 
 /* ===== SEARCH ===== */
 const searchInput = document.getElementById("searchInput");
 
+function openSearchResults(rawQuery){
+  const cleanQuery = rawQuery.trim();
+  const targetUrl = cleanQuery
+    ? `products.html?search=${encodeURIComponent(cleanQuery)}`
+    : "products.html";
+
+  window.location.href = targetUrl;
+}
+
 if(searchInput){
   searchInput.addEventListener("keyup", function(){
     const q = this.value.toLowerCase();
     renderProducts(allProducts.filter(p=>p.name.toLowerCase().includes(q)));
+  });
+
+  searchInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+      e.preventDefault();
+      openSearchResults(this.value);
+    }
   });
 }
 
@@ -1868,14 +2024,15 @@ document.addEventListener("keydown", function(e){
     closePopup();
   }
 });
-
+function getRandomProducts(list, count){
+  return list.sort(()=> Math.random() - 0.5).slice(0, count);
+}
 /* ===== LOAD PRODUCTS ===== */
 async function loadProducts(){
 
   const q = query(
     collection(db,"products"),
-    orderBy("order","asc"),
-    orderBy("createdAt","asc")
+    orderBy("createdAt","desc")
   );
 
   const snapshot = await getDocs(q);
@@ -1889,26 +2046,126 @@ async function loadProducts(){
     });
   });
 
-// 🔥 shuffle + اختيار 10
-function getRandomProducts(list, count){
-  return list.sort(()=> Math.random() - 0.5).slice(0, count);
-}
 
 const randomProducts = getRandomProducts(allProducts, 10);
 
 currentList = [...randomProducts];
 renderProducts(randomProducts);
+setTimeout(()=>{
+  showHeroProducts();
+},1000);
 }
 
 loadProducts();
-const slider = document.getElementById("productGrid");
-
-slider.addEventListener("wheel", (e) => {
-  e.preventDefault(); // يمنع اسكرول الصفحة
-
-  slider.scrollLeft += e.deltaY; 
+document.querySelectorAll(".home-grid").forEach(slider=>{
+  slider.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    slider.scrollLeft += e.deltaY;
+  });
 });
 
+function showHeroProducts(){
+
+  const container = document.querySelector(".product-cards-container");
+  container.innerHTML = "";
+
+  // 🔥 5 منتجات + 5 مشاريع
+  const products = allProducts.sort(()=>Math.random()-0.5).slice(0,5);
+
+  const projectCards = Array.from(document.querySelectorAll("#projectGrid .card"))
+    .slice(0,5)
+    .map(card => ({
+      name: card.querySelector("h3").innerText
+    }));
+
+  const allItems = [
+    ...products.map(p=>({name:p.name, price:p.price})),
+    ...projectCards
+  ];
+
+  let i = 0;
+  let currentCard = null;
+
+  function next(){
+
+    if(i >= allItems.length){
+      i = 0; // 🔁 يعيد
+    }
+
+    const item = allItems[i];
+
+    // ❌ امسح الكارت القديم
+    if(currentCard){
+      currentCard.classList.remove("active");
+
+      setTimeout(()=>{
+        currentCard.remove();
+      },500);
+    }
+
+    // ✅ اعمل كارت جديد
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    // مكان عشوائي حلو
+    card.style.top = (20 + Math.random()*60) + "%";
+    card.style.left = (20 + Math.random()*60) + "%";
+
+    card.innerHTML = `
+      <h3>${item.name}</h3>
+      ${item.price ? `<div class="price">${item.price} EGP</div>` : ""}
+    `;
+
+    container.appendChild(card);
+
+    // 👀 يظهر تدريجي
+    setTimeout(()=>{
+      card.classList.add("active");
+    },100);
+
+    currentCard = card;
+
+    // 🤖 الروبوت يتفاعل
+setTimeout(()=>{
+  followCard(card);
+  
+  setTimeout(()=>{
+    zoomOnCard(card);
+
+speakNameOnly(card, () => {
+
+  // 👇 مهم: نضمن إن الصوت وقف فعلاً
+  const waitEnd = setInterval(()=>{
+
+    if(!isSpeechPlaying()){
+
+      clearInterval(waitEnd);
+
+      setTimeout(()=>{
+
+        card.classList.remove("active");
+
+        setTimeout(()=>{
+          card.remove();
+          i++;
+          next();
+        },500);
+
+      },800); // pause cinematic
+
+    }
+
+  },100);
+
+});
+
+  },400); // 👈 pause قبل ما يتكلم
+
+},300);
+  }
+
+  next();
+}
 async function loadProjects(){
 
   const snapshot = await getDocs(collection(db,"projects"));
@@ -2020,6 +2277,9 @@ window.addEventListener("scroll", () => {
     <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>
   </div>
 </div>
+
+
+
 <script>
 
   
@@ -2089,6 +2349,9 @@ function draw(){
 
   requestAnimationFrame(draw);
 }
+
+
+
 draw();
 
 /* TYPING */
@@ -2118,6 +2381,175 @@ function type(){
 
 type();
 
+const robot = document.getElementById("robotPresenter");
+const card1 = document.getElementById("card1");
+const card2 = document.getElementById("card2");
+
+window.addEventListener("load", ()=>{
+
+  setTimeout(()=>{
+    robot.classList.add("active");
+  },500);
+
+});
+
+
+
+function moveRobot(x, y){
+
+  const rect = robot.getBoundingClientRect();
+  const centerX = rect.width/2;
+  const centerY = rect.height/2;
+
+  const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+
+  robot.style.left = x + "px";
+  robot.style.top = y + "px";
+
+  robot.style.transform =
+    `translate(-50%,-50%) rotate(${angle * 0.05}deg)`;
+}
+
+function followCard(card){
+
+  const hero = document.querySelector(".hero").getBoundingClientRect();
+  const rect = card.getBoundingClientRect();
+
+  const targetX = rect.left + rect.width/2 - hero.left;
+  const targetY = rect.top + rect.height/2 - hero.top;
+
+  moveRobot(targetX, targetY);
+}
+function zoomOnCard(card){
+
+  const rect = card.getBoundingClientRect();
+  const hero = document.querySelector(".hero").getBoundingClientRect();
+
+  const centerX = rect.left + rect.width/2 - hero.left;
+  const centerY = rect.top + rect.height/2 - hero.top;
+
+  robot.style.transform = `
+    translate(-50%,-50%)
+    scale(1.3)
+  `;
+
+  setTimeout(()=>{
+    robot.style.transform = `
+      translate(-50%,-50%)
+      scale(1)
+    `;
+  },800);
+}
+const VOICE_ENABLED = false;
+
+if(!VOICE_ENABLED && "speechSynthesis" in window){
+  speechSynthesis.cancel();
+}
+
+function isSpeechPlaying(){
+  return VOICE_ENABLED && "speechSynthesis" in window && speechSynthesis.speaking;
+}
+
+function speakNameOnly(card, callback){
+  if(!VOICE_ENABLED || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined"){
+    if(callback) callback();
+    return;
+  }
+
+  const name = getProductName(card);
+
+  const msg = new SpeechSynthesisUtterance(name);
+
+  msg.lang = "ar-EG";
+  msg.rate = 0.85;
+  msg.pitch = 1.1;
+
+  speechSynthesis.cancel();
+
+  let isDone = false;
+
+  msg.onend = () => {
+    isDone = true;
+    if(callback) callback();
+  };
+
+  speechSynthesis.speak(msg);
+
+  // 💀 fallback لو المتصفح هنج
+  setTimeout(()=>{
+    if(!isDone){
+      if(callback) callback();
+    }
+  }, 4000);
+}
+
+function getProductName(card){
+  return card.querySelector("h3")?.innerText || "منتج مميز";
+}
+function speakSmart(text){
+  if(!VOICE_ENABLED || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined"){
+    return;
+  }
+
+  const msg = new SpeechSynthesisUtterance(text);
+
+  msg.lang = "ar-EG";
+
+  const voices = speechSynthesis.getVoices();
+  const arabicVoice = voices.find(v => v.lang.includes("ar"));
+
+  if(arabicVoice){
+    msg.voice = arabicVoice;
+  }
+
+  msg.rate = 1;
+  msg.pitch = 1.1;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(msg);
+}
+
+/* ===== VOICE CONTROL (صح 💀) ===== */
+
+let recognition;
+
+if (VOICE_ENABLED && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+
+  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+  recognition.lang = "ar-EG";
+  recognition.continuous = true;
+
+  recognition.onresult = function(event){
+
+    const text = event.results[event.results.length - 1][0].transcript;
+
+    console.log("سمعت:", text);
+
+    if(text.includes("منتج")){
+      autoPresentProducts();
+    }
+
+    if(text.includes("توقف")){
+      speechSynthesis.cancel();
+    }
+
+    if(text.includes("اشتري")){
+      const first = document.querySelector("#productGrid .card");
+      if(first){
+        first.querySelector(".add-btn").click();
+        speakSmart("تم إضافة المنتج للسلة");
+      }
+    }
+
+  };
+
+  // تشغيل مرة واحدة بس
+  document.body.addEventListener("click", ()=>{
+    recognition.start();
+  }, { once: true });
+
+}
 </script>
 </body>
 </html>

@@ -7,115 +7,759 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0ea5e9">
 <title>إتمام الطلب | KIMO TECH</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
 <style>
+:root{
+  --primary:#0ea5e9;
+  --accent:#22c55e;
+  --dark:#020617;
+  --gray:#64748b;
+  --light:#f8fafc;
+  --line:#e2e8f0;
+}
+
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:'Cairo',sans-serif;
-  background:#f8fafc;
+  background:var(--light);
+  color:var(--dark);
+  overflow-x:hidden;
 }
 
-.checkout-container{
-  max-width:700px;
-  margin:40px auto;
-  background:#fff;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.1);
+a{
+  color:inherit;
 }
 
-h1{
+.robot-bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at center, rgba(125,125,125,.18), rgba(2,6,23,.92)),
+    url("images/robot-mark.png") no-repeat center;
+  background-size:72%;
+  opacity:.72;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.top-bar{
+  background:var(--dark);
+  color:#fff;
   text-align:center;
-  margin-bottom:30px;
+  padding:10px;
+  font-weight:700;
+  position:relative;
+  z-index:2;
+}
+
+.main-nav{
+  background:#020617;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 20px;
+  position:sticky;
+  top:0;
+  z-index:999;
+}
+
+.nav-left{
+  display:flex;
+  gap:25px;
+}
+
+.nav-left a{
+  color:#fff;
+  text-decoration:none;
+  font-weight:700;
+  position:relative;
+  transition:.3s;
+}
+
+.nav-left a:hover,
+.nav-link.active{
+  color:var(--accent);
+}
+
+.nav-left a::after{
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  right:0;
+  width:0;
+  height:2px;
+  background:var(--accent);
+  transition:.3s;
+}
+
+.nav-left a:hover::after,
+.nav-link.active::after{
+  width:100%;
+}
+
+.nav-right{
+  background:var(--accent);
+  padding:8px 15px;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:18px;
+  position:relative;
+  color:#fff;
+}
+
+#cart-count{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  background:#ef4444;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+}
+
+header{
+  background:#fff;
+  padding:22px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:58px;
+  z-index:10;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.logo{
+  font-size:32px;
+  font-weight:900;
+}
+
+.logo span{
+  color:var(--accent);
+}
+
+.checkout-note{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:4px;
+}
+
+.checkout-note strong{
+  font-size:18px;
+}
+
+.checkout-note span{
+  color:var(--gray);
+  font-size:14px;
+}
+
+.checkout-page{
+  max-width:1240px;
+  margin:auto;
+  padding:34px 20px 0;
+  position:relative;
+  z-index:2;
+}
+
+.checkout-hero{
+  margin-bottom:22px;
+}
+
+.page-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(14,165,233,.12);
+  color:#0369a1;
+  font-size:13px;
+  font-weight:700;
+}
+
+.checkout-hero h1{
+  margin:16px 0 10px;
+  font-size:38px;
+  line-height:1.25;
+}
+
+.checkout-hero p{
+  margin:0;
+  color:var(--gray);
+  font-size:17px;
+  max-width:760px;
+  line-height:1.8;
+}
+
+.checkout-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);
+  gap:24px;
+  align-items:start;
+}
+
+.checkout-card{
+  background:#fff;
+  border-radius:24px;
+  padding:26px;
+  box-shadow:0 16px 38px rgba(15,23,42,.08);
+  border:1px solid rgba(226,232,240,.95);
+}
+
+.section-title{
+  margin:0 0 8px;
+  font-size:24px;
+}
+
+.section-subtitle{
+  margin:0 0 22px;
+  color:var(--gray);
+  font-size:14px;
+}
+
+.summary-card{
+  position:sticky;
+  top:148px;
+}
+
+.summary-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.count-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:88px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(34,197,94,.14);
+  color:#15803d;
+  font-size:13px;
+  font-weight:700;
 }
 
 .order-summary{
-  background:#f1f5f9;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:25px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
 .order-item{
   display:flex;
   justify-content:space-between;
-  margin-bottom:8px;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
 }
 
-.total{
-  font-weight:900;
-  font-size:18px;
-  margin-top:10px;
-  color:#22c55e;
+.item-main{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:0;
 }
 
-input, select{
-  width:100%;
-  padding:12px;
-  margin-bottom:15px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:14px;
+.item-details{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
 }
 
-button{
-  width:100%;
-  padding:14px;
+.item-details strong{
+  font-size:15px;
+}
+
+.item-details span{
+  color:var(--gray);
+  font-size:13px;
+}
+
+.item-price{
+  white-space:nowrap;
+  font-weight:800;
+}
+
+.item-footer{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.quantity-controls{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px;
+  border-radius:999px;
+  background:#f8fafc;
+  border:1px solid var(--line);
+}
+
+.qty-btn{
+  width:32px;
+  height:32px;
   border:none;
-  border-radius:12px;
-  background:#0ea5e9;
-  color:#fff;
-  font-weight:bold;
-  font-size:16px;
+  border-radius:50%;
+  background:#e2e8f0;
+  color:#0f172a;
+  font-size:18px;
+  font-weight:800;
   cursor:pointer;
+  transition:.2s ease;
 }
 
-button:hover{
-  background:#0284c7;
+.qty-btn:hover{
+  background:#cbd5e1;
+}
+
+.qty-value{
+  min-width:28px;
+  text-align:center;
+  font-size:14px;
+  font-weight:800;
+}
+
+.remove-item-btn{
+  border:none;
+  background:transparent;
+  color:#ef4444;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  padding:0;
+}
+
+.remove-item-btn:hover{
+  color:#dc2626;
+}
+
+.total-box{
+  margin-top:18px;
+  padding:16px 18px;
+  border-radius:18px;
+  background:linear-gradient(135deg, rgba(14,165,233,.1), rgba(34,197,94,.12));
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+.total-box span{
+  color:#0f172a;
+  font-weight:700;
+}
+
+.total-box strong{
+  color:#15803d;
+  font-size:24px;
+}
+
+.secondary-link{
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  width:100%;
+  margin-top:16px;
+  padding:12px 16px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  text-decoration:none;
+  font-weight:700;
+  color:#0f172a;
+  transition:.25s ease;
+}
+
+.secondary-link:hover{
+  border-color:var(--primary);
+  color:#0369a1;
+}
+
+.field-grid{
+  display:grid;
+  gap:14px;
+}
+
+.field-row{
+  display:grid;
+  gap:8px;
+}
+
+.field-row label{
+  font-size:14px;
+  font-weight:700;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid #cbd5e1;
+  font-size:14px;
+  font-family:inherit;
+  background:#fff;
+  outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(14,165,233,.12);
+}
+
+textarea{
+  min-height:118px;
+  resize:vertical;
 }
 
 .payment-box{
   background:#f1f5f9;
-  padding:12px;
-  border-radius:12px;
-  margin-bottom:15px;
+  padding:16px 18px;
+  border-radius:16px;
+  margin-top:16px;
   display:none;
+  border:1px solid #dbeafe;
+}
+
+.payment-box strong{
+  display:block;
+  margin-bottom:6px;
+  color:#0f172a;
+}
+
+.payment-box span{
+  display:block;
+  color:var(--gray);
+  line-height:1.8;
+  font-size:14px;
+}
+
+.submit-btn{
+  width:100%;
+  padding:15px 18px;
+  margin-top:18px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg, var(--primary), #0284c7);
+  color:#fff;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+
+.submit-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 28px rgba(14,165,233,.24);
+}
+
+.submit-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+.hint{
+  margin:12px 0 0;
+  color:var(--gray);
+  font-size:13px;
+  line-height:1.7;
+}
+
+.empty-cart{
+  padding:18px;
+  border-radius:18px;
+  background:#f8fafc;
+  border:1px dashed #cbd5e1;
+  text-align:center;
+  color:var(--gray);
+  line-height:1.8;
+}
+
+footer{
+  background:#000;
+  color:#fff;
+  padding:60px 8% 30px;
+  margin-top:80px;
+}
+
+.footer-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:40px;
+}
+
+.footer-bottom{
+  text-align:center;
+  margin-top:40px;
+  padding-top:20px;
+  border-top:1px solid #222;
+  color:#94a3b8;
+  font-size:14px;
+}
+
+@media(max-width:768px){
+  .main-nav{
+    padding:12px;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    align-items:flex-start;
+  }
+
+  .nav-left{
+    width:100%;
+    order:2;
+    gap:10px;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:6px;
+    scrollbar-width:none;
+  }
+
+  .nav-left::-webkit-scrollbar{
+    display:none;
+  }
+
+  .nav-left a{
+    white-space:nowrap;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    font-size:14px;
+  }
+
+  .nav-right{
+    margin-inline-start:auto;
+    padding:10px 14px;
+  }
+
+  header{
+    position:static;
+    padding:16px 14px;
+    gap:10px;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .logo{
+    font-size:28px;
+  }
+
+  .checkout-note{
+    align-items:flex-start;
+  }
+
+  .top-bar{
+    padding:9px 12px;
+    font-size:13px;
+  }
+
+  .robot-bg{
+    background-size:120%;
+    opacity:.42;
+  }
+
+  .checkout-page{
+    padding:22px 12px 0;
+  }
+
+  .checkout-hero h1{
+    font-size:29px;
+  }
+
+  .checkout-hero p{
+    font-size:15px;
+  }
+
+  .checkout-grid{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .summary-card{
+    position:static;
+  }
+
+  .checkout-card{
+    padding:20px 16px;
+    border-radius:18px;
+  }
+
+  .summary-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .order-item{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .item-price{
+    align-self:flex-end;
+  }
+
+  .total-box strong{
+    font-size:20px;
+  }
+
+  footer{
+    padding:44px 16px 24px;
+    margin-top:56px;
+  }
+
+  .footer-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="checkout-container">
-  <h1>إتمام الطلب 🧾</h1>
-
-  <div class="order-summary" id="orderSummary"></div>
-
-  <input type="text" id="customerName" placeholder="الاسم بالكامل">
-  <input type="tel" id="customerPhone" placeholder="رقم الموبايل">
-  <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل">
-
-  <select id="paymentMethod" onchange="handlePaymentChange()">
-    <option value="cash">الدفع عند الاستلام</option>
-    <option value="vodafone">فودافون كاش</option>
-    <option value="instapay">InstaPay</option>
-  </select>
-
-  <div class="payment-box" id="instaBox">
-    📌 حول المبلغ على:<br>
-    💳 InstaPay: 01555735099<br>
-    👤 الاسم: KIMO TECH<br>
-    ثم اضغط تأكيد الطلب
+<nav class="main-nav">
+  <div class="nav-left">
+    <a href="index.html" class="nav-link">الرئيسية</a>
+    <a href="products.html" class="nav-link">المنتجات</a>
+    <a href="projects.html" class="nav-link">المشروعات</a>
+    <a href="index.html#services" class="nav-link">الخدمات</a>
+    <a href="index.html#why" class="nav-link">من نحن</a>
+    <a href="index.html#contact" class="nav-link">تواصل معنا</a>
   </div>
 
-  <button onclick="submitOrder()">تأكيد الطلب ✅</button>
+  <div class="nav-right" id="cartBtn" aria-label="ملخص الطلب">
+    &#128722; <span id="cart-count">0</span>
+  </div>
+</nav>
+
+<div class="robot-bg"></div>
+
+<div class="top-bar">
+  KIMO TECH - إلكترونيات وروبوتات
 </div>
 
-<script type="module">
+<header>
+  <div class="logo">KIMO <span>TECH</span></div>
+  <div class="checkout-note">
+    <strong>إتمام الطلب</strong>
+    <span>راجع طلبك وأكد البيانات وسيتم التواصل معك سريعًا</span>
+  </div>
+</header>
 
+<main class="checkout-page">
+  <section class="checkout-hero">
+    <span class="page-tag">Secure Checkout</span>
+    <h1>نظرة عامة على المنتج</h1>
+    <p>  : KIMO TECH.</p>
+  </section>
+
+  <section class="checkout-grid">
+    <div class="checkout-card form-card">
+      <h2 class="section-title">بيانات العميل</h2>
+      <p class="section-subtitle">املأ البيانات بشكل صحيح لتأكيد الطلب بدون تأخير.</p>
+
+      <div class="field-grid">
+        <div class="field-row">
+          <label for="customerName">الاسم بالكامل</label>
+          <input type="text" id="customerName" placeholder="اكتب الاسم كما تريد استلام الطلب">
+        </div>
+
+        <div class="field-row">
+          <label for="customerPhone">رقم الموبايل</label>
+          <input type="tel" id="customerPhone" placeholder="مثال: 01000000000">
+        </div>
+
+        <div class="field-row">
+          <label for="customerAddress">العنوان بالتفصيل</label>
+          <textarea id="customerAddress" placeholder="المحافظة، المنطقة، الشارع، وأي تفاصيل توصيل مهمة"></textarea>
+        </div>
+
+        <div class="field-row">
+          <label for="paymentMethod">طريقة الدفع</label>
+          <select id="paymentMethod">
+            <option value="cash">الدفع عند الاستلام</option>
+            <option value="vodafone">فودافون كاش</option>
+            <option value="instapay">InstaPay</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="payment-box" id="paymentInfoBox"></div>
+
+      <button id="submitOrderBtn" class="submit-btn" type="button">تأكيد الطلب</button>
+      <p class="hint">بعد الحفظ سيتم إفراغ السلة ثم الرجوع للصفحة الرئيسية تلقائيًا.</p>
+    </div>
+
+    <aside class="checkout-card summary-card" id="summaryCard">
+      <div class="summary-head">
+        <div>
+          <h2 class="section-title">ملخص الطلب</h2>
+          <p class="section-subtitle">راجع المنتجات قبل الإرسال</p>
+        </div>
+        <span class="count-pill" id="itemsCount">0 عنصر</span>
+      </div>
+
+      <div class="order-summary" id="orderSummary"></div>
+
+      <div class="total-box">
+        <span>الإجمالي</span>
+        <strong id="totalValue">0 EGP</strong>
+      </div>
+
+      <a class="secondary-link" href="products.html">الرجوع للمنتجات</a>
+    </aside>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h3>KIMO TECH</h3>
+      <p>أفضل جودة وأسرع خدمة توصيل في مصر.</p>
+    </div>
+    <div>
+      <h3>تواصل معنا</h3>
+      <p>📞 01555735099</p>
+      <p>📍 الإسكندرية، مصر</p>
+    </div>
+    <div>
+      <h3>ساعات العمل</h3>
+      <p>يوميًا من 10 ص حتى 10 م</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 KIMO TECH – All Rights Reserved
+  </div>
+</footer>
+
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
@@ -131,46 +775,166 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ===== عرض المنتجات ===== */
-
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
-const summary = document.getElementById("orderSummary");
 let total = 0;
 
-if(cart.length === 0){
-  summary.innerHTML = "<p>السلة فارغة</p>";
-}else{
-  cart.forEach(p=>{
-    total += p.price;
+const summary = document.getElementById("orderSummary");
+const totalValue = document.getElementById("totalValue");
+const itemsCount = document.getElementById("itemsCount");
+const cartCount = document.getElementById("cart-count");
+const paymentMethod = document.getElementById("paymentMethod");
+const paymentInfoBox = document.getElementById("paymentInfoBox");
+const submitBtn = document.getElementById("submitOrderBtn");
+const summaryCard = document.getElementById("summaryCard");
 
-    summary.innerHTML += `
-      <div class="order-item">
-        <span>${p.name}</span>
-        <span>${p.price} EGP</span>
-      </div>
-    `;
+const paymentInfo = {
+  cash: {
+    title: "",
+    body: ""
+  },
+  vodafone: {
+    title: "الدفع عبر فودافون كاش",
+    body: "حوّل المبلغ على الرقم 01555735099 ثم اضغط تأكيد الطلب وسيتم مراجعة التحويل معك."
+  },
+  instapay: {
+    title: "الدفع عبر InstaPay",
+    body: "حوّل المبلغ على InstaPay: 01555735099 باسم karem  ثم أكمل تأكيد الطلب."
+  }
+};
+
+function formatPrice(value){
+  return `${value} EGP`;
+}
+
+function escapeHtml(text){
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getCartItemKey(item){
+  return [
+    item?.id ?? "",
+    item?.name ?? "",
+    Number(item?.price) || 0
+  ].join("__");
+}
+
+function buildGroupedCartItems(){
+  const grouped = new Map();
+
+  cart.forEach((item) => {
+    const price = Number(item.price) || 0;
+    const key = getCartItemKey(item);
+
+    if(!grouped.has(key)){
+      grouped.set(key, {
+        key,
+        sourceItem: item,
+        name: item.name || "منتج",
+        price,
+        quantity: 0
+      });
+    }
+
+    grouped.get(key).quantity += 1;
   });
 
-  summary.innerHTML += `<div class="total">الإجمالي: ${total} EGP</div>`;
+  return [...grouped.values()];
 }
 
-/* ===== اظهار بيانات InstaPay ===== */
-
-window.handlePaymentChange = function(){
-  const payment = document.getElementById("paymentMethod").value;
-  const box = document.getElementById("instaBox");
-
-  box.style.display = (payment === "instapay") ? "block" : "none";
+function syncCartStorage(){
+  localStorage.setItem("cart", JSON.stringify(cart));
+  cartCount.textContent = cart.length;
 }
 
-/* ===== حفظ الطلب ===== */
+function setItemQuantity(itemKey, nextQuantity){
+  const groupedItems = buildGroupedCartItems();
+  const safeQuantity = Math.max(0, Number(nextQuantity) || 0);
 
-window.submitOrder = async function(){
+  cart = groupedItems.flatMap((item) => {
+    const quantity = item.key === itemKey ? safeQuantity : item.quantity;
 
+    return Array.from({ length: quantity }, () => ({ ...item.sourceItem }));
+  });
+
+  syncCartStorage();
+  renderSummary();
+}
+
+function renderSummary(){
+  total = 0;
+  cartCount.textContent = cart.length;
+
+  if(cart.length === 0){
+    itemsCount.textContent = "0 عنصر";
+    totalValue.textContent = formatPrice(0);
+    submitBtn.disabled = true;
+    summary.innerHTML = `
+      <div class="empty-cart">
+        السلة فارغة الآن.<br>
+        أضف بعض المنتجات أولًا ثم ارجع لتأكيد الطلب.
+      </div>
+    `;
+    return;
+  }
+
+  submitBtn.disabled = false;
+  const groupedItems = buildGroupedCartItems();
+
+  groupedItems.forEach((item) => {
+    total += item.price * item.quantity;
+  });
+
+  itemsCount.textContent = `${cart.length} عنصر`;
+
+  summary.innerHTML = groupedItems.map((item) => `
+    <div class="order-item">
+      <div class="item-main">
+        <div class="item-details">
+          <strong>${escapeHtml(item.name)}</strong>
+          <span>سعر القطعة: ${formatPrice(item.price)}</span>
+        </div>
+        <div class="item-footer">
+          <div class="quantity-controls">
+            <button class="qty-btn" type="button" data-action="increase" data-key="${escapeHtml(item.key)}">+</button>
+            <span class="qty-value">${item.quantity}</span>
+            <button class="qty-btn" type="button" data-action="decrease" data-key="${escapeHtml(item.key)}">-</button>
+          </div>
+          <button class="remove-item-btn" type="button" data-action="remove" data-key="${escapeHtml(item.key)}">حذف</button>
+        </div>
+      </div>
+      <div class="item-price">${formatPrice(item.price * item.quantity)}</div>
+    </div>
+  `).join("");
+
+  totalValue.textContent = formatPrice(total);
+}
+
+function handlePaymentChange(){
+  const config = paymentInfo[paymentMethod.value];
+
+  if(!config || !config.body){
+    paymentInfoBox.style.display = "none";
+    paymentInfoBox.innerHTML = "";
+    return;
+  }
+
+  paymentInfoBox.innerHTML = `
+    <strong>${config.title}</strong>
+    <span>${config.body}</span>
+  `;
+  paymentInfoBox.style.display = "block";
+}
+
+async function submitOrder(){
   const name = document.getElementById("customerName").value.trim();
   const phone = document.getElementById("customerPhone").value.trim();
   const address = document.getElementById("customerAddress").value.trim();
-  const payment = document.getElementById("paymentMethod").value;
+  const payment = paymentMethod.value;
 
   if(!name || !phone || !address){
     alert("من فضلك املأ كل البيانات");
@@ -188,35 +952,86 @@ window.submitOrder = async function(){
   }
 
   try{
-
     const docRef = await addDoc(collection(db, "orders"), {
       customerName: name,
-      phone: phone,
-      address: address,
+      phone,
+      address,
       paymentMethod: payment,
       items: cart,
-      total: total,
+      total,
       status: "pending",
       createdAt: serverTimestamp()
     });
 
-    alert("تم استلام طلبك بنجاح 🎉\nرقم الطلب: " + docRef.id);
+    alert("تم استلام طلبك بنجاح\nرقم الطلب: " + docRef.id);
 
     localStorage.removeItem("cart");
+    cart = [];
+    renderSummary();
 
-    setTimeout(()=>{
+    setTimeout(() => {
       window.location.href = "index.html";
-    },1000);
-
+    }, 1200);
   }catch(error){
     alert("حدث خطأ أثناء حفظ الطلب");
     console.error(error);
   }
-
 }
 
+document.getElementById("cartBtn").addEventListener("click", () => {
+  summaryCard.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+summary.addEventListener("click", (event) => {
+  const actionButton = event.target.closest("[data-action]");
+
+  if(!actionButton){
+    return;
+  }
+
+  const { action, key } = actionButton.dataset;
+
+  if(!action || !key){
+    return;
+  }
+
+  const targetItem = buildGroupedCartItems().find((item) => item.key === key);
+
+  if(!targetItem){
+    return;
+  }
+
+  if(action === "increase"){
+    setItemQuantity(key, targetItem.quantity + 1);
+    return;
+  }
+
+  if(action === "decrease"){
+    setItemQuantity(key, targetItem.quantity - 1);
+    return;
+  }
+
+  if(action === "remove"){
+    setItemQuantity(key, 0);
+  }
+});
+
+paymentMethod.addEventListener("change", handlePaymentChange);
+submitBtn.addEventListener("click", submitOrder);
+
+const links = document.querySelectorAll(".nav-link");
+const currentPage = window.location.pathname.split("/").pop();
+
+links.forEach((link) => {
+  const linkPage = link.getAttribute("href");
+  if(linkPage === currentPage){
+    link.classList.add("active");
+  }
+});
+
+renderSummary();
+handlePaymentChange();
 </script>
 
 </body>
 </html>
-

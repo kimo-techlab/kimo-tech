@@ -58,11 +58,16 @@
   --light:#f8fafc;
 }
 
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:'Cairo',sans-serif;
   background:var(--light);
   overflow-x:hidden;
+  color:var(--dark);
 }
 
 /* ===== Robot Watermark ===== */
@@ -543,6 +548,105 @@ background:#16a34a;
   width:100%;
 }
 
+@media(max-width:768px){
+  .main-nav{
+    padding:12px;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    align-items:flex-start;
+  }
+
+  .nav-left{
+    width:100%;
+    order:2;
+    gap:10px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:6px;
+    scrollbar-width:none;
+  }
+
+  .nav-left::-webkit-scrollbar{
+    display:none;
+  }
+
+  .nav-left a{
+    white-space:nowrap;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    font-size:14px;
+  }
+
+  .nav-right{
+    margin-inline-start:auto;
+    padding:10px 14px;
+  }
+
+  header{
+    position:static;
+    padding:16px 14px;
+    justify-content:center;
+  }
+
+  .top-bar{
+    padding:9px 12px;
+    font-size:13px;
+  }
+
+  .container{
+    display:block;
+    padding:20px 12px;
+  }
+
+  .main{
+    width:100%;
+  }
+
+  .top-controls{
+    margin-bottom:16px;
+  }
+
+  .project-page{
+    padding:20px 16px;
+    border-radius:16px;
+  }
+
+  .project-page img{
+    max-height:240px;
+    margin-bottom:18px;
+  }
+
+  .project-page h1{
+    font-size:24px;
+    line-height:1.35;
+  }
+
+  .project-page p{
+    font-size:15px;
+    line-height:1.8;
+  }
+
+  .projects-btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    font-size:16px;
+    padding:12px 18px;
+  }
+
+  footer{
+    padding:44px 16px 24px;
+    margin-top:56px;
+  }
+
+  .footer-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+}
+
 </style>
 
 </head>
@@ -726,6 +830,5 @@ links.forEach(link => {
 });
 </script>
 
-</div>
 </body>
 </html>

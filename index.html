@@ -1469,86 +1469,100 @@ body{
 
   .hero{
     height:auto;
-    min-height:72vh;
-    padding:32px 16px 48px;
+    min-height:68vh;
+    padding:28px 14px 34px;
     background-attachment:scroll;
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:center;
-    gap:18px;
+    justify-content:center;
+    align-items:stretch;
   }
 
   .hero-content{
-    max-width:100%;
+    position:absolute;
+    right:14px;
+    left:14px;
+    bottom:8%;
+    max-width:none;
     padding:0;
     text-align:center;
+    z-index:35;
   }
 
   .hero h1{
-    font-size:32px;
-    line-height:1.35;
+    font-size:29px;
+    line-height:1.4;
+    margin-bottom:14px;
   }
 
   .hero p{
     font-size:15px;
-    margin-bottom:18px;
+    margin-bottom:0;
   }
 
   .robot-presenter{
-    position:relative;
-    top:auto;
-    left:auto;
-    width:min(52vw,210px);
-    height:min(52vw,210px);
-    min-width:170px;
-    min-height:170px;
-    margin-top:8px;
-    border-radius:28px;
-    padding:10px;
-    mix-blend-mode:normal;
-    background:linear-gradient(180deg, rgba(15,23,42,.9), rgba(2,6,23,.72));
-    border:1px solid rgba(148,163,184,.22);
-    box-shadow:
-      0 22px 50px rgba(2,6,23,.32),
-      0 0 24px rgba(14,165,233,.22);
-    transform:none !important;
-    opacity:1;
-    z-index:2;
+    position:absolute;
+    top:24%;
+    left:72%;
+    width:min(34vw,152px);
+    height:min(34vw,152px);
+    min-width:126px;
+    min-height:126px;
+    margin:0;
+    padding:0;
+    border-radius:50%;
+    mix-blend-mode:color-dodge;
+    background:transparent;
+    border:none;
+    box-shadow:0 0 18px rgba(14,165,233,.45);
+    z-index:26;
   }
 
   .robot-presenter::before{
-    inset:-10px;
-    border-radius:34px;
-    opacity:.75;
+    inset:-12px;
+    border-radius:50%;
+    opacity:.95;
   }
 
   .robot-presenter video{
-    object-fit:contain;
+    object-fit:cover;
     object-position:center center;
-    border-radius:20px;
-    background:radial-gradient(circle at top, rgba(14,165,233,.15), transparent 60%);
+    border-radius:50%;
+    background:transparent;
     filter:
-      drop-shadow(0 0 8px rgba(14,165,233,.55))
-      drop-shadow(0 0 16px rgba(34,197,94,.28))
-      brightness(1.08)
-      contrast(1.03);
+      drop-shadow(0 0 10px rgba(14,165,233,.65))
+      drop-shadow(0 0 18px rgba(34,197,94,.26))
+      brightness(1.12)
+      contrast(1.06);
   }
 
   .robot-presenter.active{
-    animation:none;
-    transform:none !important;
-  }
-
-  .robot-presenter.active video{
-    animation:none;
+    transform:translate(-50%,-50%) scale(.92);
   }
 
   .product-cards-container{
-    display:none;
+    display:block;
+    z-index:18;
   }
 
   #particles{
-    opacity:.45;
+    opacity:.58;
+  }
+
+  .product-card{
+    width:min(46vw,184px);
+    padding:12px 12px 14px;
+    border-radius:16px;
+    background:rgba(2,6,23,.9);
+    box-shadow:0 0 18px rgba(14,165,233,.18);
+  }
+
+  .product-card h3{
+    margin:0 0 8px;
+    font-size:14px;
+    line-height:1.45;
+  }
+
+  .product-card .price{
+    font-size:13px;
   }
 
   .main{
@@ -2103,11 +2117,9 @@ const randomProducts = getRandomProducts(allProducts, 10);
 
 currentList = [...randomProducts];
 renderProducts(randomProducts);
-if(!isMobileHeroView()){
-  setTimeout(()=>{
-    showHeroProducts();
-  },1000);
-}
+setTimeout(()=>{
+  showHeroProducts();
+},1000);
 }
 
 loadProducts();
@@ -2119,12 +2131,9 @@ document.querySelectorAll(".home-grid").forEach(slider=>{
 });
 
 function showHeroProducts(){
-  if(isMobileHeroView()){
-    return;
-  }
-
   const container = document.querySelector(".product-cards-container");
   container.innerHTML = "";
+  const isMobileHero = isMobileHeroView();
 
   // 🔥 5 منتجات + 5 مشاريع
   const products = allProducts.sort(()=>Math.random()-0.5).slice(0,5);
@@ -2165,8 +2174,16 @@ function showHeroProducts(){
     card.className = "product-card";
 
     // مكان عشوائي حلو
-    card.style.top = (20 + Math.random()*60) + "%";
-    card.style.left = (20 + Math.random()*60) + "%";
+    card.style.top = (
+      isMobileHero
+        ? 18 + Math.random() * 16
+        : 20 + Math.random() * 60
+    ) + "%";
+    card.style.left = (
+      isMobileHero
+        ? 10 + Math.random() * 22
+        : 20 + Math.random() * 60
+    ) + "%";
 
     card.innerHTML = `
       <h3>${item.name}</h3>
@@ -2459,6 +2476,18 @@ window.addEventListener("load", ()=>{
 
 function moveRobot(x, y){
   if(isMobileHeroView()){
+    const heroRect = document.querySelector(".hero").getBoundingClientRect();
+    const rect = robot.getBoundingClientRect();
+    const centerX = rect.width/2;
+    const centerY = rect.height/2;
+    const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+    const clampedX = Math.min(Math.max(x, heroRect.width * 0.42), heroRect.width * 0.78);
+    const clampedY = Math.min(Math.max(y, heroRect.height * 0.16), heroRect.height * 0.38);
+
+    robot.style.left = clampedX + "px";
+    robot.style.top = clampedY + "px";
+    robot.style.transform =
+      `translate(-50%,-50%) rotate(${angle * 0.04}deg) scale(.92)`;
     return;
   }
 
@@ -2476,10 +2505,6 @@ function moveRobot(x, y){
 }
 
 function followCard(card){
-  if(isMobileHeroView()){
-    return;
-  }
-
   const hero = document.querySelector(".hero").getBoundingClientRect();
   const rect = card.getBoundingClientRect();
 
@@ -2490,6 +2515,17 @@ function followCard(card){
 }
 function zoomOnCard(card){
   if(isMobileHeroView()){
+    robot.style.transform = `
+      translate(-50%,-50%)
+      scale(1.02)
+    `;
+
+    setTimeout(()=>{
+      robot.style.transform = `
+        translate(-50%,-50%)
+        scale(.92)
+      `;
+    },800);
     return;
   }
 

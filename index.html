@@ -1535,7 +1535,7 @@ body{
   }
 
   .robot-presenter.active{
-    transform:translate(-50%,-50%) scale(.92);
+    transform:translate(-50%,-50%) scale(.96);
   }
 
   .product-cards-container{
@@ -2134,6 +2134,9 @@ function showHeroProducts(){
   const container = document.querySelector(".product-cards-container");
   container.innerHTML = "";
   const isMobileHero = isMobileHeroView();
+  const cardFollowDelay = isMobileHero ? 220 : 300;
+  const cardZoomDelay = isMobileHero ? 320 : 400;
+  const cardHoldDelay = isMobileHero ? 2200 : 1400;
 
   // 🔥 5 منتجات + 5 مشاريع
   const products = allProducts.sort(()=>Math.random()-0.5).slice(0,5);
@@ -2176,12 +2179,12 @@ function showHeroProducts(){
     // مكان عشوائي حلو
     card.style.top = (
       isMobileHero
-        ? 18 + Math.random() * 16
+        ? 14 + Math.random() * 24
         : 20 + Math.random() * 60
     ) + "%";
     card.style.left = (
       isMobileHero
-        ? 10 + Math.random() * 22
+        ? 6 + Math.random() * 34
         : 20 + Math.random() * 60
     ) + "%";
 
@@ -2225,7 +2228,7 @@ speakNameOnly(card, () => {
           next();
         },500);
 
-      },800); // pause cinematic
+      },cardHoldDelay); // pause cinematic
 
     }
 
@@ -2233,9 +2236,9 @@ speakNameOnly(card, () => {
 
 });
 
-  },400); // 👈 pause قبل ما يتكلم
+  },cardZoomDelay); // 👈 pause قبل ما يتكلم
 
-},300);
+},cardFollowDelay);
   }
 
   next();
@@ -2481,13 +2484,17 @@ function moveRobot(x, y){
     const centerX = rect.width/2;
     const centerY = rect.height/2;
     const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
-    const clampedX = Math.min(Math.max(x, heroRect.width * 0.42), heroRect.width * 0.78);
-    const clampedY = Math.min(Math.max(y, heroRect.height * 0.16), heroRect.height * 0.38);
+    const minX = Math.max(rect.width * 0.55, heroRect.width * 0.18);
+    const maxX = Math.min(heroRect.width - rect.width * 0.55, heroRect.width * 0.82);
+    const minY = Math.max(rect.height * 0.55, heroRect.height * 0.1);
+    const maxY = Math.min(heroRect.height - rect.height * 0.7, heroRect.height * 0.46);
+    const clampedX = Math.min(Math.max(x, minX), maxX);
+    const clampedY = Math.min(Math.max(y, minY), maxY);
 
     robot.style.left = clampedX + "px";
     robot.style.top = clampedY + "px";
     robot.style.transform =
-      `translate(-50%,-50%) rotate(${angle * 0.04}deg) scale(.92)`;
+      `translate(-50%,-50%) rotate(${angle * 0.07}deg) scale(.96)`;
     return;
   }
 
@@ -2517,15 +2524,15 @@ function zoomOnCard(card){
   if(isMobileHeroView()){
     robot.style.transform = `
       translate(-50%,-50%)
-      scale(1.02)
+      scale(1.1)
     `;
 
     setTimeout(()=>{
       robot.style.transform = `
         translate(-50%,-50%)
-        scale(.92)
+        scale(.96)
       `;
-    },800);
+    },1100);
     return;
   }
 

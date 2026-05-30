@@ -168,6 +168,151 @@ img{
   line-height:1.6;
   resize:vertical;
 }
+.assistant-panel{
+  background:rgba(255,255,255,.96);
+  border-radius:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,.08);
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.assistant-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:14px;
+}
+
+.assistant-title{
+  margin:0;
+  font-size:22px;
+}
+
+.assistant-subtitle{
+  margin:6px 0 0;
+  color:#475569;
+  line-height:1.6;
+}
+
+.assistant-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.assistant-secondary{
+  background:#0f172a;
+  color:#fff;
+}
+
+.assistant-meta{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.assistant-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#0f172a;
+  font-size:13px;
+  font-weight:700;
+}
+
+.assistant-status{
+  background:#f8fafc;
+  color:#334155;
+  border:1px dashed #cbd5e1;
+  border-radius:14px;
+  padding:12px 14px;
+  line-height:1.6;
+  margin-bottom:14px;
+}
+
+.assistant-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:14px;
+}
+
+.assistant-card{
+  border:1px solid #e2e8f0;
+  border-radius:18px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 10px 25px rgba(15,23,42,.06);
+}
+
+.assistant-card img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  display:block;
+  background:#f8fafc;
+}
+
+.assistant-card-body{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.assistant-card h3{
+  margin:0;
+  font-size:15px;
+  line-height:1.5;
+  color:#0f172a;
+}
+
+.assistant-path{
+  margin:0;
+  font-size:12px;
+  line-height:1.5;
+  color:#64748b;
+  word-break:break-word;
+}
+
+.assistant-card-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.assistant-small-btn{
+  padding:8px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.assistant-empty{
+  padding:24px;
+  text-align:center;
+  color:#475569;
+  background:#f8fafc;
+  border:1px dashed #cbd5e1;
+  border-radius:16px;
+}
+
+@media(max-width:768px){
+  .assistant-header{
+    flex-direction:column;
+  }
+
+  .assistant-actions{
+    width:100%;
+  }
+
+  .assistant-actions button{
+    flex:1 1 180px;
+  }
+}
 </style>
 </head>
 
@@ -188,6 +333,34 @@ img{
     <button class="add-btn" onclick="openModal()">➕ إضافة منتج</button>
   </div>
 </div>
+
+<section class="assistant-panel">
+  <div class="assistant-header">
+    <div>
+      <h2 class="assistant-title">Image Helper</h2>
+      <p class="assistant-subtitle">
+        Review local images that are not linked yet, fill the add form from one click,
+        or generate bulk drafts for the remaining files.
+      </p>
+    </div>
+
+    <div class="assistant-actions">
+      <button class="add-btn" type="button" onclick="generateUnusedImageDrafts()">Generate Drafts</button>
+      <button class="assistant-secondary" type="button" onclick="fixBrokenProductImages()">Fix Missing Images</button>
+    </div>
+  </div>
+
+  <div class="assistant-meta">
+    <div class="assistant-chip">Catalog: <strong id="catalogImageCount">0</strong></div>
+    <div class="assistant-chip">Unused: <strong id="unusedImageCount">0</strong></div>
+  </div>
+
+  <div class="assistant-status" id="imageAssistantStatus">
+    Loading local image catalog...
+  </div>
+
+  <div class="assistant-grid" id="unusedImageGrid"></div>
+</section>
 
 <div class="table">
 <div class="table-header">
@@ -282,9 +455,245 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+const LOCAL_IMAGE_CATALOG_URL = "data/local-product-images.json";
+const LOCAL_FALLBACK_IMAGE = "images/no-image.png";
+const CATEGORY_LABELS = {
+  arduino: "Arduino",
+  battery: "Battery",
+  charger: "Charger",
+  communication: "Communication",
+  control: "Control",
+  displays: "Displays",
+  drivers: "Drivers",
+  heaters: "Heaters",
+  motors: "Motors",
+  sensors: "Sensors"
+};
+
 let currentRole = null;
 let allProducts = [];
+let localImageCatalog = [];
+let unusedLocalImages = [];
+let localImageCatalogLoaded = false;
 document.getElementById("searchInput").addEventListener("keyup", filterProducts);
+
+function escapeHtml(text){
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function parseBulkCollectionInput(raw){
+  const cleaned = raw
+    .trim()
+    .replace(/^\s*(?:const|let|var)\s+\w+\s*=\s*/, "")
+    .replace(/;\s*$/, "");
+
+  try{
+    return JSON.parse(cleaned);
+  }catch(jsonError){
+    const normalized = cleaned
+      .replace(/([{,]\s*)([A-Za-z_][\w-]*)\s*:/g, '$1"$2":')
+      .replace(/'/g, '"')
+      .replace(/,\s*([}\]])/g, "$1");
+
+    return JSON.parse(normalized);
+  }
+}
+
+function normalizePath(value){
+  return String(value || "")
+    .replace(/\\/g, "/")
+    .trim()
+    .toLowerCase();
+}
+
+function normalizeLookupText(value){
+  return String(value || "")
+    .toLowerCase()
+    .replaceAll("&", " and ")
+    .replaceAll("+", " plus ")
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replaceAll("/", " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function humanizeCatalogName(value){
+  return String(value || "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function inferCategoryFromFolder(folder){
+  return CATEGORY_LABELS[String(folder || "").toLowerCase()] || folder || "";
+}
+
+function setImageAssistantStatus(message){
+  document.getElementById("imageAssistantStatus").textContent = message;
+}
+
+function showToast(message, type = "success"){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+  toast.style.background = type === "error" ? "#dc2626" : "#111827";
+
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => {
+    toast.style.display = "none";
+  }, 2600);
+}
+
+function findCatalogItemByPath(path){
+  const normalizedPath = normalizePath(path);
+  return localImageCatalog.find((item) => normalizePath(item.path) === normalizedPath) || null;
+}
+
+function buildDraftProductFromImage(item){
+  return {
+    name: humanizeCatalogName(item.name),
+    price: 0,
+    category: inferCategoryFromFolder(item.folder),
+    image: item.path,
+    use: "",
+    badge: "New",
+    inStock: true
+  };
+}
+
+function renderUnusedImageGrid(){
+  const grid = document.getElementById("unusedImageGrid");
+
+  if(!unusedLocalImages.length){
+    grid.innerHTML = `
+      <div class="assistant-empty">
+        No unused local product images were found.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = unusedLocalImages.map((item) => {
+    const displayName = humanizeCatalogName(item.name);
+    const displayCategory = inferCategoryFromFolder(item.folder);
+    const safePath = escapeHtml(item.path);
+    const serializedPath = JSON.stringify(item.path);
+
+    return `
+      <article class="assistant-card">
+        <img src="${safePath}" alt="${escapeHtml(displayName)}" onerror="this.src='images/no-image.png';this.onerror=null;">
+        <div class="assistant-card-body">
+          <h3>${escapeHtml(displayName)}</h3>
+          <p class="assistant-path">${escapeHtml(displayCategory)} - ${safePath}</p>
+          <div class="assistant-card-actions">
+            <button class="add-btn assistant-small-btn" type="button" onclick='prefillFromImage(${serializedPath})'>Use In Form</button>
+            <button class="assistant-secondary assistant-small-btn" type="button" onclick='copyImagePath(${serializedPath})'>Copy Path</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function syncLocalImageAssistant(){
+  if(!localImageCatalogLoaded){
+    return;
+  }
+
+  const usedPaths = new Set(
+    allProducts
+      .map((product) => normalizePath(product.image || product.img))
+      .filter(Boolean)
+  );
+
+  unusedLocalImages = localImageCatalog.filter((item) => !usedPaths.has(normalizePath(item.path)));
+
+  document.getElementById("catalogImageCount").textContent = String(localImageCatalog.length);
+  document.getElementById("unusedImageCount").textContent = String(unusedLocalImages.length);
+
+  if(unusedLocalImages.length){
+    setImageAssistantStatus(`Found ${unusedLocalImages.length} local image files that are not linked yet. Run scripts/build-local-product-image-catalog.ps1 after adding new image files.`);
+  }else{
+    setImageAssistantStatus("All cataloged local product images are already linked to products.");
+  }
+
+  renderUnusedImageGrid();
+}
+
+function findBestLocalImageMatch(product){
+  const targetName = normalizeLookupText(product.name);
+  const targetCategory = normalizeLookupText(product.category);
+
+  if(!targetName){
+    return null;
+  }
+
+  const exactInCategory = localImageCatalog.find((item) =>
+    normalizeLookupText(item.folder) === targetCategory &&
+    normalizeLookupText(item.name) === targetName
+  );
+
+  if(exactInCategory){
+    return exactInCategory;
+  }
+
+  const exactAnywhere = localImageCatalog.find((item) =>
+    normalizeLookupText(item.name) === targetName
+  );
+
+  if(exactAnywhere){
+    return exactAnywhere;
+  }
+
+  const fuzzyInCategory = localImageCatalog.filter((item) =>
+    normalizeLookupText(item.folder) === targetCategory &&
+    (
+      normalizeLookupText(item.name).includes(targetName) ||
+      targetName.includes(normalizeLookupText(item.name))
+    )
+  );
+
+  if(fuzzyInCategory.length === 1){
+    return fuzzyInCategory[0];
+  }
+
+  const fuzzyAnywhere = localImageCatalog.filter((item) =>
+    normalizeLookupText(item.name).includes(targetName) ||
+    targetName.includes(normalizeLookupText(item.name))
+  );
+
+  return fuzzyAnywhere.length === 1 ? fuzzyAnywhere[0] : null;
+}
+
+async function fetchLocalImageCatalog(){
+  try{
+    const response = await fetch(LOCAL_IMAGE_CATALOG_URL, { cache:"no-store" });
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const payload = await response.json();
+    localImageCatalog = Array.isArray(payload) ? payload : [];
+    localImageCatalogLoaded = true;
+    syncLocalImageAssistant();
+  }catch(error){
+    console.error(error);
+    setImageAssistantStatus("Could not load local image catalog. Run scripts/build-local-product-image-catalog.ps1 and refresh this page.");
+    document.getElementById("unusedImageGrid").innerHTML = `
+      <div class="assistant-empty">
+        Local image catalog is unavailable right now.
+      </div>
+    `;
+  }
+}
 
 function filterProducts(){
 
@@ -371,22 +780,28 @@ function startProductsListener(){
       return (a.order || 9999) - (b.order || 9999);
     });
 
-    renderProducts(allProducts);
     populateCategories();
+    filterProducts();
+    syncLocalImageAssistant();
 
   });
 }
 
 function populateCategories(){
   const select = document.getElementById("categoryFilter");
+  const currentValue = select.value;
 
   const categories = [...new Set(allProducts.map(p=>p.category).filter(Boolean))];
 
   select.innerHTML = `<option value="all">كل التصنيفات</option>`;
 
   categories.forEach(cat=>{
-    select.innerHTML += `<option value="${cat}">${cat}</option>`;
+    select.innerHTML += `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`;
   });
+
+  if([...select.options].some((option)=> option.value === currentValue)){
+    select.value = currentValue;
+  }
 }
 
 
@@ -418,6 +833,15 @@ function renderProducts(list){
   container.innerHTML = "";
 
   list.forEach(p=>{
+    const orderValue = Number.isFinite(Number(p.order)) ? Number(p.order) : 9999;
+    const imageUrl = escapeHtml(p.image || LOCAL_FALLBACK_IMAGE);
+    const name = escapeHtml(p.name || "");
+    const badge = escapeHtml(p.badge || "");
+    const category = escapeHtml(p.category || "-");
+    const priceLabel = Number.isFinite(Number(p.price)) ? `${Number(p.price)} EGP` : "—";
+    const stockClass = p.inStock ? "stock-yes" : "stock-no";
+    const stockLabel = p.inStock ? "In Stock" : "Out";
+    const productId = JSON.stringify(p.id);
 
     container.innerHTML += `
   <div class="table-row">
@@ -425,32 +849,32 @@ function renderProducts(list){
 <div>
   <input 
     type="number" 
-    value="${p.order ?? 9999}" 
+    value="${orderValue}" 
     style="width:70px;padding:5px;border-radius:6px;border:1px solid #ccc;"
-    onchange="updateOrder('${p.id}', this.value)"
+    onchange='updateOrder(${productId}, this.value)'
   >
 </div>
     <div>
-      <img src="${p.image || 'https://via.placeholder.com/60'}"
+      <img src="${imageUrl}" alt="${name}" onerror="this.src='images/no-image.png';this.onerror=null;"
       style="width:60px;height:60px;object-fit:cover;border-radius:10px;">
     </div>
 
         <div>
-          ${p.name}
-          ${p.badge ? `<span class="badge">${p.badge}</span>` : ``}
+          ${name}
+          ${badge ? `<span class="badge">${badge}</span>` : ``}
         </div>
 
-        <div>${p.price ? p.price + ' EGP' : '—'}</div>
-        <div>${p.category || '-'}</div>
+        <div>${escapeHtml(priceLabel)}</div>
+        <div>${category}</div>
 
-        <div class="${p.inStock ? 'stock-yes':'stock-no'}">
-          ${p.inStock ? 'In Stock':'Out'}
+        <div class="${stockClass}">
+          ${stockLabel}
         </div>
 
         <div>
-          <button class="action-btn toggle" onclick="toggleStock('${p.id}',${p.inStock})">Toggle</button>
-          <button class="action-btn edit" onclick="editProduct('${p.id}')">Edit</button>
-          <button class="action-btn delete" onclick="deleteProduct('${p.id}')">🗑</button>
+          <button class="action-btn toggle" onclick='toggleStock(${productId}, ${Boolean(p.inStock)})'>Toggle</button>
+          <button class="action-btn edit" onclick='editProduct(${productId})'>Edit</button>
+          <button class="action-btn delete" onclick='deleteProduct(${productId})'>🗑</button>
         </div>
       </div>
     `;
@@ -503,6 +927,100 @@ window.closeModal = function(){
   editId = null;
   document.getElementById("productModal").style.display="none";
 }
+
+window.prefillFromImage = function(path){
+  const item = findCatalogItemByPath(path);
+
+  if(!item){
+    showToast("Image path was not found in the local catalog","error");
+    return;
+  }
+
+  openModal();
+  document.getElementById("modalTitle").innerText = "Add Product From Local Image";
+  document.getElementById("pName").value = humanizeCatalogName(item.name);
+  document.getElementById("pCategory").value = inferCategoryFromFolder(item.folder);
+  document.getElementById("pImage").value = item.path;
+  document.getElementById("pBadge").value = "New";
+  document.getElementById("pStock").checked = true;
+};
+
+window.copyImagePath = async function(path){
+  try{
+    await navigator.clipboard.writeText(path);
+    showToast("Image path copied","success");
+  }catch(error){
+    console.error(error);
+    showToast("Could not copy the path automatically","error");
+  }
+};
+
+window.generateUnusedImageDrafts = function(){
+  if(!unusedLocalImages.length){
+    showToast("No unused local image drafts to generate","error");
+    return;
+  }
+
+  openModal();
+  document.getElementById("modalTitle").innerText = "Bulk Drafts From Local Images";
+  document.getElementById("bulkInput").value = `[
+${unusedLocalImages.map((item) => {
+  const draft = buildDraftProductFromImage(item);
+
+  return `  {
+    name: ${JSON.stringify(draft.name)},
+    price: PRICE_HERE,
+    category: ${JSON.stringify(draft.category)},
+    image: ${JSON.stringify(draft.image)},
+    use: "",
+    badge: "New",
+    inStock: true
+  }`;
+}).join(",\n")}
+]`;
+  showToast("Draft template generated. Replace PRICE_HERE before upload.","success");
+};
+
+window.fixBrokenProductImages = async function(){
+  if(!localImageCatalogLoaded){
+    showToast("Load the local image catalog first","error");
+    return;
+  }
+
+  const validPaths = new Set(localImageCatalog.map((item) => normalizePath(item.path)));
+  const invalidProducts = allProducts.filter((product) => {
+    const currentImage = normalizePath(product.image || product.img);
+    return !currentImage || !validPaths.has(currentImage);
+  });
+
+  if(!invalidProducts.length){
+    showToast("All current products already point to valid local images","success");
+    return;
+  }
+
+  let updatedCount = 0;
+  let unmatchedCount = 0;
+
+  for(const product of invalidProducts){
+    const match = findBestLocalImageMatch(product);
+
+    if(!match){
+      unmatchedCount += 1;
+      continue;
+    }
+
+    await updateDoc(doc(db,"products",product.id), {
+      image: match.path
+    });
+    updatedCount += 1;
+  }
+
+  if(updatedCount){
+    showToast(`Fixed ${updatedCount} product image links`, "success");
+  }else{
+    showToast(`No automatic match found for ${unmatchedCount} products`, "error");
+  }
+};
 
 window.saveProduct = async function(){
 
@@ -570,7 +1088,7 @@ window.bulkUpload = async function(){
   let products;
 
   try{
-    products = eval(raw); // نحول النص لكود
+    products = parseBulkCollectionInput(raw);
   }catch(err){
     alert("في مشكلة في الصيغة ❌");
     return;
@@ -589,12 +1107,13 @@ window.bulkUpload = async function(){
   name: p.name,
   price: Number(p.price),
   category: p.cat || p.category || "",
-  image: p.img || "",
+  image: p.image || p.img || "",
   use: p.use || "",
-  description: p.use || "",
+  description: p.description || p.use || "",
   badge: p.badge || "",
-  inStock: true,
-  order: 9999, // 👈 مهم
+  inStock: p.inStock ?? true,
+  stockQty: Number.isFinite(Number(p.stockQty)) ? Math.max(0, Number(p.stockQty)) : null,
+  order: Number.isFinite(Number(p.order)) ? Number(p.order) : 9999, // 👈 مهم
   createdAt: serverTimestamp()
 });
 
@@ -618,6 +1137,8 @@ function resetForm(){
   document.getElementById("pBadge").value = "";
   document.getElementById("pStock").checked = true;
 }
+
+fetchLocalImageCatalog();
 </script>
 
 </body>

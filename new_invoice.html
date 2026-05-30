@@ -207,11 +207,12 @@ th,td{
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="data/makers-electronics-products.js"></script>
 
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyA2fF2ZAa-Xb_zQcVSUdAERS-gLaFFROT",
+  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
   authDomain: "kimo-tech-store-962df.firebaseapp.com",
   projectId: "kimo-tech-store-962df",
 };
@@ -294,9 +295,6 @@ r.innerHTML=`
 document.addEventListener("input",calc);
 
 function calc(){
-
-  console.log("Calc running");
-
 let q=document.querySelectorAll(".q");
 let p=document.querySelectorAll(".p");
 let t=document.querySelectorAll(".t");
@@ -314,7 +312,7 @@ document.getElementById("grand").innerText=g;
 
 function searchProduct(input){
 
-let text = input.value.toLowerCase();
+let text = normalizeProductText(input.value);
 let results = input.parentElement.querySelector(".results");
 
 results.innerHTML="";
@@ -322,9 +320,10 @@ selectedIndex = -1;
 
 if(text.length < 1) return;
 
-allProducts.forEach((d)=>{
-
-if(d.name && d.name.toLowerCase().includes(text)){
+allProducts
+.filter((d)=> d.name && normalizeProductText(d.name).includes(text))
+.slice(0, 12)
+.forEach((d)=>{
 
 let div=document.createElement("div");
 div.innerText=d.name+" - "+d.price+" EGP";
@@ -334,7 +333,6 @@ selectProduct(input, d);
 };
 
 results.appendChild(div);
-}
 });
 }
 function highlight(items){
@@ -346,9 +344,61 @@ items[selectedIndex].style.background="#dfefff";
 }
 }
 
+function normalizeProductText(value){
+return String(value || "").toLowerCase().trim();
+}
+
+function getCatalogPayloadProducts(payload){
+if(Array.isArray(payload)) return payload;
+if(Array.isArray(payload?.products)) return payload.products;
+return [];
+}
+
+function getEmbeddedImportedProducts(){
+return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
+}
+
+function mergeProducts(...groups){
+let merged = [];
+let seen = new Set();
+
+groups.flat().forEach((product)=>{
+if(!product) return;
+
+let key = [
+String(product.sourceSite || ""),
+String(product.sourceProductId || ""),
+normalizeProductText(product.name),
+Number(product.price) || 0
+].join("__");
+
+if(seen.has(key)) return;
+
+seen.add(key);
+merged.push(product);
+});
+
+return merged;
+}
+
+async function fetchImportedProducts(){
+let embeddedProducts = getEmbeddedImportedProducts();
+if(embeddedProducts.length) return embeddedProducts;
+
+try{
+let response = await fetch(IMPORTED_CATALOG_URL, { cache:"no-store" });
+if(!response.ok) throw new Error(`HTTP ${response.status}`);
+return getCatalogPayloadProducts(await response.json());
+}catch(error){
+console.error("Imported catalog could not be loaded:", error);
+return [];
+}
+}
+
 
 let invoiceId = localStorage.getItem("invoiceId");
-if(invoiceId){
+const invoiceHeading = document.querySelector("h2");
+if(invoiceId && invoiceHeading){
 document.querySelector("h2").innerText = "✏️ تعديل فاتورة";
 }
 function selectProduct(input, product){
@@ -366,35 +416,424 @@ results.innerHTML="";
 
 
 let invoice = "INV-"+Date.now();
+let currentInvoiceNumber = invoice;
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 
-// استبدل دالة saveInvoice بالكامل بهذا الكود
-function saveInvoice(){
+function getInvoiceRowsData(){
   let rows = document.querySelectorAll("#table tr");
   let items = [];
+
   rows.forEach((row, index)=>{
-    if(index === 0) return; 
-    let name = row.querySelector(".product")?.value;
-    let price = row.querySelector(".p")?.value;
-    let qty = row.querySelector(".q")?.value;
-    if(name){ items.push({ name, price, qty }); }
+    if(index === 0) return;
+
+    let name = row.querySelector(".product")?.value.trim();
+    let price = Number(row.querySelector(".p")?.value) || 0;
+    let qty = Number(row.querySelector(".q")?.value) || 1;
+
+    if(name){
+      items.push({ name, price, qty });
+    }
   });
 
-  let data = {
-    customer: document.getElementById("customer").value,
-    phone: document.getElementById("phone").value,
-    total: document.getElementById("grand").innerText,
-    date: new Date().toLocaleDateString(),
-    items: items
+  return items;
+}
+
+function getGroupedInvoiceItems(items){
+  return Array.from(items.reduce((map, item)=>{
+    const key = `${item.name}__${item.price}`;
+
+    if(!map.has(key)){
+      map.set(key, {
+        name:item.name,
+        price:item.price,
+        qty:0
+      });
+    }
+
+    map.get(key).qty += item.qty;
+    return map;
+  }, new Map()).values());
+}
+
+function collectInvoiceState(){
+  const items = getInvoiceRowsData();
+  const groupedItems = getGroupedInvoiceItems(items);
+  const total = groupedItems.reduce((sum,item)=> sum + (item.price * item.qty), 0);
+  const now = new Date();
+
+  return {
+    id: invoiceId,
+    number: currentInvoiceNumber,
+    customer: document.getElementById("customer").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    total,
+    date: now.toLocaleDateString("ar-EG"),
+    printDateTime: now.toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" }),
+    items,
+    groupedItems,
+    totalPieces: groupedItems.reduce((sum,item)=> sum + item.qty, 0)
+  };
+}
+
+function buildPrintableInvoiceMarkup(state){
+  const logoUrl = new URL("logo.png", window.location.href).href;
+  const itemsMarkup = state.groupedItems.map(item=>{
+    const lineTotal = item.price * item.qty;
+
+    return `
+      <div class="invoice-item">
+        <div class="invoice-item-main">
+          <strong>${item.name}</strong>
+          <span class="invoice-qty">x${item.qty}</span>
+        </div>
+        <span class="invoice-price">${lineTotal} EGP</span>
+      </div>
+    `;
+  }).join("") || `<div class="invoice-empty">لا توجد منتجات في هذه الفاتورة.</div>`;
+
+  return `
+    <div class="print-page">
+      <div class="invoice-sheet">
+        <div class="invoice-head">
+          <div>
+            <span class="invoice-eyebrow">KIMO TECH</span>
+            <h1>فاتورة بيع</h1>
+            <p>رقم الفاتورة: ${state.number}</p>
+          </div>
+          <div class="invoice-brand">
+            <img src="${logoUrl}" alt="KIMO TECH" onerror="this.style.display='none'">
+            <div>
+              <strong>KIMO TECH</strong>
+              <span>Electronics & Robotics</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="invoice-chip-row">
+          <span class="invoice-chip date">${state.printDateTime}</span>
+          <span class="invoice-chip status">جاهزة للطباعة</span>
+        </div>
+
+        <div class="invoice-meta">
+          <div class="invoice-meta-card">
+            <span>اسم العميل</span>
+            <strong>${state.customer || "بدون اسم"}</strong>
+          </div>
+          <div class="invoice-meta-card">
+            <span>رقم الهاتف</span>
+            <strong>${state.phone || "-"}</strong>
+          </div>
+          <div class="invoice-meta-card">
+            <span>عدد الأنواع</span>
+            <strong>${state.groupedItems.length} نوع</strong>
+          </div>
+          <div class="invoice-meta-card">
+            <span>إجمالي القطع</span>
+            <strong>${state.totalPieces} قطعة</strong>
+          </div>
+        </div>
+
+        <div class="invoice-section">
+          <h2>المنتجات</h2>
+          <div class="invoice-items">${itemsMarkup}</div>
+        </div>
+
+        <div class="invoice-total">
+          <span>الإجمالي النهائي</span>
+          <strong>${state.total} EGP</strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildPrintableInvoiceDocument(state){
+  return `
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>فاتورة ${state.number}</title>
+      <style>
+        @page{
+          size:A4;
+          margin:12mm;
+        }
+
+        *{
+          box-sizing:border-box;
+        }
+
+        body{
+          margin:0;
+          font-family:"Cairo",Arial,sans-serif;
+          background:#eef4fb;
+          color:#0f172a;
+          -webkit-print-color-adjust:exact;
+          print-color-adjust:exact;
+        }
+
+        .print-page{
+          max-width:820px;
+          margin:0 auto;
+          padding:22px;
+        }
+
+        .invoice-sheet{
+          background:#ffffff;
+          border:1px solid #dbe4f0;
+          border-radius:30px;
+          padding:28px;
+          box-shadow:0 18px 48px rgba(15,23,42,.12);
+        }
+
+        .invoice-head{
+          display:flex;
+          align-items:flex-start;
+          justify-content:space-between;
+          gap:16px;
+          margin-bottom:18px;
+        }
+
+        .invoice-eyebrow{
+          display:inline-block;
+          color:#0ea5e9;
+          font-size:12px;
+          font-weight:800;
+          letter-spacing:.08em;
+        }
+
+        .invoice-head h1{
+          margin:8px 0 6px;
+          font-size:30px;
+          line-height:1.2;
+        }
+
+        .invoice-head p{
+          margin:0;
+          color:#64748b;
+          font-size:14px;
+        }
+
+        .invoice-brand{
+          display:flex;
+          flex-direction:column;
+          align-items:flex-end;
+          gap:10px;
+          text-align:left;
+        }
+
+        .invoice-brand img{
+          width:84px;
+          height:auto;
+          object-fit:contain;
+        }
+
+        .invoice-brand strong{
+          display:block;
+          font-size:22px;
+          line-height:1;
+        }
+
+        .invoice-brand span{
+          color:#64748b;
+          font-size:12px;
+        }
+
+        .invoice-chip-row{
+          display:flex;
+          flex-wrap:wrap;
+          gap:10px;
+          margin-bottom:18px;
+        }
+
+        .invoice-chip{
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          padding:8px 14px;
+          border-radius:999px;
+          font-size:13px;
+          font-weight:700;
+        }
+
+        .invoice-chip.status{
+          background:#dcfce7;
+          color:#166534;
+        }
+
+        .invoice-chip.date{
+          background:#e0f2fe;
+          color:#075985;
+        }
+
+        .invoice-meta{
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:14px;
+          margin-bottom:24px;
+        }
+
+        .invoice-meta-card{
+          background:#f8fbff;
+          border:1px solid #dbe4f0;
+          border-radius:18px;
+          padding:14px 16px;
+        }
+
+        .invoice-meta-card span{
+          display:block;
+          margin-bottom:6px;
+          color:#94a3b8;
+          font-size:12px;
+        }
+
+        .invoice-meta-card strong{
+          display:block;
+          font-size:15px;
+          line-height:1.65;
+          word-break:break-word;
+        }
+
+        .invoice-section{
+          margin-bottom:24px;
+        }
+
+        .invoice-section h2{
+          margin:0 0 14px;
+          font-size:24px;
+        }
+
+        .invoice-items{
+          display:flex;
+          flex-direction:column;
+          gap:10px;
+        }
+
+        .invoice-item{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:16px;
+          background:#fff;
+          border:1px solid #dbe4f0;
+          border-radius:18px;
+          padding:14px 16px;
+        }
+
+        .invoice-item-main{
+          display:flex;
+          align-items:center;
+          gap:10px;
+          min-width:0;
+        }
+
+        .invoice-item-main strong{
+          font-size:15px;
+          line-height:1.5;
+        }
+
+        .invoice-qty{
+          background:#dff0ff;
+          color:#0284c7;
+          border-radius:999px;
+          padding:5px 10px;
+          font-size:12px;
+          font-weight:700;
+          white-space:nowrap;
+        }
+
+        .invoice-price{
+          color:#16a34a;
+          font-size:22px;
+          font-weight:900;
+          white-space:nowrap;
+        }
+
+        .invoice-empty{
+          background:#fff;
+          border:1px dashed #cbd5e1;
+          border-radius:18px;
+          padding:18px;
+          text-align:center;
+          color:#64748b;
+        }
+
+        .invoice-total{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+          background:#0f172a;
+          color:#fff;
+          border-radius:22px;
+          padding:18px 20px;
+        }
+
+        .invoice-total span{
+          color:#cbd5e1;
+          font-size:14px;
+        }
+
+        .invoice-total strong{
+          font-size:32px;
+        }
+
+        @media print{
+          body{
+            background:#fff;
+          }
+
+          .print-page{
+            max-width:none;
+            padding:0;
+          }
+
+          .invoice-sheet{
+            border:none;
+            border-radius:0;
+            box-shadow:none;
+            padding:0;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${buildPrintableInvoiceMarkup(state)}
+    </body>
+    </html>
+  `;
+}
+
+// استبدل دالة saveInvoice بالكامل بهذا الكود
+async function saveInvoice(showSuccess = true){
+  const state = collectInvoiceState();
+  const data = {
+    customer: state.customer,
+    phone: state.phone,
+    total: state.total,
+    date: state.date,
+    number: state.number,
+    items: state.items
   };
 
-  if(invoiceId){
-    // تحديث آمن: التأكد من وجود الوثيقة أولاً
-    db.collection("invoices").doc(invoiceId).set(data, { merge: true })
-      .then(() => alert("تم التحديث بنجاح ✅"))
-      .catch(e => console.error("خطأ في التحديث:", e));
-  } else {
-    data.number = "INV-" + Date.now(); 
-    db.collection("invoices").add(data).then(() => alert("تم الحفظ بنجاح ✅"));
+  try{
+    if(invoiceId){
+      await db.collection("invoices").doc(invoiceId).set(data, { merge: true });
+      if(showSuccess) alert("تم التحديث بنجاح ✅");
+      return { ...state, id: invoiceId };
+    }
+
+    const docRef = await db.collection("invoices").add(data);
+    invoiceId = docRef.id;
+    localStorage.setItem("invoiceId", invoiceId);
+    if(showSuccess) alert("تم الحفظ بنجاح ✅");
+    return { ...state, id: invoiceId };
+  }catch(e){
+    console.error("خطأ في حفظ الفاتورة:", e);
+    alert("حصل خطأ في حفظ الفاتورة ❌");
+    throw e;
   }
 }
 
@@ -403,24 +842,50 @@ function saveInvoice(){
 
 
 
-function printA4(){
-  saveInvoice();
-  setTimeout(() => { 
-    window.print(); 
-    localStorage.removeItem("invoiceId"); // امسح الـ ID بعد الطباعة
-    location.reload(); // ريفرش للصفحة عشان تبدأ من جديد
-  }, 1000);
+async function printA4(){
+  const printWindow = window.open("", "", "width=900,height=700");
+
+  if(!printWindow){
+    alert("اسمح بفتح نافذة الطباعة أولاً");
+    return;
+  }
+
+  try{
+    const state = await saveInvoice(false);
+
+    printWindow.document.write(buildPrintableInvoiceDocument(state));
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onafterprint = () => {
+      printWindow.close();
+      localStorage.removeItem("invoiceId");
+      location.reload();
+    };
+
+    setTimeout(() => {
+      printWindow.print();
+    }, 300);
+  }catch(e){
+    printWindow.close();
+  }
 }
 
 
-function sendWhatsApp(){
-  saveInvoice();
+async function sendWhatsApp(){
+  const whatsappWindow = window.open("about:blank", "_blank");
+
+  if(!whatsappWindow){
+    alert("اسمح بفتح واتساب أولاً");
+    return;
+  }
+
+  const state = await saveInvoice(false);
   
-  let msg = `فاتورتك من Kimo Tech\nTotal: ${document.getElementById("grand").innerText} EGP`;
+  let msg = `فاتورتك من Kimo Tech\nرقم الفاتورة: ${state.number}\nTotal: ${state.total} EGP`;
   let phone = document.getElementById("phone").value.replace(/^0/,"20");
   
   // فتح رابط الواتساب
-  window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(msg));
+  whatsappWindow.location.href = "https://wa.me/"+phone+"?text="+encodeURIComponent(msg);
 
   // التصفير التلقائي بعد ثانية
   setTimeout(() => { 
@@ -429,8 +894,8 @@ function sendWhatsApp(){
   }, 1000);
 }
 
-function sendPDF(){
-  saveInvoice();
+async function sendPDF(){
+  await saveInvoice(false);
   
   let element = document.querySelector(".box");
   
@@ -450,13 +915,18 @@ let allProducts = [];
 
 async function loadProducts(){
   try{
-    let snapshot = await db.collection("products").get();
+    let [snapshot, importedProducts] = await Promise.all([
+      db.collection("products").get(),
+      fetchImportedProducts()
+    ]);
+
+    let localProducts = [];
 
     snapshot.forEach(doc=>{
-      allProducts.push(doc.data());
+      localProducts.push(doc.data());
     });
 
-    console.log("Products Loaded:", allProducts);
+    allProducts = mergeProducts(localProducts, importedProducts);
 
   }catch(e){
     console.error("Error loading products:", e);
@@ -470,6 +940,7 @@ async function loadInvoice(){
   let docRef = await db.collection("invoices").doc(invoiceId).get();
   if(docRef.exists){
     let data = docRef.data();
+    currentInvoiceNumber = data.number || currentInvoiceNumber;
     document.getElementById("customer").value = data.customer || "";
     document.getElementById("phone").value = data.phone || "";
 

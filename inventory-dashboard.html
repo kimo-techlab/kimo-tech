@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="shortcut icon" href="favicon.png">
+<title>إدارة المخزون | KIMO TECH</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-start:#0b1020;
+  --bg-end:#172554;
+  --panel:#ffffff;
+  --panel-soft:#f8fbff;
+  --line:#dbe4f0;
+  --text:#0f172a;
+  --muted:#64748b;
+  --primary:#0ea5e9;
+  --success:#22c55e;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --shadow:0 18px 48px rgba(15,23,42,.14);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(34,197,94,.18), transparent 24%),
+    radial-gradient(circle at left center, rgba(14,165,233,.16), transparent 22%),
+    linear-gradient(135deg,var(--bg-start),var(--bg-end));
+  color:#fff;
+  min-height:100vh;
+}
+
+.container{
+  max-width:1240px;
+  margin:0 auto;
+  padding:32px 18px 48px;
+}
+
+.page-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:26px;
+}
+
+.page-head h1{
+  margin:0 0 10px;
+  font-size:34px;
+  line-height:1.2;
+}
+
+.page-head p{
+  margin:0;
+  color:rgba(255,255,255,.75);
+}
+
+.head-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.link-btn,
+.primary-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:46px;
+  padding:0 16px;
+  border:none;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.link-btn{
+  background:rgba(255,255,255,.14);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.14);
+}
+
+.primary-btn{
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  color:#fff;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.stat-card{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 12px 32px rgba(0,0,0,.12);
+  backdrop-filter:blur(10px);
+}
+
+.stat-card span{
+  display:block;
+  margin-bottom:10px;
+  color:rgba(255,255,255,.72);
+  font-size:13px;
+}
+
+.stat-card strong{
+  font-size:32px;
+  line-height:1;
+}
+
+.controls-panel{
+  background:var(--panel);
+  color:var(--text);
+  border-radius:28px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.filters{
+  display:grid;
+  grid-template-columns:minmax(260px,1.6fr) repeat(3,minmax(150px,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.search-input,
+.filter-select{
+  width:100%;
+  min-height:48px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  outline:none;
+  background:#fff;
+  color:var(--text);
+  font-family:inherit;
+  font-size:14px;
+}
+
+.table-shell{
+  background:var(--panel-soft);
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:hidden;
+}
+
+.table-head,
+.stock-row{
+  display:grid;
+  grid-template-columns:minmax(270px,1.8fr) 140px 120px 180px 120px 140px 140px;
+  gap:12px;
+  align-items:center;
+}
+
+.table-head{
+  padding:14px 16px;
+  background:#eaf4ff;
+  color:#0f172a;
+  font-size:13px;
+  font-weight:800;
+}
+
+.stock-row{
+  padding:14px 16px;
+  background:#fff;
+  color:var(--text);
+  border-top:1px solid var(--line);
+}
+
+.product-cell{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.product-thumb{
+  width:62px;
+  height:62px;
+  object-fit:cover;
+  border-radius:16px;
+  background:#eff6ff;
+  border:1px solid var(--line);
+  flex-shrink:0;
+}
+
+.product-copy{
+  min-width:0;
+}
+
+.product-copy strong{
+  display:block;
+  font-size:15px;
+  line-height:1.45;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.product-copy span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.price-pill{
+  color:var(--success);
+  font-weight:900;
+}
+
+.stock-editor{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.step-btn{
+  width:34px;
+  height:34px;
+  border:none;
+  border-radius:50%;
+  background:#e2e8f0;
+  color:#0f172a;
+  font-size:18px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.qty-input{
+  width:88px;
+  min-height:40px;
+  padding:0 10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  text-align:center;
+  font-size:15px;
+  font-weight:800;
+  font-family:inherit;
+}
+
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.status-pill.available{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.status-pill.low{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.status-pill.out{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.status-pill.unknown{
+  background:#e0f2fe;
+  color:#075985;
+}
+
+.row-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.save-btn,
+.out-btn{
+  min-height:38px;
+  padding:0 12px;
+  border:none;
+  border-radius:12px;
+  font-family:inherit;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.save-btn{
+  background:#0f172a;
+  color:#fff;
+}
+
+.out-btn{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.empty-state{
+  padding:28px 16px;
+  text-align:center;
+  color:var(--muted);
+  background:#fff;
+}
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  min-width:220px;
+  padding:12px 16px;
+  border-radius:14px;
+  color:#fff;
+  background:#0f172a;
+  box-shadow:0 12px 30px rgba(15,23,42,.28);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:9999;
+}
+
+.toast.show{
+  opacity:1;
+}
+
+.toast.success{background:#16a34a;}
+.toast.error{background:#dc2626;}
+
+@media(max-width:1180px){
+  .stats-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .table-head{
+    display:none;
+  }
+
+  .stock-row{
+    grid-template-columns:1fr;
+    gap:10px;
+    border-top:1px solid var(--line);
+  }
+}
+
+@media(max-width:860px){
+  .page-head{
+    flex-direction:column;
+  }
+
+  .filters{
+    grid-template-columns:1fr;
+  }
+
+  .stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:520px){
+  .container{
+    padding:22px 12px 36px;
+  }
+
+  .stats-grid{
+    grid-template-columns:1fr;
+  }
+
+  .product-cell{
+    align-items:flex-start;
+  }
+
+  .stock-editor{
+    width:100%;
+  }
+
+  .qty-input{
+    flex:1;
+    width:auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>لوحة المخزون</h1>
+      <p>تابع الكميات الموجودة وحدد بسرعة إيه اللي متاح، قليل، أو خلص.</p>
+    </div>
+
+    <div class="head-actions">
+      <a class="link-btn" href="admin.html">رجوع للإدارة</a>
+      <a class="link-btn" href="products-admin.html">إدارة المنتجات</a>
+      <button class="primary-btn" type="button" onclick="applyFilter()">تحديث العرض</button>
+    </div>
+  </div>
+
+  <section class="stats-grid">
+    <div class="stat-card">
+      <span>كل المنتجات</span>
+      <strong id="totalProducts">0</strong>
+    </div>
+    <div class="stat-card">
+      <span>متاح</span>
+      <strong id="availableProducts">0</strong>
+    </div>
+    <div class="stat-card">
+      <span>قليل</span>
+      <strong id="lowProducts">0</strong>
+    </div>
+    <div class="stat-card">
+      <span>خلصان</span>
+      <strong id="outProducts">0</strong>
+    </div>
+    <div class="stat-card">
+      <span>محتاج تحديد كمية</span>
+      <strong id="unknownProducts">0</strong>
+    </div>
+  </section>
+
+  <section class="controls-panel">
+    <div class="filters">
+      <input id="searchInput" class="search-input" type="text" placeholder="ابحث بالاسم أو التصنيف">
+      <select id="statusFilter" class="filter-select">
+        <option value="all">كل الحالات</option>
+        <option value="available">متاح</option>
+        <option value="low">قليل</option>
+        <option value="out">خلصان</option>
+        <option value="unknown">بدون كمية</option>
+      </select>
+      <select id="categoryFilter" class="filter-select">
+        <option value="all">كل التصنيفات</option>
+      </select>
+      <select id="sortFilter" class="filter-select">
+        <option value="name">ترتيب: الاسم</option>
+        <option value="qty-desc">ترتيب: الأعلى كمية</option>
+        <option value="qty-asc">ترتيب: الأقل كمية</option>
+      </select>
+    </div>
+
+    <div class="table-shell">
+      <div class="table-head">
+        <div>المنتج</div>
+        <div>التصنيف</div>
+        <div>السعر</div>
+        <div>الكمية</div>
+        <div>الحالة</div>
+        <div>آخر تحديث</div>
+        <div>إجراء</div>
+      </div>
+
+      <div id="inventoryRows"></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  serverTimestamp,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
+  authDomain: "kimo-tech-store-962df.firebaseapp.com",
+  projectId: "kimo-tech-store-962df",
+  storageBucket: "kimo-tech-store-962df.firebasestorage.app",
+  messagingSenderId: "845478890277",
+  appId: "1:845478890277:web:3cdd3328bde1b5b9dda8cc"
+};
+
+const LOW_STOCK_LIMIT = 5;
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const categoryFilter = document.getElementById("categoryFilter");
+const sortFilter = document.getElementById("sortFilter");
+const rowsContainer = document.getElementById("inventoryRows");
+
+let allProducts = [];
+
+searchInput.addEventListener("input", applyFilter);
+statusFilter.addEventListener("change", applyFilter);
+categoryFilter.addEventListener("change", applyFilter);
+sortFilter.addEventListener("change", applyFilter);
+
+onAuthStateChanged(auth, async (user) => {
+  if(!user){
+    window.location.href = "admin-login.html";
+    return;
+  }
+
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+
+  if(!userDoc.exists()){
+    window.location.href = "admin-login.html";
+    return;
+  }
+
+  const role = userDoc.data().role;
+
+  if(role !== "owner"){
+    alert("غير مصرح لك بالدخول");
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  startInventoryListener();
+});
+
+function getStockQuantity(product){
+  const parsed = Number(product.stockQty);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : null;
+}
+
+function getStockStatus(product){
+  const qty = getStockQuantity(product);
+
+  if(qty === null){
+    return product.inStock
+      ? { key:"unknown", label:"متاح بدون رقم" }
+      : { key:"out", label:"خلصان" };
+  }
+
+  if(qty <= 0) return { key:"out", label:"خلصان" };
+  if(qty <= LOW_STOCK_LIMIT) return { key:"low", label:"قليل" };
+  return { key:"available", label:"متاح" };
+}
+
+function formatDate(value){
+  if(!value?.toDate) return "—";
+  return value.toDate().toLocaleString("ar-EG", {
+    dateStyle:"short",
+    timeStyle:"short"
+  });
+}
+
+function formatPrice(value){
+  return `${Number(value) || 0} EGP`;
+}
+
+function escapeHtml(text){
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function showToast(message, type = "success"){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => {
+    toast.className = `toast ${type}`;
+  }, 2600);
+}
+
+function populateCategories(){
+  const current = categoryFilter.value;
+  const categories = [...new Set(allProducts.map((product) => product.category).filter(Boolean))].sort();
+
+  categoryFilter.innerHTML = `<option value="all">كل التصنيفات</option>`;
+  categories.forEach((category) => {
+    categoryFilter.innerHTML += `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`;
+  });
+
+  if([...categoryFilter.options].some((option) => option.value === current)){
+    categoryFilter.value = current;
+  }
+}
+
+function updateStats(){
+  const totals = {
+    total: allProducts.length,
+    available: 0,
+    low: 0,
+    out: 0,
+    unknown: 0
+  };
+
+  allProducts.forEach((product) => {
+    const status = getStockStatus(product).key;
+    totals[status] += 1;
+  });
+
+  document.getElementById("totalProducts").textContent = totals.total;
+  document.getElementById("availableProducts").textContent = totals.available;
+  document.getElementById("lowProducts").textContent = totals.low;
+  document.getElementById("outProducts").textContent = totals.out;
+  document.getElementById("unknownProducts").textContent = totals.unknown;
+}
+
+function getFilteredProducts(){
+  const query = searchInput.value.trim().toLowerCase();
+  const statusValue = statusFilter.value;
+  const categoryValue = categoryFilter.value;
+  const sortValue = sortFilter.value;
+
+  const filtered = allProducts.filter((product) => {
+    const status = getStockStatus(product).key;
+    const matchesQuery =
+      !query ||
+      product.name?.toLowerCase().includes(query) ||
+      product.category?.toLowerCase().includes(query);
+    const matchesStatus = statusValue === "all" || status === statusValue;
+    const matchesCategory = categoryValue === "all" || product.category === categoryValue;
+
+    return matchesQuery && matchesStatus && matchesCategory;
+  });
+
+  filtered.sort((a, b) => {
+    const qtyA = getStockQuantity(a);
+    const qtyB = getStockQuantity(b);
+
+    if(sortValue === "qty-desc"){
+      return (qtyB ?? -1) - (qtyA ?? -1);
+    }
+
+    if(sortValue === "qty-asc"){
+      return (qtyA ?? Number.MAX_SAFE_INTEGER) - (qtyB ?? Number.MAX_SAFE_INTEGER);
+    }
+
+    return (a.name || "").localeCompare(b.name || "", "ar");
+  });
+
+  return filtered;
+}
+
+function renderInventory(list){
+  if(!list.length){
+    rowsContainer.innerHTML = `<div class="empty-state">لا توجد منتجات مطابقة للفلتر الحالي.</div>`;
+    return;
+  }
+
+  rowsContainer.innerHTML = list.map((product) => {
+    const qty = getStockQuantity(product);
+    const status = getStockStatus(product);
+    const value = qty === null ? "" : qty;
+    const placeholder = product.inStock ? "حدد الكمية" : "0";
+
+    return `
+      <div class="stock-row">
+        <div class="product-cell">
+          <img class="product-thumb" src="${escapeHtml(product.image || "images/no-image.png")}" alt="${escapeHtml(product.name || "منتج")}" onerror="this.src='images/no-image.png';this.onerror=null;">
+          <div class="product-copy">
+            <strong>${escapeHtml(product.name || "منتج بدون اسم")}</strong>
+            <span>${escapeHtml(product.badge || product.description || "بدون ملاحظات")}</span>
+          </div>
+        </div>
+
+        <div>${escapeHtml(product.category || "-")}</div>
+        <div class="price-pill">${formatPrice(product.price)}</div>
+
+        <div class="stock-editor">
+          <button class="step-btn" type="button" onclick="adjustQty('${product.id}', -1)">-</button>
+          <input id="qty-${product.id}" class="qty-input" type="number" min="0" value="${value}" placeholder="${placeholder}">
+          <button class="step-btn" type="button" onclick="adjustQty('${product.id}', 1)">+</button>
+        </div>
+
+        <div><span class="status-pill ${status.key}">${status.label}</span></div>
+        <div class="muted">${formatDate(product.stockUpdatedAt || product.createdAt)}</div>
+
+        <div class="row-actions">
+          <button class="save-btn" type="button" onclick="saveStock('${product.id}')">حفظ</button>
+          <button class="out-btn" type="button" onclick="markOut('${product.id}')">خلص</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function startInventoryListener(){
+  onSnapshot(collection(db, "products"), (snapshot) => {
+    allProducts = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data()
+    }));
+
+    populateCategories();
+    updateStats();
+    applyFilter();
+  });
+}
+
+function applyFilter(){
+  renderInventory(getFilteredProducts());
+}
+
+window.applyFilter = applyFilter;
+
+window.adjustQty = function(id, delta){
+  const input = document.getElementById(`qty-${id}`);
+  const currentValue = Math.max(0, Number(input.value) || 0);
+  input.value = currentValue + delta < 0 ? 0 : currentValue + delta;
+};
+
+window.saveStock = async function(id){
+  const input = document.getElementById(`qty-${id}`);
+  const qty = Math.max(0, Number(input.value) || 0);
+
+  try{
+    await updateDoc(doc(db, "products", id), {
+      stockQty: qty,
+      inStock: qty > 0,
+      stockUpdatedAt: serverTimestamp()
+    });
+
+    showToast("تم تحديث المخزون ✅", "success");
+  }catch(error){
+    console.error(error);
+    showToast("حصل خطأ في تحديث المخزون ❌", "error");
+  }
+};
+
+window.markOut = async function(id){
+  const input = document.getElementById(`qty-${id}`);
+  input.value = 0;
+  await window.saveStock(id);
+};
+</script>
+
+</body>
+</html>

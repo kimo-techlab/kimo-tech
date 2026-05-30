@@ -139,6 +139,269 @@ select,input{
   background:#dc2626;
 }
 
+.order-popup{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.78);
+  backdrop-filter:blur(8px);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+  padding:24px 16px;
+}
+
+.popup-shell{
+  position:relative;
+  width:min(720px,100%);
+  max-height:min(88vh,900px);
+  overflow:auto;
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  color:#0f172a;
+  border:1px solid rgba(148,163,184,.28);
+  border-radius:28px;
+  box-shadow:0 28px 80px rgba(15,23,42,.35);
+  padding:28px;
+}
+
+.popup-close{
+  position:absolute;
+  top:16px;
+  left:16px;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:none;
+  background:#e2e8f0;
+  color:#0f172a;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+}
+
+#popupContent{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.popup-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding-bottom:16px;
+  border-bottom:1px solid #dbe4f0;
+}
+
+.popup-eyebrow{
+  display:block;
+  margin-bottom:6px;
+  color:#0ea5e9;
+  font-size:12px;
+  font-weight:700;
+}
+
+.popup-title{
+  margin:0;
+  font-size:28px;
+  line-height:1.25;
+}
+
+.popup-subtitle{
+  margin:6px 0 0;
+  color:#64748b;
+  font-size:14px;
+}
+
+.popup-customer{
+  background:linear-gradient(135deg,#eff6ff,#f8fafc);
+  border:1px solid #dbeafe;
+  border-radius:22px;
+  padding:18px;
+}
+
+.popup-customer-name{
+  margin:0 0 14px;
+  font-size:23px;
+  font-weight:900;
+}
+
+.popup-meta{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.popup-meta-card{
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  padding:12px 14px;
+}
+
+.popup-meta-card span{
+  display:block;
+  margin-bottom:6px;
+  color:#64748b;
+  font-size:12px;
+}
+
+.popup-meta-card strong{
+  display:block;
+  color:#0f172a;
+  font-size:14px;
+  line-height:1.6;
+  word-break:break-word;
+}
+
+.popup-section-title{
+  margin:0 0 12px;
+  font-size:18px;
+  font-weight:800;
+}
+
+.popup-items{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.popup-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  padding:14px 16px;
+}
+
+.popup-item-main{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.popup-item-name{
+  font-size:15px;
+  font-weight:800;
+  line-height:1.5;
+}
+
+.popup-item-qty{
+  background:#e0f2fe;
+  color:#0369a1;
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.popup-item-price{
+  color:#16a34a;
+  font-size:15px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.popup-total{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:#0f172a;
+  color:#fff;
+  border-radius:18px;
+  padding:16px 18px;
+}
+
+.popup-total span{
+  color:#cbd5e1;
+  font-size:14px;
+}
+
+.popup-total strong{
+  font-size:24px;
+}
+
+.popup-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.popup-actions button{
+  flex:1 1 140px;
+  min-height:46px;
+  border-radius:14px;
+  font-size:14px;
+}
+
+.status-action.pending{background:#facc15;color:#111827;}
+.status-action.shipped{background:#38bdf8;color:#082f49;}
+.status-action.completed{background:#22c55e;color:#fff;}
+.print-action{background:#0f172a;color:#fff;}
+.delete-action{background:#dc2626;color:#fff;}
+
+.popup-empty{
+  background:#fff;
+  border:1px dashed #cbd5e1;
+  border-radius:16px;
+  padding:18px;
+  text-align:center;
+  color:#64748b;
+}
+
+@media(max-width:700px){
+  .order-popup{
+    padding:16px 10px;
+    align-items:flex-end;
+  }
+
+  .popup-shell{
+    width:100%;
+    max-height:92vh;
+    border-radius:24px 24px 18px 18px;
+    padding:22px 16px 18px;
+  }
+
+  .popup-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .popup-title{
+    font-size:24px;
+  }
+
+  .popup-meta{
+    grid-template-columns:1fr;
+  }
+
+  .popup-item{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .popup-item-main{
+    width:100%;
+    justify-content:space-between;
+  }
+
+  .popup-item-price,
+  .popup-total strong{
+    font-size:20px;
+  }
+
+  .popup-actions button{
+    flex:1 1 calc(50% - 5px);
+  }
+}
+
 @keyframes slideIn{
   from{transform:translateX(-30px);opacity:0;}
   to{transform:translateX(0);opacity:1;}
@@ -177,7 +440,12 @@ select,input{
 
   <a href="dashboard.html"
   style="padding:8px 15px;background:#f59e0b;color:#fff;border-radius:8px;text-decoration:none;">
-  📊 إدارة الفواتير
+  📊 داشبورد الفواتير
+  </a>
+
+  <a href="inventory-dashboard.html"
+  style="padding:8px 15px;background:#06b6d4;color:#fff;border-radius:8px;text-decoration:none;">
+  📦 لوحة المخزون
   </a>
 
   <button onclick="logout()"
@@ -276,9 +544,24 @@ import { getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-fires
 let currentRole = null;
 let allOrders = [];
 let unsubscribe = null;
+let unsubscribeNotifications = null;
+let activeOrderDetails = null;
+let notificationsPrimed = false;
+const audio = new Audio("notification.mp3");
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
+    if(unsubscribe){
+      unsubscribe();
+      unsubscribe = null;
+    }
+
+    if(unsubscribeNotifications){
+      unsubscribeNotifications();
+      unsubscribeNotifications = null;
+    }
+
+    notificationsPrimed = false;
     window.location.href = "admin-login.html";
     return;
   }
@@ -288,26 +571,49 @@ onAuthStateChanged(auth, async (user) => {
   if(userDoc.exists()){
     currentRole = userDoc.data().role;
   }
-     console.log("ROLE:", currentRole);
 
   if(currentRole === "owner"){
-  autoDeleteOldOrders();
-}
-unsubscribe = onSnapshot(collection(db,"orders"), (snapshot)=>{
+    autoDeleteOldOrders();
+  }
 
-  allOrders = [];
+  if(unsubscribe){
+    unsubscribe();
+  }
 
-  snapshot.forEach(docSnap=>{
-    allOrders.push({
-      id: docSnap.id,
-      ...docSnap.data()
+  if(unsubscribeNotifications){
+    unsubscribeNotifications();
+  }
+
+  notificationsPrimed = false;
+  unsubscribe = onSnapshot(collection(db,"orders"), (snapshot)=>{
+
+    allOrders = [];
+
+    snapshot.forEach(docSnap=>{
+      allOrders.push({
+        id: docSnap.id,
+        ...docSnap.data()
+      });
     });
+  
+    renderOrders();
   });
 
-  renderOrders();
+  unsubscribeNotifications = onSnapshot(collection(db,"orders"), (snapshot)=>{
+    if(!notificationsPrimed){
+      notificationsPrimed = true;
+      return;
+    }
 
+    const hasNewOrder = snapshot.docChanges().some((change)=> change.type === "added");
 
-});
+    if(!hasNewOrder){
+      return;
+    }
+
+    audio.play().catch(()=>{});
+    showToast("طلب جديد وصل 🔥","success");
+  });
 });
 
 
@@ -316,20 +622,11 @@ unsubscribe = onSnapshot(collection(db,"orders"), (snapshot)=>{
 
 /* ================= صوت الإشعار ================= */
 
-const audio = new Audio("notification.mp3");
 document.addEventListener("click", () => {
-  audio.play().then(()=> audio.pause());
+  audio.play().then(()=> audio.pause()).catch(()=>{});
 },{ once:true });
 
-onSnapshot(collection(db,"orders"), (snapshot)=>{
-  snapshot.docChanges().forEach(change=>{
-    if(change.type === "added"){
 
-      audio.play();
-       showToast("طلب جديد وصل 🔥","success");
-    }
-  });
-});
 
 /* ================= تحميل الطلبات ================= */
 
@@ -393,6 +690,16 @@ function renderOrders(){
   const statusFilter = document.getElementById("statusFilter").value;
   const fromDate = document.getElementById("fromDate").value;
   const toDate = document.getElementById("toDate").value;
+  const fromDateLimit = fromDate ? new Date(fromDate) : null;
+  const toDateLimit = toDate ? new Date(toDate) : null;
+
+  if(fromDateLimit){
+    fromDateLimit.setHours(0, 0, 0, 0);
+  }
+
+  if(toDateLimit){
+    toDateLimit.setHours(23, 59, 59, 999);
+  }
 
   let total=0;
   let revenue=0;
@@ -405,26 +712,28 @@ function renderOrders(){
   allOrders.forEach(data=>{
 
     const id = data.id;
+    const customerName = (data.customerName || "").toLowerCase();
+    const phone = String(data.phone || "");
 
     if(
       searchValue &&
-      !data.customerName.toLowerCase().includes(searchValue) &&
-      !data.phone.includes(searchValue)
+      !customerName.includes(searchValue) &&
+      !phone.includes(searchValue)
     ) return;
 
     const status=data.status || "pending";
     let orderDate = data.createdAt ? data.createdAt.toDate() : null;
 
     if(statusFilter !== "all" && status !== statusFilter) return;
-    if(fromDate && orderDate && orderDate < new Date(fromDate)) return;
-    if(toDate && orderDate && orderDate > new Date(toDate)) return;
+    if(fromDateLimit && orderDate && orderDate < fromDateLimit) return;
+    if(toDateLimit && orderDate && orderDate > toDateLimit) return;
 
     total++;
 
     if(status==="pending") pending++;
     if(status==="completed"){
       completed++;
-      revenue += data.total;
+      revenue += Number(data.total) || 0;
     }
 
     const card=document.createElement("div");
@@ -434,9 +743,9 @@ function renderOrders(){
 
     card.innerHTML=`
       <div class="order-id">Order ID: ${id.slice(0,8).toUpperCase()}</div>
-      <strong>${data.customerName}</strong>
+      <strong>${data.customerName || "Customer"}</strong>
       <div class="status ${status}">${status.toUpperCase()}</div>
-      <div>💰 ${data.total} EGP</div>
+      <div>💰 ${Number(data.total) || 0} EGP</div>
     `;
 
     container.appendChild(card);
@@ -491,36 +800,466 @@ async function autoDeleteOldOrders(){
 
 
 document.getElementById("searchInput").addEventListener("keyup", renderOrders);
-window.openOrderDetails = function(data,id){
+function getStatusLabel(status){
+  return {
+    pending:"قيد الانتظار",
+    shipped:"تم الشحن",
+    completed:"مكتمل"
+  }[status] || status;
+}
 
-  let itemsHTML = "";
-  data.items.forEach(p=>{
-    itemsHTML += `
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-        <span>${p.name}</span>
-        <span>${p.price} EGP</span>
+function getPaymentLabel(method){
+  return {
+    cash:"كاش",
+    card:"بطاقة",
+    wallet:"محفظة إلكترونية"
+  }[method] || method || "غير محدد";
+}
+
+function getGroupedOrderItems(items){
+  return Array.from((items || []).reduce((map, item)=>{
+    const name = item.name || "منتج بدون اسم";
+    const unitPrice = Number(item.price) || 0;
+    const quantity = Number(item.quantity) || 1;
+    const key = `${name}__${unitPrice}`;
+
+    if(!map.has(key)){
+      map.set(key, {
+        name,
+        unitPrice,
+        quantity:0
+      });
+    }
+
+    map.get(key).quantity += quantity;
+    return map;
+  }, new Map()).values());
+}
+
+function getOrderDetailsState(data,id){
+  const status = data.status || "pending";
+  const orderDate = data.createdAt
+    ? data.createdAt.toDate().toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" })
+    : "غير متوفر";
+  const groupedItems = getGroupedOrderItems(data.items);
+  const totalPieces = groupedItems.reduce((sum,item)=> sum + item.quantity, 0);
+  const totalAmount = Number(data.total) || 0;
+
+  return {
+    id,
+    data,
+    status,
+    orderDate,
+    groupedItems,
+    totalPieces,
+    totalAmount
+  };
+}
+
+function buildOrderItemsMarkup(groupedItems){
+  return groupedItems.map(item=>{
+    const lineTotal = item.unitPrice * item.quantity;
+
+    return `
+      <div class="popup-item">
+        <div class="popup-item-main">
+          <strong class="popup-item-name">${item.name}</strong>
+          <span class="popup-item-qty">x${item.quantity}</span>
+        </div>
+        <span class="popup-item-price">${lineTotal} EGP</span>
       </div>
     `;
-  });
+  }).join("") || `<div class="popup-empty">لا توجد منتجات داخل هذا الطلب.</div>`;
+}
+
+function buildPrintableInvoiceDocument(order){
+  const logoUrl = new URL("logo.png", window.location.href).href;
+  const itemsMarkup = order.groupedItems.map(item=>{
+    const lineTotal = item.unitPrice * item.quantity;
+
+    return `
+      <div class="invoice-item">
+        <div class="invoice-item-main">
+          <strong>${item.name}</strong>
+          <span class="invoice-qty">x${item.quantity}</span>
+        </div>
+        <span class="invoice-price">${lineTotal} EGP</span>
+      </div>
+    `;
+  }).join("") || `<div class="invoice-empty">لا توجد منتجات داخل هذا الطلب.</div>`;
+
+  return `
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>فاتورة طلب ${order.id.slice(0,8).toUpperCase()}</title>
+      <style>
+        @page{
+          size:A4;
+          margin:12mm;
+        }
+
+        *{
+          box-sizing:border-box;
+        }
+
+        body{
+          margin:0;
+          font-family:"Cairo",Arial,sans-serif;
+          background:#eef4fb;
+          color:#0f172a;
+          -webkit-print-color-adjust:exact;
+          print-color-adjust:exact;
+        }
+
+        .print-page{
+          max-width:820px;
+          margin:0 auto;
+          padding:22px;
+        }
+
+        .invoice-sheet{
+          background:#ffffff;
+          border:1px solid #dbe4f0;
+          border-radius:30px;
+          padding:28px;
+          box-shadow:0 18px 48px rgba(15,23,42,.12);
+        }
+
+        .invoice-head{
+          display:flex;
+          align-items:flex-start;
+          justify-content:space-between;
+          gap:16px;
+          margin-bottom:18px;
+        }
+
+        .invoice-eyebrow{
+          display:inline-block;
+          color:#0ea5e9;
+          font-size:12px;
+          font-weight:800;
+          letter-spacing:.08em;
+        }
+
+        .invoice-head h1{
+          margin:8px 0 6px;
+          font-size:30px;
+          line-height:1.2;
+        }
+
+        .invoice-head p{
+          margin:0;
+          color:#64748b;
+          font-size:14px;
+        }
+
+        .invoice-brand{
+          display:flex;
+          flex-direction:column;
+          align-items:flex-end;
+          gap:10px;
+          text-align:left;
+        }
+
+        .invoice-brand img{
+          width:84px;
+          height:auto;
+          object-fit:contain;
+        }
+
+        .invoice-brand strong{
+          display:block;
+          font-size:22px;
+          line-height:1;
+        }
+
+        .invoice-brand span{
+          color:#64748b;
+          font-size:12px;
+        }
+
+        .invoice-chip-row{
+          display:flex;
+          flex-wrap:wrap;
+          gap:10px;
+          margin-bottom:18px;
+        }
+
+        .invoice-chip{
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          padding:8px 14px;
+          border-radius:999px;
+          font-size:13px;
+          font-weight:700;
+        }
+
+        .invoice-chip.status{
+          background:#dcfce7;
+          color:#166534;
+        }
+
+        .invoice-chip.date{
+          background:#e0f2fe;
+          color:#075985;
+        }
+
+        .invoice-meta{
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:14px;
+          margin-bottom:24px;
+        }
+
+        .invoice-meta-card{
+          background:#f8fbff;
+          border:1px solid #dbe4f0;
+          border-radius:18px;
+          padding:14px 16px;
+        }
+
+        .invoice-meta-card span{
+          display:block;
+          margin-bottom:6px;
+          color:#94a3b8;
+          font-size:12px;
+        }
+
+        .invoice-meta-card strong{
+          display:block;
+          font-size:15px;
+          line-height:1.65;
+          word-break:break-word;
+        }
+
+        .invoice-section{
+          margin-bottom:24px;
+        }
+
+        .invoice-section h2{
+          margin:0 0 14px;
+          font-size:24px;
+        }
+
+        .invoice-items{
+          display:flex;
+          flex-direction:column;
+          gap:10px;
+        }
+
+        .invoice-item{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:16px;
+          background:#fff;
+          border:1px solid #dbe4f0;
+          border-radius:18px;
+          padding:14px 16px;
+        }
+
+        .invoice-item-main{
+          display:flex;
+          align-items:center;
+          gap:10px;
+          min-width:0;
+        }
+
+        .invoice-item-main strong{
+          font-size:15px;
+          line-height:1.5;
+        }
+
+        .invoice-qty{
+          background:#dff0ff;
+          color:#0284c7;
+          border-radius:999px;
+          padding:5px 10px;
+          font-size:12px;
+          font-weight:700;
+          white-space:nowrap;
+        }
+
+        .invoice-price{
+          color:#16a34a;
+          font-size:22px;
+          font-weight:900;
+          white-space:nowrap;
+        }
+
+        .invoice-empty{
+          background:#fff;
+          border:1px dashed #cbd5e1;
+          border-radius:18px;
+          padding:18px;
+          text-align:center;
+          color:#64748b;
+        }
+
+        .invoice-total{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+          background:#0f172a;
+          color:#fff;
+          border-radius:22px;
+          padding:18px 20px;
+        }
+
+        .invoice-total span{
+          color:#cbd5e1;
+          font-size:14px;
+        }
+
+        .invoice-total strong{
+          font-size:32px;
+        }
+
+        @media print{
+          body{
+            background:#fff;
+          }
+
+          .print-page{
+            max-width:none;
+            padding:0;
+          }
+
+          .invoice-sheet{
+            border:none;
+            border-radius:0;
+            box-shadow:none;
+            padding:0;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="print-page">
+        <div class="invoice-sheet">
+          <div class="invoice-head">
+            <div>
+              <span class="invoice-eyebrow">KIMO TECH</span>
+              <h1>فاتورة طلب</h1>
+              <p>رقم الطلب: ${order.id.slice(0,8).toUpperCase()}</p>
+            </div>
+            <div class="invoice-brand">
+              <img src="${logoUrl}" alt="KIMO TECH" onerror="this.style.display='none'">
+              <div>
+                <strong>KIMO TECH</strong>
+                <span>Electronics & Robotics</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="invoice-chip-row">
+            <span class="invoice-chip status">${getStatusLabel(order.status)}</span>
+            <span class="invoice-chip date">${order.orderDate}</span>
+          </div>
+
+          <div class="invoice-meta">
+            <div class="invoice-meta-card">
+              <span>اسم العميل</span>
+              <strong>${order.data.customerName || "عميل بدون اسم"}</strong>
+            </div>
+            <div class="invoice-meta-card">
+              <span>رقم الهاتف</span>
+              <strong>${order.data.phone || "-"}</strong>
+            </div>
+            <div class="invoice-meta-card">
+              <span>طريقة الدفع</span>
+              <strong>${getPaymentLabel(order.data.paymentMethod)}</strong>
+            </div>
+            <div class="invoice-meta-card">
+              <span>العنوان</span>
+              <strong>${order.data.address || "لا يوجد عنوان"}</strong>
+            </div>
+            <div class="invoice-meta-card">
+              <span>الأصناف والقطع</span>
+              <strong>${order.groupedItems.length} نوع / ${order.totalPieces} قطعة</strong>
+            </div>
+            <div class="invoice-meta-card">
+              <span>وقت الطباعة</span>
+              <strong>${new Date().toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" })}</strong>
+            </div>
+          </div>
+
+          <div class="invoice-section">
+            <h2>المنتجات</h2>
+            <div class="invoice-items">${itemsMarkup}</div>
+          </div>
+
+          <div class="invoice-total">
+            <span>الإجمالي النهائي</span>
+            <strong>${order.totalAmount} EGP</strong>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+window.openOrderDetails = function(data,id){
+
+  const order = getOrderDetailsState(data,id);
+  const itemsHTML = buildOrderItemsMarkup(order.groupedItems);
+
+  activeOrderDetails = order;
 
   document.getElementById("popupContent").innerHTML = `
-    <h3>${data.customerName}</h3>
-    <p>📞 ${data.phone}</p>
-    <p>📍 ${data.address}</p>
-    <p>💳 ${data.paymentMethod}</p>
-    <hr>
-    ${itemsHTML}
-    <hr>
-    <strong>الإجمالي: ${data.total} EGP</strong>
+    <div class="popup-header">
+      <div>
+        <span class="popup-eyebrow">تفاصيل الطلب</span>
+        <h3 class="popup-title">طلب ${id.slice(0,8).toUpperCase()}</h3>
+        <p class="popup-subtitle">${order.orderDate}</p>
+      </div>
+      <div class="status ${order.status}">${getStatusLabel(order.status)}</div>
+    </div>
 
-<div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
-  <button onclick="changeStatus('${id}','pending')">Pending</button>
-  <button onclick="changeStatus('${id}','shipped')">Shipped</button>
-  <button onclick="changeStatus('${id}','completed')">Completed</button>
-  <button onclick="printOrder()">🖨 طباعة</button>
-  ${currentRole === "owner" ? `<button onclick="deleteOrder('${id}')" style="background:#dc2626;color:#fff;">🗑 حذف</button>` : ``}
-</div>
+    <div class="popup-customer">
+      <h4 class="popup-customer-name">${data.customerName || "عميل بدون اسم"}</h4>
+      <div class="popup-meta">
+        <div class="popup-meta-card">
+          <span>رقم الهاتف</span>
+          <strong>${data.phone || "-"}</strong>
+        </div>
+        <div class="popup-meta-card">
+          <span>طريقة الدفع</span>
+          <strong>${getPaymentLabel(data.paymentMethod)}</strong>
+        </div>
+        <div class="popup-meta-card">
+          <span>العنوان</span>
+          <strong>${data.address || "لا يوجد عنوان"}</strong>
+        </div>
+        <div class="popup-meta-card">
+          <span>الأصناف والقطع</span>
+          <strong>${order.groupedItems.length} نوع / ${order.totalPieces} قطعة</strong>
+        </div>
+      </div>
+    </div>
 
+    <div>
+      <h4 class="popup-section-title">المنتجات</h4>
+      <div class="popup-items">${itemsHTML}</div>
+    </div>
+
+    <div class="popup-total">
+      <span>الإجمالي النهائي</span>
+      <strong>${order.totalAmount} EGP</strong>
+    </div>
+
+    <div class="popup-actions">
+      <button class="status-action pending" onclick="changeStatus('${id}','pending')">قيد الانتظار</button>
+      <button class="status-action shipped" onclick="changeStatus('${id}','shipped')">تم الشحن</button>
+      <button class="status-action completed" onclick="changeStatus('${id}','completed')">مكتمل</button>
+      <button class="print-action" onclick="printOrder()">طباعة</button>
+      ${currentRole === "owner" ? `<button class="delete-action" onclick="deleteOrder('${id}')">حذف الطلب</button>` : ``}
+    </div>
   `;
 
   document.getElementById("orderPopup").style.display="flex";
@@ -569,67 +1308,43 @@ window.closePopup = function(){
   document.getElementById("orderPopup").style.display="none";
 }
 
+document.addEventListener("keydown", (event)=>{
+  if(event.key === "Escape"){
+    closePopup();
+  }
+});
+
 window.printOrder = function(){
-  const content = document.getElementById("popupContent").innerHTML;
+  if(!activeOrderDetails){
+    showToast("افتح الطلب أولاً قبل الطباعة","error");
+    return;
+  }
 
   const printWindow = window.open("", "", "width=800,height=600");
-  printWindow.document.write(`
-    <html>
-    <head>
-      <title>Print Order</title>
-      <style>
-        body{font-family:Arial;padding:20px;}
+  if(!printWindow){
+    showToast("اسمح بفتح نافذة الطباعة أولاً","error");
+    return;
+  }
 
-        .light-mode{
-  background:#f8fafc;
-  color:#111;
-}
-
-.light-mode .card{
-  background:#ffffff;
-  color:#111;
-}
-      </style>
-    </head>
-    <body>
-      ${content}
-
-      
-    </body>
-    </html>
-  `);
+  printWindow.document.write(buildPrintableInvoiceDocument(activeOrderDetails));
 
   printWindow.document.close();
-  printWindow.print();
+  printWindow.focus();
+  printWindow.onafterprint = () => printWindow.close();
+  setTimeout(()=>{
+    printWindow.print();
+  },300);
 }
 
 
 </script>
 <canvas id="salesChart" style="max-width:400px;margin:30px auto;"></canvas>
 
-<div id="orderPopup" style="
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.6);
-z-index:9999;
-justify-content:center;
-align-items:center;
-">
-
-<div style="
-background:#fff;
-width:90%;
-max-width:600px;
-padding:25px;
-border-radius:20px;
-position:relative;
-">
-
-<span onclick="closePopup()" 
-style="position:absolute;top:10px;left:15px;cursor:pointer;font-size:18px;">
-✖
-</span>
+<div id="orderPopup" class="order-popup" onclick="if(event.target === this) closePopup()">
+<div class="popup-shell">
+<button type="button" class="popup-close" onclick="closePopup()" aria-label="إغلاق">
+&times;
+</button>
 
 <div id="popupContent"></div>
 

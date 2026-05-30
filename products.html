@@ -229,6 +229,52 @@ header{
   gap:28px;
 }
 
+.results-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin:18px 0 0;
+  color:#334155;
+  font-weight:700;
+  flex-wrap:wrap;
+}
+
+.pagination{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
+.page-btn{
+  min-width:44px;
+  padding:10px 14px;
+  border:none;
+  border-radius:12px;
+  background:#e2e8f0;
+  color:#0f172a;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.page-btn:hover{
+  background:#cbd5e1;
+}
+
+.page-btn.active{
+  background:linear-gradient(135deg,var(--primary),#0284c7);
+  color:#fff;
+}
+
+.page-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
 .empty-state{
   grid-column:1/-1;
   background:#fff;
@@ -294,6 +340,12 @@ header{
   color:#fff;
   font-weight:bold;
   cursor:pointer;
+}
+
+.add-btn:disabled{
+  background:#94a3b8;
+  box-shadow:none;
+  cursor:not-allowed;
 }
 
 /* ===== Cart ===== */
@@ -765,6 +817,8 @@ footer{
 </div>
 
 <div class="grid" id="productGrid"></div>
+<div class="results-meta" id="resultsMeta"></div>
+<div class="pagination" id="paginationControls"></div>
  </main>
 </div>
 
@@ -792,6 +846,7 @@ footer{
 </footer>
 
 
+<script src="data/makers-electronics-products.js"></script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -804,7 +859,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIza....",
+  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
   authDomain: "kimo-tech-store-962df.firebaseapp.com",
   projectId: "kimo-tech-store-962df",
   storageBucket: "kimo-tech-store-962df.firebasestorage.app",
@@ -819,6 +874,10 @@ const db = getFirestore(app);
 let allProducts = [];
 let currentList = [];
 let activeSearchQuery = "";
+let currentPageNumber = 1;
+const PRODUCTS_PAGE_SIZE = 48;
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 const searchParams = new URLSearchParams(window.location.search);
 const initialSearchQuery = (searchParams.get("search") || "").trim();
 
@@ -828,46 +887,194 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 const cartCount = document.getElementById("cart-count");
 cartCount.innerText = cart.length;
 
+function getCatalogPayloadProducts(payload){
+  if(Array.isArray(payload)){
+    return payload;
+  }
+
+  if(Array.isArray(payload?.products)){
+    return payload.products;
+  }
+
+  return [];
+}
+
+function getEmbeddedImportedProducts(){
+  return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
+}
+
+function getProductRecencyValue(product){
+  if(typeof product?.order === "number"){
+    return product.order;
+  }
+
+  if(typeof product?.sourceProductId === "number"){
+    return product.sourceProductId;
+  }
+
+  if(typeof product?.createdAt?.seconds === "number"){
+    return product.createdAt.seconds;
+  }
+
+  return 0;
+}
+
+function mergeProducts(...groups){
+  const merged = [];
+  const seen = new Set();
+
+  groups.flat().forEach((product) => {
+    if(!product){
+      return;
+    }
+
+    const key = [
+      String(product.sourceSite || ""),
+      String(product.sourceProductId || ""),
+      normalizeSearchText(product.name),
+      Number(product.price) || 0
+    ].join("__");
+
+    if(seen.has(key)){
+      return;
+    }
+
+    seen.add(key);
+    merged.push(product);
+  });
+
+  return merged;
+}
+
+async function fetchImportedProducts(){
+  const embeddedProducts = getEmbeddedImportedProducts();
+
+  if(embeddedProducts.length){
+    return embeddedProducts;
+  }
+
+  try{
+    const response = await fetch(IMPORTED_CATALOG_URL, { cache:"no-store" });
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return getCatalogPayloadProducts(await response.json());
+  }catch(error){
+    console.error("Imported catalog could not be loaded:", error);
+    return [];
+  }
+}
+
+function renderResultsMeta(totalCount){
+  const meta = document.getElementById("resultsMeta");
+
+  if(totalCount === 0){
+    meta.textContent = "";
+    return;
+  }
+
+  const start = ((currentPageNumber - 1) * PRODUCTS_PAGE_SIZE) + 1;
+  const end = Math.min(start + PRODUCTS_PAGE_SIZE - 1, totalCount);
+  meta.textContent = `عرض ${start}-${end} من ${totalCount} منتج`;
+}
+
+function renderPagination(totalCount){
+  const pagination = document.getElementById("paginationControls");
+  const totalPages = Math.max(1, Math.ceil(totalCount / PRODUCTS_PAGE_SIZE));
+
+  if(totalCount <= PRODUCTS_PAGE_SIZE){
+    pagination.innerHTML = "";
+    return;
+  }
+
+  const pageNumbers = [];
+  const startPage = Math.max(1, currentPageNumber - 2);
+  const endPage = Math.min(totalPages, startPage + 4);
+
+  for(let page = startPage; page <= endPage; page += 1){
+    pageNumbers.push(`
+      <button class="page-btn ${page === currentPageNumber ? "active" : ""}" type="button" onclick="goToProductsPage(${page})">
+        ${page}
+      </button>
+    `);
+  }
+
+  pagination.innerHTML = `
+    <button class="page-btn" type="button" onclick="goToProductsPage(${currentPageNumber - 1})" ${currentPageNumber === 1 ? "disabled" : ""}>السابق</button>
+    ${pageNumbers.join("")}
+    <button class="page-btn" type="button" onclick="goToProductsPage(${currentPageNumber + 1})" ${currentPageNumber === totalPages ? "disabled" : ""}>التالي</button>
+  `;
+}
+
 /* ===== RENDER PRODUCTS ===== */
-function renderProducts(list){
- currentList = [...list]; 
- 
+function renderProducts(list, options = {}){
+  const { preservePage = false } = options;
+  currentList = [...list];
+
+  if(!preservePage){
+    currentPageNumber = 1;
+  }
+
   const grid = document.getElementById("productGrid");
   grid.innerHTML = "";
 
-  if(list.length === 0){
+  if(currentList.length === 0){
     grid.innerHTML = `
       <div class="empty-state">
         ${activeSearchQuery ? "لا توجد نتائج مطابقة لبحثك الآن" : "لا توجد منتجات متاحة الآن"}
       </div>
     `;
+    renderResultsMeta(0);
+    renderPagination(0);
     return;
   }
 
-  list.forEach(p => {
+  const totalPages = Math.max(1, Math.ceil(currentList.length / PRODUCTS_PAGE_SIZE));
+  currentPageNumber = Math.min(currentPageNumber, totalPages);
+
+  const startIndex = (currentPageNumber - 1) * PRODUCTS_PAGE_SIZE;
+  const visibleProducts = currentList.slice(startIndex, startIndex + PRODUCTS_PAGE_SIZE);
+
+  visibleProducts.forEach(p => {
     const card = document.createElement("div");
     card.className = "card";
     card.style.position = "relative";
 
     card.onclick = () => openPopup(p);
+    const productBadge = p.inStock === false ? "غير متاح" : (p.badge || "");
+    const isDisabled = p.inStock === false;
 
     card.innerHTML = `
-      ${p.badge ? `<div class="badge">${p.badge}</div>` : ""}
-      <img src="${p.image || p.img}" onerror="this.src='https://via.placeholder.com/300x220?text=No+Image'">
+      ${productBadge ? `<div class="badge">${productBadge}</div>` : ""}
+      <img src="${p.image || p.img || 'images/no-image.png'}" loading="lazy" onerror="this.src='images/no-image.png';this.onerror=null;">
       <div class="card-info">
         <h3>${p.name}</h3>
         <div class="price">${p.price} EGP</div>
-        <button class="add-btn">أضف للسلة</button>
+        <button class="add-btn" ${isDisabled ? "disabled" : ""}>${isDisabled ? "غير متاح" : "أضف للسلة"}</button>
       </div>
     `;
 
-    card.querySelector(".add-btn").onclick = (e)=>{
-      e.stopPropagation();
-      addToCart(p);
-    };
+    if(!isDisabled){
+      card.querySelector(".add-btn").onclick = (e)=>{
+        e.stopPropagation();
+        addToCart(p);
+      };
+    }
 
     grid.appendChild(card);
   });
+
+  renderResultsMeta(currentList.length);
+  renderPagination(currentList.length);
+}
+
+window.goToProductsPage = function(pageNumber){
+  const totalPages = Math.max(1, Math.ceil(currentList.length / PRODUCTS_PAGE_SIZE));
+  currentPageNumber = Math.min(Math.max(1, pageNumber), totalPages);
+  renderProducts(currentList, { preservePage:true });
+  window.scrollTo({ top:0, behavior:"smooth" });
 }
 
 document.getElementById("sortSelect").addEventListener("change", function(){
@@ -883,7 +1090,7 @@ document.getElementById("sortSelect").addEventListener("change", function(){
   }
 
   else if(this.value === "new"){
-    sorted.sort((a,b)=> b.id - a.id);
+    sorted.sort((a,b)=> getProductRecencyValue(b) - getProductRecencyValue(a));
   }
 
   renderProducts(sorted);
@@ -892,7 +1099,15 @@ document.getElementById("sortSelect").addEventListener("change", function(){
 /* ===== CATEGORIES ===== */
 
 function renderCategories(){
-  const cats = ["الكل", ...new Set(allProducts.map(p=>p.category))];
+  const cats = [
+    "الكل",
+    ...new Set(
+      allProducts
+        .map((product) => String(product.category || "").trim())
+        .filter(Boolean)
+        .sort((a,b) => a.localeCompare(b))
+    )
+  ];
   const list = document.getElementById("categoryList");
 
   list.innerHTML = "";
@@ -929,7 +1144,7 @@ function filterCategory(cat, el){
     filtered = allProducts;
   }else{
     filtered = allProducts.filter(p => 
-      p.category.trim().toLowerCase() === cat.trim().toLowerCase()
+      String(p.category || "").trim().toLowerCase() === cat.trim().toLowerCase()
     );
   }
 
@@ -1084,7 +1299,7 @@ document.addEventListener("keydown", function(e){
 /* ===== POPUP FUNCTIONS ===== */
 function openPopup(product){
 
-  document.getElementById("popupImg").src = product.image || product.img;
+  document.getElementById("popupImg").src = product.fullImage || product.image || product.img || "images/no-image.png";
 
   document.getElementById("popupTitle").innerText = product.name;
 
@@ -1102,24 +1317,27 @@ document.getElementById("categoryTitle").innerHTML = "عرض جميع المنت
 
 
 async function loadProducts(){
-
   const q = query(
     collection(db,"products"),
     orderBy("order","asc"),
     orderBy("createdAt","asc")
   );
 
-  const snapshot = await getDocs(q);
+  const [snapshot, importedProducts] = await Promise.all([
+    getDocs(q),
+    fetchImportedProducts()
+  ]);
 
-  allProducts = [];
+  const localProducts = [];
 
   snapshot.forEach(doc=>{
-    allProducts.push({
+    localProducts.push({
       id: doc.id,
       ...doc.data()
     });
   });
 
+  allProducts = mergeProducts(localProducts, importedProducts);
   currentList = [...allProducts];
 
   renderCategories();

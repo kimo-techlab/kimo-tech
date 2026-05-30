@@ -1,0 +1,668 @@
+﻿[
+    {
+        "path":  "images/arduino/Arduino CNC Shield V3.webp",
+        "folder":  "arduino",
+        "name":  "Arduino CNC Shield V3",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/arduino/Arduino Leonardo.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Leonardo",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/arduino mega 2560 wifi esp8266.jpg",
+        "folder":  "arduino",
+        "name":  "arduino mega 2560 wifi esp8266",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino Mega2560 Rev3.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Mega2560 Rev3",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino Nano Micro USB.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Nano Micro USB",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino Nano Mini USB.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Nano Mini USB",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino Pro Micro 5V 16M Mini.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Pro Micro 5V 16M Mini",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino Pro Mini ATMEGA328P.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Pro Mini ATMEGA328P",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino UNO R4 WiFi board (Clone) Type-C.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino UNO R4 WiFi board (Clone) Type-C",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/Arduino Uno Rev3 SMD.jpg",
+        "folder":  "arduino",
+        "name":  "Arduino Uno Rev3 SMD",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/arduino-uno.jpg",
+        "folder":  "arduino",
+        "name":  "arduino-uno",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102 Type-C USB.webp",
+        "folder":  "arduino",
+        "name":  "ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102 Type-C USB",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/arduino/ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102.jpg",
+        "folder":  "arduino",
+        "name":  "ESP32 Development Board WIFI and Bluetooth 30-Pin with CP2102",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/arduino/ESP8266 NodeMCU WiFi Micro USB.webp",
+        "folder":  "arduino",
+        "name":  "ESP8266 NodeMCU WiFi Micro USB",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/arduino/ESP8266 NodeMCU WiFi Type-C.webp",
+        "folder":  "arduino",
+        "name":  "ESP8266 NodeMCU WiFi Type-C",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/arduino/Ethernet Shield W5100.webp",
+        "folder":  "arduino",
+        "name":  "Ethernet Shield W5100",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/arduino/L298 Motor Driver Module.webp",
+        "folder":  "arduino",
+        "name":  "L298 Motor Driver Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/arduino/Motor Shield L293D.webp",
+        "folder":  "arduino",
+        "name":  "Motor Shield L293D",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/battery/1699977759465884647.webp",
+        "folder":  "battery",
+        "name":  "1699977759465884647",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/battery/611J1ky8zkL._AC_UL375_SR375,375_.jpg",
+        "folder":  "battery",
+        "name":  "611J1ky8zkL._AC_UL375_SR375,375_",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/battery/61lThwxLBsL._AC_UF894,1000_QL80_.jpg",
+        "folder":  "battery",
+        "name":  "61lThwxLBsL._AC_UF894,1000_QL80_",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/battery/813e4dde-73c2-4e0c-8420-17e6cb876e39-20250225_112100_0000.webp",
+        "folder":  "battery",
+        "name":  "813e4dde-73c2-4e0c-8420-17e6cb876e39-20250225_112100_0000",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/battery/images.jpg",
+        "folder":  "battery",
+        "name":  "images",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/Charger/61NOjRdURtL._AC_UF350,350_QL80_.jpg",
+        "folder":  "Charger",
+        "name":  "61NOjRdURtL._AC_UF350,350_QL80_",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/Charger/LithiumBatteryCharger_TP4056_b311e041-e573-4ca9-9c91-a1ee6267b295.webp",
+        "folder":  "Charger",
+        "name":  "LithiumBatteryCharger_TP4056_b311e041-e573-4ca9-9c91-a1ee6267b295",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/Charger/project-st6845-c-usb-type-c-5v-step-up-booster-2.webp",
+        "folder":  "Charger",
+        "name":  "project-st6845-c-usb-type-c-5v-step-up-booster-2",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Adapter Board for NRF24L01 Wireless Module 3.3V.webp",
+        "folder":  "communication",
+        "name":  "Adapter Board for NRF24L01 Wireless Module 3.3V",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Bluetooth HM-10 BLE.webp",
+        "folder":  "communication",
+        "name":  "Bluetooth HM-10 BLE",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Bluetooth Module HC-05.webp",
+        "folder":  "communication",
+        "name":  "Bluetooth Module HC-05",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Bluetooth Module HC-06.webp",
+        "folder":  "communication",
+        "name":  "Bluetooth Module HC-06",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/buy-blue-rpi-gpio-breakout-expansion-board-40pin-flat-rainbow-ribbon-cable-for-raspberry-pi-4-3-2-model.jpg",
+        "folder":  "communication",
+        "name":  "buy-blue-rpi-gpio-breakout-expansion-board-40pin-flat-rainbow-ribbon-cable-for-raspberry-pi-4-3-2-model",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/communication/e39f5118-3460-40a6-aa7b-7368abce1021.jpg",
+        "folder":  "communication",
+        "name":  "e39f5118-3460-40a6-aa7b-7368abce1021",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/communication/ESP8266 ESP-01 WiFi Module.webp",
+        "folder":  "communication",
+        "name":  "ESP8266 ESP-01 WiFi Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/ESP8266 ESP-12E Module.webp",
+        "folder":  "communication",
+        "name":  "ESP8266 ESP-12E Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/ESP8266 ESP-12F Module.webp",
+        "folder":  "communication",
+        "name":  "ESP8266 ESP-12F Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/NRF24L01 Wireless Module With Antenna.webp",
+        "folder":  "communication",
+        "name":  "NRF24L01 Wireless Module With Antenna",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/NRF24L01+ 2.4GHz RF Transceiver Module.webp",
+        "folder":  "communication",
+        "name":  "NRF24L01+ 2.4GHz RF Transceiver Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/RXB6 433Mhz Superheterodyne Wireless Receiver Module.webp",
+        "folder":  "communication",
+        "name":  "RXB6 433Mhz Superheterodyne Wireless Receiver Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/SIM800L GSM - GPRS Module + External Antenna.webp",
+        "folder":  "communication",
+        "name":  "SIM800L GSM - GPRS Module + External Antenna",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Ublox NEO-6M GPS Module HW-539A11.webp",
+        "folder":  "communication",
+        "name":  "Ublox NEO-6M GPS Module HW-539A11",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Ublox NEO-6M GPS Module HW-542A.webp",
+        "folder":  "communication",
+        "name":  "Ublox NEO-6M GPS Module HW-542A",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Ublox NEO-7m GPS Module HW-539B.webp",
+        "folder":  "communication",
+        "name":  "Ublox NEO-7m GPS Module HW-539B",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Ublox NEO-7m GPS Module HW-542B.webp",
+        "folder":  "communication",
+        "name":  "Ublox NEO-7m GPS Module HW-542B",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Wireless RF Kit 433Mhz.webp",
+        "folder":  "communication",
+        "name":  "Wireless RF Kit 433Mhz",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/communication/Wireless Transmitter \u0026 Receiver Board Module SYN115-SYN480R 433MHz.webp",
+        "folder":  "communication",
+        "name":  "Wireless Transmitter \u0026 Receiver Board Module SYN115-SYN480R 433MHz",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/control/httpselectra-group.comuploadse84474bbe30647eb3ca9f73cf50763fc.jpg",
+        "folder":  "control",
+        "name":  "httpselectra-group.comuploadse84474bbe30647eb3ca9f73cf50763fc",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/displays/Character LCD 16×2 Display Module.webp",
+        "folder":  "displays",
+        "name":  "Character LCD 16×2 Display Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/displays/I2C LCD Module.webp",
+        "folder":  "displays",
+        "name":  "I2C LCD Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/displays/LCD Character 20×4.webp",
+        "folder":  "displays",
+        "name":  "LCD Character 20×4",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/displays/max7219-8x8-dot-led-matrix-display-module-fr-01-897-500x500.webp",
+        "folder":  "displays",
+        "name":  "max7219-8x8-dot-led-matrix-display-module-fr-01-897-500x500",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/displays/OLED Display I2C 4 Pin 0.96.webp",
+        "folder":  "displays",
+        "name":  "OLED Display I2C 4 Pin 0.96",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/displays/OLED Display I2C 4 Pin 1.3.webp",
+        "folder":  "displays",
+        "name":  "OLED Display I2C 4 Pin 1.3",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/displays/s-l960.webp",
+        "folder":  "displays",
+        "name":  "s-l960",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/A4988 Stepper Motor Driver 2A.webp",
+        "folder":  "drivers",
+        "name":  "A4988 Stepper Motor Driver 2A",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/BTS7960 43A Motor Driver.webp",
+        "folder":  "drivers",
+        "name":  "BTS7960 43A Motor Driver",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/DC Motor Speed Controller 10A.webp",
+        "folder":  "drivers",
+        "name":  "DC Motor Speed Controller 10A",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/DC Motor Speed Controller 20A.webp",
+        "folder":  "drivers",
+        "name":  "DC Motor Speed Controller 20A",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/DRV8825 Stepper Driver.webp",
+        "folder":  "drivers",
+        "name":  "DRV8825 Stepper Driver",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/ESC 30A Brushless.webp",
+        "folder":  "drivers",
+        "name":  "ESC 30A Brushless",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/IRF520 MOSFET DRIVER MODULE.webp",
+        "folder":  "drivers",
+        "name":  "IRF520 MOSFET DRIVER MODULE",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/L9110S Dual Motor Driver.webp",
+        "folder":  "drivers",
+        "name":  "L9110S Dual Motor Driver",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/MX1508 Dual Motor Driver.webp",
+        "folder":  "drivers",
+        "name":  "MX1508 Dual Motor Driver",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/TB6612FNG Motor Driver.webp",
+        "folder":  "drivers",
+        "name":  "TB6612FNG Motor Driver",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/drivers/ULN2003 Stepper Driver Board.webp",
+        "folder":  "drivers",
+        "name":  "ULN2003 Stepper Driver Board",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/Heaters/PTCHeatersPlate24V110Degrees35_21_5mm_3.webp",
+        "folder":  "Heaters",
+        "name":  "PTCHeatersPlate24V110Degrees35_21_5mm_3",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/28BYJ-48 Stepper Motor 5VDC 0.1A 0.03Nm.webp",
+        "folder":  "motors",
+        "name":  "28BYJ-48 Stepper Motor 5VDC 0.1A 0.03Nm",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/DC Geared Wired Motor Dual Shaft 3-12VDC.webp",
+        "folder":  "motors",
+        "name":  "DC Geared Wired Motor Dual Shaft 3-12VDC",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/DC Motor with Gear Box JGA25-370-12V-250RPM 8.8Kg.webp",
+        "folder":  "motors",
+        "name":  "DC Motor with Gear Box JGA25-370-12V-250RPM 8.8Kg",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/ef9c0c61-f25d-4d5f-9ebe-606ddbf8d8a9.jpg",
+        "folder":  "motors",
+        "name":  "ef9c0c61-f25d-4d5f-9ebe-606ddbf8d8a9",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/motors/MG90S Micro Servo Continuous Rotation 360 Degree.webp",
+        "folder":  "motors",
+        "name":  "MG90S Micro Servo Continuous Rotation 360 Degree",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/MG90S Micro Servo Full Metal Gear 180 Degree.webp",
+        "folder":  "motors",
+        "name":  "MG90S Micro Servo Full Metal Gear 180 Degree",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/MG996R Servo Motor Tower Pro 180 Degree.webp",
+        "folder":  "motors",
+        "name":  "MG996R Servo Motor Tower Pro 180 Degree",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/MG996R Servo Motor Tower Pro 360 Degree.webp",
+        "folder":  "motors",
+        "name":  "MG996R Servo Motor Tower Pro 360 Degree",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/Push Type Linear Solenoid JF-0530B 12V 300mA 10mm 5N.webp",
+        "folder":  "motors",
+        "name":  "Push Type Linear Solenoid JF-0530B 12V 300mA 10mm 5N",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/Push Type Linear Solenoid JF-0826B 12V 2A 10mm 20N.webp",
+        "folder":  "motors",
+        "name":  "Push Type Linear Solenoid JF-0826B 12V 2A 10mm 20N",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/SG90 Micro Servo 180 Degree.webp",
+        "folder":  "motors",
+        "name":  "SG90 Micro Servo 180 Degree",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/Stepper Motor NEMA17.webp",
+        "folder":  "motors",
+        "name":  "Stepper Motor NEMA17",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/Stepper Motor NEMA23.webp",
+        "folder":  "motors",
+        "name":  "Stepper Motor NEMA23",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/TB6612FNGDualDCMotorDriverModule_c7152276-53c6-4026-a4b2-925789494bc9_1024x1024@2x.webp",
+        "folder":  "motors",
+        "name":  "TB6612FNGDualDCMotorDriverModule_c7152276-53c6-4026-a4b2-925789494bc9_1024x1024@2x",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/tower-pro-mg995-13kg._imresizer.jpg",
+        "folder":  "motors",
+        "name":  "tower-pro-mg995-13kg._imresizer",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/motors/Vibration Motor.webp",
+        "folder":  "motors",
+        "name":  "Vibration Motor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/Water Pump 12V.webp",
+        "folder":  "motors",
+        "name":  "Water Pump 12V",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/motors/Water Pump DC 5V.webp",
+        "folder":  "motors",
+        "name":  "Water Pump DC 5V",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/474ebc23-05c3-4691-bcef-dfc36dcdfd4c.jpg",
+        "folder":  "sensors",
+        "name":  "474ebc23-05c3-4691-bcef-dfc36dcdfd4c",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/sensors/981edba3-63fa-413e-84fe-7f7a8c582b05.jpg",
+        "folder":  "sensors",
+        "name":  "981edba3-63fa-413e-84fe-7f7a8c582b05",
+        "extension":  "jpg"
+    },
+    {
+        "path":  "images/sensors/BME280 I2C Pressure Humidity Temperature Sensor Module.webp",
+        "folder":  "sensors",
+        "name":  "BME280 I2C Pressure Humidity Temperature Sensor Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/BMP280 Pressure Sensor.webp",
+        "folder":  "sensors",
+        "name":  "BMP280 Pressure Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Color Sensor TCS3200.webp",
+        "folder":  "sensors",
+        "name":  "Color Sensor TCS3200",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/DHT11 Temperature \u0026 Humidity.webp",
+        "folder":  "sensors",
+        "name":  "DHT11 Temperature \u0026 Humidity",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/DHT22.webp",
+        "folder":  "sensors",
+        "name":  "DHT22",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Fingerprint Sensor R307.webp",
+        "folder":  "sensors",
+        "name":  "Fingerprint Sensor R307",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Flame Sensor Module.webp",
+        "folder":  "sensors",
+        "name":  "Flame Sensor Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/GY-521 MPU6050.webp",
+        "folder":  "sensors",
+        "name":  "GY-521 MPU6050",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/hx711-load-cell-sensor.webp",
+        "folder":  "sensors",
+        "name":  "hx711-load-cell-sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/IPR Motion Sensor HC-SR501.webp",
+        "folder":  "sensors",
+        "name":  "IPR Motion Sensor HC-SR501",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/IR Line Tracking Sensor.webp",
+        "folder":  "sensors",
+        "name":  "IR Line Tracking Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/IR Obstacle Sensor.webp",
+        "folder":  "sensors",
+        "name":  "IR Obstacle Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/KY-035 Digital.webp",
+        "folder":  "sensors",
+        "name":  "KY-035 Digital",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/ldr_sensor_module.webp",
+        "folder":  "sensors",
+        "name":  "ldr_sensor_module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Load Cell 1kg.webp",
+        "folder":  "sensors",
+        "name":  "Load Cell 1kg",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Mic Sound Sensor.webp",
+        "folder":  "sensors",
+        "name":  "Mic Sound Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/MQ-135 Air Quality Sensor.webp",
+        "folder":  "sensors",
+        "name":  "MQ-135 Air Quality Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/MQ-2 Gas Sensor.webp",
+        "folder":  "sensors",
+        "name":  "MQ-2 Gas Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/MQ-7 Carbon Monoxide Sensor.webp",
+        "folder":  "sensors",
+        "name":  "MQ-7 Carbon Monoxide Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Pulse Heart Rate Sensor.webp",
+        "folder":  "sensors",
+        "name":  "Pulse Heart Rate Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Rain Drop Sensor.webp",
+        "folder":  "sensors",
+        "name":  "Rain Drop Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Reed Switch Module.webp",
+        "folder":  "sensors",
+        "name":  "Reed Switch Module",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Soil Moisture Sensor.webp",
+        "folder":  "sensors",
+        "name":  "Soil Moisture Sensor",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Ultrasonic HC-SR04.webp",
+        "folder":  "sensors",
+        "name":  "Ultrasonic HC-SR04",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Ultrasonic Sensor Holder.webp",
+        "folder":  "sensors",
+        "name":  "Ultrasonic Sensor Holder",
+        "extension":  "webp"
+    },
+    {
+        "path":  "images/sensors/Water Level Sensor.webp",
+        "folder":  "sensors",
+        "name":  "Water Level Sensor",
+        "extension":  "webp"
+    }
+]

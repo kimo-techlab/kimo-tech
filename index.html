@@ -261,6 +261,11 @@ header{
   cursor:pointer;
 }
 
+.add-btn:disabled{
+  background:#94a3b8;
+  cursor:not-allowed;
+}
+
 /* ===== Cart ===== */
 .cart-btn{
   position:fixed;
@@ -1929,6 +1934,7 @@ body{
 </footer>
 
 
+<script src="data/makers-electronics-products.js"></script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -1941,7 +1947,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIza....",
+  apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
   authDomain: "kimo-tech-store-962df.firebaseapp.com",
   projectId: "kimo-tech-store-962df",
   storageBucket: "kimo-tech-store-962df.firebasestorage.app",
@@ -1955,12 +1961,83 @@ const db = getFirestore(app);
 /* ===== VARIABLES ===== */
 let allProducts = [];
 let currentList = [];
+let featuredProducts = [];
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 
 /* ===== CART (GLOBAL) ===== */
 const cartCount = document.getElementById("cart-count");
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 cartCount.innerText = cart.length;
+
+function normalizeProductText(value){
+  return String(value || "").toLowerCase().trim();
+}
+
+function getCatalogPayloadProducts(payload){
+  if(Array.isArray(payload)){
+    return payload;
+  }
+
+  if(Array.isArray(payload?.products)){
+    return payload.products;
+  }
+
+  return [];
+}
+
+function getEmbeddedImportedProducts(){
+  return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
+}
+
+function mergeProducts(...groups){
+  const merged = [];
+  const seen = new Set();
+
+  groups.flat().forEach((product) => {
+    if(!product){
+      return;
+    }
+
+    const key = [
+      String(product.sourceSite || ""),
+      String(product.sourceProductId || ""),
+      normalizeProductText(product.name),
+      Number(product.price) || 0
+    ].join("__");
+
+    if(seen.has(key)){
+      return;
+    }
+
+    seen.add(key);
+    merged.push(product);
+  });
+
+  return merged;
+}
+
+async function fetchImportedProducts(){
+  const embeddedProducts = getEmbeddedImportedProducts();
+
+  if(embeddedProducts.length){
+    return embeddedProducts;
+  }
+
+  try{
+    const response = await fetch(IMPORTED_CATALOG_URL, { cache:"no-store" });
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return getCatalogPayloadProducts(await response.json());
+  }catch(error){
+    console.error("Imported catalog could not be loaded:", error);
+    return [];
+  }
+}
 
 /* ===== RENDER PRODUCTS ===== */
 function renderProducts(list){
@@ -1975,21 +2052,25 @@ function renderProducts(list){
     card.style.position = "relative";
 
     card.onclick = () => openPopup(p);
+    const productBadge = p.inStock === false ? "غير متاح" : (p.badge || "");
+    const isDisabled = p.inStock === false;
 
     card.innerHTML = `
-      ${p.badge ? `<div class="badge">${p.badge}</div>` : ""}
-      <img src="${p.image || p.img}" onerror="this.src='https://via.placeholder.com/300x220?text=No+Image'">
+      ${productBadge ? `<div class="badge">${productBadge}</div>` : ""}
+      <img src="${p.image || p.img || 'images/no-image.png'}" loading="lazy" onerror="this.src='images/no-image.png';this.onerror=null;">
       <div class="card-info">
         <h3>${p.name}</h3>
         <div class="price">${p.price} EGP</div>
-        <button class="add-btn">أضف للسلة</button>
+        <button class="add-btn" ${isDisabled ? "disabled" : ""}>${isDisabled ? "غير متاح" : "أضف للسلة"}</button>
       </div>
     `;
 
-    card.querySelector(".add-btn").onclick = (e)=>{
-      e.stopPropagation();
-      addToCart(p);
-    };
+    if(!isDisabled){
+      card.querySelector(".add-btn").onclick = (e)=>{
+        e.stopPropagation();
+        addToCart(p);
+      };
+    }
 
     grid.appendChild(card);
   });
@@ -2034,9 +2115,19 @@ function openSearchResults(rawQuery){
 }
 
 if(searchInput){
-  searchInput.addEventListener("keyup", function(){
-    const q = this.value.toLowerCase();
-    renderProducts(allProducts.filter(p=>p.name.toLowerCase().includes(q)));
+  searchInput.addEventListener("input", function(){
+    const q = normalizeProductText(this.value);
+
+    if(!q){
+      renderProducts(featuredProducts);
+      return;
+    }
+
+    renderProducts(
+      allProducts
+        .filter((product) => normalizeProductText(product.name).includes(q))
+        .slice(0, 24)
+    );
   });
 
   searchInput.addEventListener("keydown", function(e){
@@ -2075,7 +2166,7 @@ window.closePopup = function(){
 }
 
 function openPopup(product){
-  document.getElementById("popupImg").src = product.image || product.img;
+  document.getElementById("popupImg").src = product.fullImage || product.image || product.img || "images/no-image.png";
   document.getElementById("popupTitle").innerText = product.name;
   document.getElementById("popupDesc").innerText =
     product.use || product.description || "";
@@ -2091,7 +2182,7 @@ document.addEventListener("keydown", function(e){
   }
 });
 function getRandomProducts(list, count){
-  return list.sort(()=> Math.random() - 0.5).slice(0, count);
+  return [...list].sort(()=> Math.random() - 0.5).slice(0, count);
 }
 /* ===== LOAD PRODUCTS ===== */
 async function loadProducts(){
@@ -2101,22 +2192,24 @@ async function loadProducts(){
     orderBy("createdAt","desc")
   );
 
-  const snapshot = await getDocs(q);
+  const [snapshot, importedProducts] = await Promise.all([
+    getDocs(q),
+    fetchImportedProducts()
+  ]);
 
-  allProducts = [];
+  const localProducts = [];
 
   snapshot.forEach(doc=>{
-    allProducts.push({
+    localProducts.push({
       id: doc.id,
       ...doc.data()
     });
   });
 
-
-const randomProducts = getRandomProducts(allProducts, 10);
-
-currentList = [...randomProducts];
-renderProducts(randomProducts);
+  allProducts = mergeProducts(localProducts, importedProducts);
+  featuredProducts = getRandomProducts(allProducts, 10);
+  currentList = [...featuredProducts];
+  renderProducts(featuredProducts);
 setTimeout(()=>{
   showHeroProducts();
 },1000);
@@ -2139,7 +2232,7 @@ function showHeroProducts(){
   const cardHoldDelay = isMobileHero ? 2200 : 1400;
 
   // 🔥 5 منتجات + 5 مشاريع
-  const products = allProducts.sort(()=>Math.random()-0.5).slice(0,5);
+  const products = getRandomProducts(allProducts, 5);
 
   const projectCards = Array.from(document.querySelectorAll("#projectGrid .card"))
     .slice(0,5)
@@ -2267,7 +2360,7 @@ async function loadProjects(){
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${p.image}">
+      <img src="${p.image || 'images/no-image.png'}" onerror="this.src='images/no-image.png';this.onerror=null;">
       <div class="card-info">
         <h3>${p.name}</h3>
         <button class="add-btn">أضف للسلة</button>
@@ -2637,8 +2730,6 @@ if (VOICE_ENABLED && ('webkitSpeechRecognition' in window || 'SpeechRecognition'
   recognition.onresult = function(event){
 
     const text = event.results[event.results.length - 1][0].transcript;
-
-    console.log("سمعت:", text);
 
     if(text.includes("منتج")){
       autoPresentProducts();

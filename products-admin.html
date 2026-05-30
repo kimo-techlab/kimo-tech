@@ -45,6 +45,11 @@ button{
   font-weight:bold;
 }
 
+button:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
 .add-btn{background:#16a34a;color:#fff;}
 .back-btn{background:#5726dc;color:#fff;}
 
@@ -300,6 +305,40 @@ img{
   border-radius:16px;
 }
 
+.table-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  padding:16px 18px 18px;
+  background:#fff;
+  border-top:1px solid #e2e8f0;
+}
+
+.table-summary{
+  color:#334155;
+  font-size:14px;
+  font-weight:700;
+}
+
+.pagination{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.pagination button{
+  min-width:110px;
+}
+
+.page-status{
+  color:#0f172a;
+  font-size:14px;
+  font-weight:700;
+}
+
 @media(max-width:768px){
   .assistant-header{
     flex-direction:column;
@@ -311,6 +350,15 @@ img{
 
   .assistant-actions button{
     flex:1 1 180px;
+  }
+
+  .table-footer{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .pagination{
+    justify-content:space-between;
   }
 }
 </style>
@@ -345,18 +393,24 @@ img{
     </div>
 
     <div class="assistant-actions">
+      <button class="assistant-secondary" id="importMakersBtn" type="button" onclick="importMakersCatalogToFirestore()">Import Makers Catalog</button>
       <button class="add-btn" type="button" onclick="generateUnusedImageDrafts()">Generate Drafts</button>
       <button class="assistant-secondary" type="button" onclick="fixBrokenProductImages()">Fix Missing Images</button>
     </div>
   </div>
 
   <div class="assistant-meta">
+    <div class="assistant-chip">Makers: <strong id="makersCatalogCount">0</strong></div>
     <div class="assistant-chip">Catalog: <strong id="catalogImageCount">0</strong></div>
     <div class="assistant-chip">Unused: <strong id="unusedImageCount">0</strong></div>
   </div>
 
   <div class="assistant-status" id="imageAssistantStatus">
     Loading local image catalog...
+  </div>
+
+  <div class="assistant-status" id="makersImportStatus">
+    Makers catalog import is ready.
   </div>
 
   <div class="assistant-grid" id="unusedImageGrid"></div>
@@ -373,6 +427,14 @@ img{
   <div>إجراءات</div>
 </div>
   <div id="productsContainer"></div>
+  <div class="table-footer">
+    <div class="table-summary" id="productsSummary">0 products</div>
+    <div class="pagination">
+      <button class="assistant-secondary assistant-small-btn" id="prevProductsPageBtn" type="button" onclick="changeProductsPage(-1)">Previous</button>
+      <span class="page-status" id="productsPageStatus">Page 1 of 1</span>
+      <button class="assistant-secondary assistant-small-btn" id="nextProductsPageBtn" type="button" onclick="changeProductsPage(1)">Next</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -422,6 +484,7 @@ img{
 
 <div class="toast" id="toast"></div>
 
+<script src="data/makers-electronics-products.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { 
@@ -432,6 +495,7 @@ import {
   deleteDoc,
   updateDoc,
   doc,
+  writeBatch,
   serverTimestamp,
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
@@ -456,7 +520,12 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const LOCAL_IMAGE_CATALOG_URL = "data/local-product-images.json";
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 const LOCAL_FALLBACK_IMAGE = "images/no-image.png";
+const MAKERS_SOURCE_SITE = "makerselectronics.com";
+const IMPORT_BATCH_SIZE = 400;
+const ADMIN_PAGE_SIZE = 60;
 const CATEGORY_LABELS = {
   arduino: "Arduino",
   battery: "Battery",
@@ -475,7 +544,11 @@ let allProducts = [];
 let localImageCatalog = [];
 let unusedLocalImages = [];
 let localImageCatalogLoaded = false;
-document.getElementById("searchInput").addEventListener("keyup", filterProducts);
+let makersCatalogProducts = [];
+let filteredProducts = [];
+let currentProductsPage = 1;
+let makersImportInProgress = false;
+document.getElementById("searchInput").addEventListener("keyup", () => filterProducts({ resetPage:true }));
 
 function escapeHtml(text){
   return String(text ?? "")
@@ -539,6 +612,22 @@ function setImageAssistantStatus(message){
   document.getElementById("imageAssistantStatus").textContent = message;
 }
 
+function setMakersImportStatus(message){
+  document.getElementById("makersImportStatus").textContent = message;
+}
+
+function setMakersImportBusyState(isBusy){
+  makersImportInProgress = isBusy;
+  const button = document.getElementById("importMakersBtn");
+
+  if(!button){
+    return;
+  }
+
+  button.disabled = isBusy;
+  button.textContent = isBusy ? "Importing Makers..." : "Import Makers Catalog";
+}
+
 function showToast(message, type = "success"){
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -549,6 +638,22 @@ function showToast(message, type = "success"){
   showToast.timer = setTimeout(() => {
     toast.style.display = "none";
   }, 2600);
+}
+
+function getCatalogPayloadProducts(payload){
+  if(Array.isArray(payload)){
+    return payload;
+  }
+
+  if(Array.isArray(payload?.products)){
+    return payload.products;
+  }
+
+  return [];
+}
+
+function getEmbeddedImportedProducts(){
+  return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
 }
 
 function findCatalogItemByPath(path){
@@ -695,12 +800,83 @@ async function fetchLocalImageCatalog(){
   }
 }
 
-function filterProducts(){
+async function fetchMakersCatalog(){
+  const embeddedProducts = getEmbeddedImportedProducts();
+
+  if(embeddedProducts.length){
+    makersCatalogProducts = embeddedProducts;
+    document.getElementById("makersCatalogCount").textContent = String(makersCatalogProducts.length);
+    setMakersImportStatus(`Loaded ${makersCatalogProducts.length} Makers products from the embedded local catalog.`);
+    return makersCatalogProducts;
+  }
+
+  try{
+    const response = await fetch(IMPORTED_CATALOG_URL, { cache:"no-store" });
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    makersCatalogProducts = getCatalogPayloadProducts(await response.json());
+    document.getElementById("makersCatalogCount").textContent = String(makersCatalogProducts.length);
+    setMakersImportStatus(`Loaded ${makersCatalogProducts.length} Makers products from the JSON catalog.`);
+    return makersCatalogProducts;
+  }catch(error){
+    console.error(error);
+    makersCatalogProducts = [];
+    document.getElementById("makersCatalogCount").textContent = "0";
+    setMakersImportStatus("Could not load the Makers catalog yet.");
+    return makersCatalogProducts;
+  }
+}
+
+function buildImportedFirestoreProduct(product, existsAlready){
+  const payload = {
+    name: String(product.name || "").trim(),
+    price: Number(product.price) || 0,
+    category: String(product.category || "").trim(),
+    image: product.image || LOCAL_FALLBACK_IMAGE,
+    fullImage: product.fullImage || product.image || LOCAL_FALLBACK_IMAGE,
+    use: product.use || product.description || "",
+    description: product.description || product.use || "",
+    badge: product.badge || "",
+    inStock: product.inStock !== false,
+    stockQty: Number.isFinite(Number(product.stockQty)) ? Math.max(0, Number(product.stockQty)) : null,
+    order: Number.isFinite(Number(product.order)) ? Number(product.order) : 9999,
+    sourceSite: product.sourceSite || MAKERS_SOURCE_SITE,
+    sourceProductId: Number.isFinite(Number(product.sourceProductId)) ? Number(product.sourceProductId) : null,
+    sourceUrl: product.sourceUrl || "",
+    sku: product.sku || "",
+    updatedAt: serverTimestamp()
+  };
+
+  if(!existsAlready){
+    payload.createdAt = serverTimestamp();
+  }
+
+  return payload;
+}
+
+function renderProductsPager(totalProducts){
+  const totalPages = Math.max(1, Math.ceil(totalProducts / ADMIN_PAGE_SIZE));
+  currentProductsPage = Math.min(Math.max(currentProductsPage, 1), totalPages);
+
+  const firstVisible = totalProducts ? ((currentProductsPage - 1) * ADMIN_PAGE_SIZE) + 1 : 0;
+  const lastVisible = totalProducts ? Math.min(currentProductsPage * ADMIN_PAGE_SIZE, totalProducts) : 0;
+
+  document.getElementById("productsPageStatus").textContent = `Page ${currentProductsPage} of ${totalPages}`;
+  document.getElementById("productsSummary").textContent = `${totalProducts} products • showing ${firstVisible}-${lastVisible}`;
+  document.getElementById("prevProductsPageBtn").disabled = currentProductsPage <= 1;
+  document.getElementById("nextProductsPageBtn").disabled = currentProductsPage >= totalPages;
+}
+
+function filterProducts(options = {}){
+  const { resetPage = false } = options;
 
   const q = document.getElementById("searchInput").value.toLowerCase();
   const selectedCategory = document.getElementById("categoryFilter").value;
 
-  const filtered = allProducts.filter(p=>{
+  filteredProducts = allProducts.filter(p=>{
 
     const matchesSearch =
       p.name?.toLowerCase().includes(q) ||
@@ -713,10 +889,14 @@ function filterProducts(){
     return matchesSearch && matchesCategory;
   });
 
-  renderProducts(filtered);
+  if(resetPage){
+    currentProductsPage = 1;
+  }
+
+  renderProducts(filteredProducts);
 }
 document.getElementById("categoryFilter").addEventListener("change", function(){
-  filterProducts();
+  filterProducts({ resetPage:true });
 });
 
 let editId = null;
@@ -827,12 +1007,39 @@ window.updateOrder = async function(id, newOrder){
   }
 }
 
+window.changeProductsPage = function(direction){
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ADMIN_PAGE_SIZE));
+  const nextPage = currentProductsPage + Number(direction || 0);
+
+  if(nextPage < 1 || nextPage > totalPages){
+    return;
+  }
+
+  currentProductsPage = nextPage;
+  renderProducts(filteredProducts);
+}
+
 function renderProducts(list){
 
   const container = document.getElementById("productsContainer");
   container.innerHTML = "";
 
-  list.forEach(p=>{
+  if(!list.length){
+    renderProductsPager(0);
+    container.innerHTML = `
+      <div class="table-row">
+        <div style="grid-column:1 / -1;text-align:center;color:#64748b;">No products match the current filters.</div>
+      </div>
+    `;
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(list.length / ADMIN_PAGE_SIZE));
+  currentProductsPage = Math.min(Math.max(currentProductsPage, 1), totalPages);
+  const startIndex = (currentProductsPage - 1) * ADMIN_PAGE_SIZE;
+  const visibleProducts = list.slice(startIndex, startIndex + ADMIN_PAGE_SIZE);
+
+  visibleProducts.forEach(p=>{
     const orderValue = Number.isFinite(Number(p.order)) ? Number(p.order) : 9999;
     const imageUrl = escapeHtml(p.image || LOCAL_FALLBACK_IMAGE);
     const name = escapeHtml(p.name || "");
@@ -880,6 +1087,7 @@ function renderProducts(list){
     `;
   });
 
+  renderProductsPager(list.length);
 }
 
 
@@ -1022,6 +1230,73 @@ window.fixBrokenProductImages = async function(){
   }
 };
 
+window.importMakersCatalogToFirestore = async function(){
+  if(makersImportInProgress){
+    return;
+  }
+
+  if(currentRole !== "owner"){
+    showToast("Owner access is required for import", "error");
+    return;
+  }
+
+  const catalogProducts = makersCatalogProducts.length ? makersCatalogProducts : await fetchMakersCatalog();
+
+  if(!catalogProducts.length){
+    showToast("Makers catalog is not loaded", "error");
+    return;
+  }
+
+  if(!confirm(`سيتم استيراد أو تحديث ${catalogProducts.length} منتج من Makers داخل Firestore. هل تريد المتابعة؟`)){
+    return;
+  }
+
+  const existingIds = new Set(allProducts.map((product) => String(product.id || "")));
+  let createdCount = 0;
+  let updatedCount = 0;
+
+  try{
+    setMakersImportBusyState(true);
+    setMakersImportStatus(`Starting import for ${catalogProducts.length} products...`);
+
+    for(let start = 0; start < catalogProducts.length; start += IMPORT_BATCH_SIZE){
+      const chunk = catalogProducts.slice(start, start + IMPORT_BATCH_SIZE);
+      const batch = writeBatch(db);
+
+      chunk.forEach((product) => {
+        const docId = String(product.id || `makers-${product.sourceProductId || ""}`);
+        const existsAlready = existingIds.has(docId);
+        const docRef = doc(db, "products", docId);
+        const firestoreProduct = buildImportedFirestoreProduct(product, existsAlready);
+
+        batch.set(docRef, firestoreProduct, { merge:true });
+
+        if(existsAlready){
+          updatedCount += 1;
+        }else{
+          createdCount += 1;
+          existingIds.add(docId);
+        }
+      });
+
+      await batch.commit();
+
+      const processed = Math.min(start + chunk.length, catalogProducts.length);
+      setMakersImportStatus(`Imported ${processed} / ${catalogProducts.length} Makers products...`);
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
+
+    setMakersImportStatus(`Import complete. Created ${createdCount} and updated ${updatedCount} Makers products.`);
+    showToast(`Makers import complete: ${createdCount} new, ${updatedCount} updated`, "success");
+  }catch(error){
+    console.error(error);
+    setMakersImportStatus("Import stopped بسبب خطأ أثناء الكتابة إلى Firestore.");
+    showToast("Import failed while writing to Firestore", "error");
+  }finally{
+    setMakersImportBusyState(false);
+  }
+};
+
 window.saveProduct = async function(){
 
   const name = document.getElementById("pName").value.trim();
@@ -1139,6 +1414,7 @@ function resetForm(){
 }
 
 fetchLocalImageCatalog();
+fetchMakersCatalog();
 </script>
 
 </body>

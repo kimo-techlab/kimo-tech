@@ -182,31 +182,146 @@ header{
   z-index:2;
 }
 .sidebar{
-  width:260px;
-  background:#fff;
-  padding:28px;
-  border-radius:22px;
-  box-shadow:0 12px 30px rgba(0,0,0,.06);
+  width:300px;
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  padding:24px;
+  border-radius:24px;
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 18px 42px rgba(15,23,42,.08);
+  align-self:flex-start;
+  position:sticky;
+  top:128px;
+  max-height:calc(100vh - 150px);
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  overflow:hidden;
 }
+
+.sidebar-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
 .sidebar h3{
-  border-bottom:2px solid #e5e7eb;
+  margin:0;
   padding-bottom:12px;
+  border-bottom:1px solid #e2e8f0;
+  color:#0f172a;
+  font-size:22px;
+  font-weight:900;
 }
-.sidebar li{
+
+.sidebar-close{
+  display:none;
+  border:none;
+  border-radius:999px;
+  padding:10px 14px;
+  background:#e2e8f0;
+  color:#0f172a;
+  font-weight:800;
+}
+
+#categoryList{
+  margin:0;
+  padding:0 4px 0 0;
   list-style:none;
-  padding:14px;
-  border-radius:12px;
+  display:grid;
+  gap:10px;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:#94a3b8 transparent;
+}
+
+#categoryList::-webkit-scrollbar{
+  width:6px;
+}
+
+#categoryList::-webkit-scrollbar-thumb{
+  background:#cbd5e1;
+  border-radius:999px;
+}
+
+.sidebar li{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:54px;
+  padding:14px 16px;
+  border-radius:16px;
   cursor:pointer;
   font-weight:700;
-  margin-bottom:6px;
+  line-height:1.45;
+  white-space:normal;
+  word-break:break-word;
+  background:#f8fafc;
+  border:1px solid #dbeafe;
+  color:#0f172a;
+  box-shadow:0 8px 18px rgba(15,23,42,.05);
+  transition:.2s ease;
 }
+
+.sidebar li::before{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  flex:0 0 10px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  box-shadow:0 0 0 4px rgba(14,165,233,.14);
+}
+
 .sidebar li:hover,
 .sidebar li.active{
-  background:var(--accent);
+  background:linear-gradient(135deg,var(--primary),#0284c7);
+  color:#fff;
+  border-color:transparent;
+  transform:translateY(-1px);
+  box-shadow:0 14px 26px rgba(14,165,233,.24);
+}
+
+.sidebar li:hover::before,
+.sidebar li.active::before{
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(255,255,255,.2);
+}
+
+.category-label{
+  flex:1 1 auto;
+}
+
+.category-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:34px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(14,165,233,.12);
+  color:#0369a1;
+  font-size:12px;
+  font-weight:800;
+}
+
+.sidebar li:hover .category-count,
+.sidebar li.active .category-count{
+  background:rgba(255,255,255,.16);
   color:#fff;
 }
 
 .main{flex:1;}
+
+.sidebar-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.45);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+  z-index:1990;
+}
 
 #categoryTitle{
   font-size:22px;
@@ -441,19 +556,36 @@ footer{
 
   .sidebar{
     position:fixed;
-    top:0;
-    right:-100%;
-    height:100%;
-    width:75%;
+    inset:0;
+    right:0;
+    width:100vw;
+    max-width:100vw;
+    height:100dvh;
     background:#fff;
     z-index:2000;
-    transition:.3s;
+    transition:transform .28s ease;
     overflow-y:auto;
-    box-shadow:-5px 0 20px rgba(0,0,0,.1);
+    box-shadow:none;
+    transform:translateX(100%);
   }
 
   .sidebar.show-sidebar{
-    right:0;
+    transform:translateX(0);
+  }
+
+  .sidebar-close{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  body.sidebar-open{
+    overflow:hidden;
+  }
+
+  body.sidebar-open .sidebar-backdrop{
+    opacity:1;
+    pointer-events:auto;
   }
 }
 /* ===== Mobile Fix ===== */
@@ -687,9 +819,11 @@ footer{
   }
 
   .sidebar{
-    width:min(82vw,320px);
-    padding:76px 20px 24px;
+    width:100vw;
+    padding:18px 16px calc(24px + env(safe-area-inset-bottom));
     border-radius:0;
+    max-height:none;
+    top:0;
   }
 
   .main{
@@ -709,6 +843,29 @@ footer{
 
   .sort-small{
     width:auto;
+  }
+
+  .sidebar-header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:#fff;
+    padding-bottom:10px;
+  }
+
+  .sidebar h3{
+    font-size:20px;
+  }
+
+  #categoryList{
+    padding-inline-end:2px;
+  }
+
+  .sidebar li{
+    min-height:52px;
+    padding:13px 14px;
+    font-size:14px;
+    border-radius:14px;
   }
 
   .grid{
@@ -794,9 +951,13 @@ footer{
 
 <div class="container">
   <aside class="sidebar">
-    <h3>التصنيفات</h3>
+    <div class="sidebar-header">
+      <h3>التصنيفات</h3>
+      <button class="sidebar-close" type="button" onclick="toggleCategories(false)">إغلاق</button>
+    </div>
     <ul id="categoryList"></ul>
   </aside>
+  <div class="sidebar-backdrop" onclick="toggleCategories(false)"></div>
 
  <main class="main">
  <h2 id="categoryTitle"></h2>
@@ -880,6 +1041,21 @@ const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
 const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 const searchParams = new URLSearchParams(window.location.search);
 const initialSearchQuery = (searchParams.get("search") || "").trim();
+const CATEGORY_GROUP_RULES = [
+  { label:"Resistors", pattern:/resistor/i },
+  { label:"Capacitors", pattern:/capacitor/i },
+  { label:"Diodes", pattern:/diode|zener|schottky|tvs/i },
+  { label:"Transistors & MOSFETs", pattern:/mosfet|transistor|bjt|darlington|igbt|triac|thyristor/i },
+  { label:"Connectors & Terminals", pattern:/connector|terminal block|pin header|jst|rj45|rj11|d-type|wago|audio\s*&\s*video connector|rf connectors/i },
+  { label:"Switches & Relays", pattern:/switch|relay/i },
+  { label:"Batteries & Chargers", pattern:/battery|batteries|charger|holders?\s*&\s*connectors/i },
+  { label:"ICs & Controllers", pattern:/\bic(s)?\b|74 series|40 series|op amp|memory\/eeprom|microcontroller|logic|controller|regulator|optocoupler|special purpose/i },
+  { label:"Modules & Boards", pattern:/modules?|development boards|arduino boards|boards?|ai-thinker/i },
+  { label:"Motors & Drivers", pattern:/motors?|servo|drivers/i },
+  { label:"LEDs & Displays", pattern:/\bleds?\b|led smd|7-segment|displays?/i },
+  { label:"Meters & Tools", pattern:/tools?|multimeter|meter|tester|measurement|soldering|fnirsi|uni-t|kyoritsu|sanwa/i },
+  { label:"Power Supplies & Converters", pattern:/power supply|converters?/i }
+];
 
 
 /* ===== CART ===== */
@@ -1099,22 +1275,44 @@ document.getElementById("sortSelect").addEventListener("change", function(){
 /* ===== CATEGORIES ===== */
 
 function renderCategories(){
-  const cats = [
-    "الكل",
-    ...new Set(
-      allProducts
-        .map((product) => String(product.category || "").trim())
-        .filter(Boolean)
-        .sort((a,b) => a.localeCompare(b))
-    )
-  ];
   const list = document.getElementById("categoryList");
+  const categoriesCountMap = new Map();
+
+  allProducts.forEach((product) => {
+    const categoryLabel = getCategoryGroupLabel(product.category);
+
+    if(!categoryLabel){
+      return;
+    }
+
+    categoriesCountMap.set(categoryLabel, (categoriesCountMap.get(categoryLabel) || 0) + 1);
+  });
+
+  const categories = [...categoriesCountMap.entries()]
+    .sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
   list.innerHTML = "";
 
-  cats.forEach(cat => {
+  [
+    ["الكل", allProducts.length],
+    ...categories
+  ].forEach(([cat, count]) => {
     const li = document.createElement("li");
-    li.textContent = cat;
+    li.dataset.category = cat;
+
+    const label = document.createElement("span");
+    label.className = "category-label";
+    label.textContent = cat;
+
+    const countBadge = document.createElement("span");
+    countBadge.className = "category-count";
+    countBadge.textContent = String(count);
+
+    li.append(label, countBadge);
+
+    if(cat === "الكل" && !activeSearchQuery){
+      li.classList.add("active");
+    }
 
     li.addEventListener("click", function(){
       filterCategory(cat, li);
@@ -1133,10 +1331,7 @@ function filterCategory(cat, el){
 
   updateSearchUrl("");
 
-  document.querySelectorAll(".sidebar li")
-    .forEach(li=>li.classList.remove("active"));
-
-  el.classList.add("active");
+  setActiveCategory(cat);
 
   let filtered;
 
@@ -1144,7 +1339,7 @@ function filterCategory(cat, el){
     filtered = allProducts;
   }else{
     filtered = allProducts.filter(p => 
-      String(p.category || "").trim().toLowerCase() === cat.trim().toLowerCase()
+      getCategoryGroupLabel(p.category).toLowerCase() === cat.trim().toLowerCase()
     );
   }
 
@@ -1156,7 +1351,7 @@ function filterCategory(cat, el){
     : `عرض منتجات: <span style="color:var(--accent)">${cat}</span>`;
 
   if(window.innerWidth <= 768){
-    document.querySelector(".sidebar").classList.remove("show-sidebar");
+    setSidebarOpen(false);
   }
 }
 
@@ -1165,6 +1360,17 @@ const searchInput = document.getElementById("searchInput");
 
 function normalizeSearchText(value){
   return String(value || "").toLowerCase().trim();
+}
+
+function getCategoryGroupLabel(value){
+  const rawCategory = String(value || "").trim();
+
+  if(!rawCategory){
+    return "";
+  }
+
+  const matchingRule = CATEGORY_GROUP_RULES.find((rule) => rule.pattern.test(rawCategory));
+  return matchingRule ? matchingRule.label : rawCategory;
 }
 
 function updateSearchUrl(queryText){
@@ -1176,8 +1382,12 @@ function updateSearchUrl(queryText){
 }
 
 function clearCategorySelection(){
+  setActiveCategory("");
+}
+
+function setActiveCategory(categoryLabel){
   document.querySelectorAll(".sidebar li")
-    .forEach(li => li.classList.remove("active"));
+    .forEach((li) => li.classList.toggle("active", li.dataset.category === categoryLabel));
 }
 
 function applySearch(queryText, options = {}){
@@ -1196,6 +1406,7 @@ function applySearch(queryText, options = {}){
   if(!cleanQuery){
     renderProducts(allProducts);
     document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
+    setActiveCategory("الكل");
     return;
   }
 
@@ -1239,9 +1450,29 @@ function openCart(){
   document.getElementById("cartBtn").click();
 }
 
-function toggleCategories(){
+function setSidebarOpen(isOpen){
   const sidebar = document.querySelector(".sidebar");
-  sidebar.classList.toggle("show-sidebar");
+
+  if(!sidebar){
+    return;
+  }
+
+  sidebar.classList.toggle("show-sidebar", isOpen);
+  document.body.classList.toggle("sidebar-open", isOpen);
+}
+
+function toggleCategories(forceState){
+  const sidebar = document.querySelector(".sidebar");
+
+  if(!sidebar){
+    return;
+  }
+
+  const shouldOpen = typeof forceState === "boolean"
+    ? forceState
+    : !sidebar.classList.contains("show-sidebar");
+
+  setSidebarOpen(shouldOpen);
 }
 
 

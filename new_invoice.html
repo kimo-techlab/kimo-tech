@@ -207,7 +207,7 @@ th,td{
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script src="data/makers-electronics-products.js"></script>
+<script src="data/makers-electronics-products-lite.js"></script>
 
 
 <script>
@@ -417,8 +417,8 @@ results.innerHTML="";
 
 let invoice = "INV-"+Date.now();
 let currentInvoiceNumber = invoice;
-const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
-const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products-lite.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS_LITE__";
 
 function getInvoiceRowsData(){
   let rows = document.querySelectorAll("#table tr");

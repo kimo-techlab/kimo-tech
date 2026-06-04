@@ -1007,7 +1007,6 @@ footer{
 </footer>
 
 
-<script src="data/makers-electronics-products.js"></script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -1036,9 +1035,21 @@ let allProducts = [];
 let currentList = [];
 let activeSearchQuery = "";
 let currentPageNumber = 1;
+let localProductsCache = [];
+let activeCategoryFilter = "الكل";
+let activeSortValue = "default";
+let isImportedCatalogLoading = false;
+let importedCatalogError = "";
+let importedProductDetailsById = null;
+let importedProductDetailsPromise = null;
+let currentPopupProductKey = "";
 const PRODUCTS_PAGE_SIZE = 48;
-const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
-const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
+const IMPORTED_CATALOG_SCRIPT_URL = "data/makers-electronics-products-lite.js";
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products-lite.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS_LITE__";
+const IMPORTED_DETAILS_SCRIPT_URL = "data/makers-electronics-products.js";
+const IMPORTED_DETAILS_URL = "data/makers-electronics-products.json";
+const IMPORTED_DETAILS_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 const searchParams = new URLSearchParams(window.location.search);
 const initialSearchQuery = (searchParams.get("search") || "").trim();
 const CATEGORY_GROUP_RULES = [
@@ -1077,6 +1088,63 @@ function getCatalogPayloadProducts(payload){
 
 function getEmbeddedImportedProducts(){
   return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
+}
+
+const dataScriptLoaders = new Map();
+
+function loadCatalogDataScript(src, globalName){
+  if(globalThis[globalName]){
+    return Promise.resolve(globalThis[globalName]);
+  }
+
+  if(dataScriptLoaders.has(src)){
+    return dataScriptLoaders.get(src);
+  }
+
+  const loader = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+
+    script.onload = () => resolve(globalThis[globalName] || null);
+    script.onerror = () => reject(new Error(`Could not load ${src}`));
+
+    document.head.appendChild(script);
+  });
+
+  dataScriptLoaders.set(src, loader);
+  return loader;
+}
+
+function getProductDetailKey(product){
+  if(product?.id){
+    return String(product.id);
+  }
+
+  if(product?.sourceProductId){
+    return `makers-${product.sourceProductId}`;
+  }
+
+  return "";
+}
+
+function buildImportedDetailsMap(products){
+  const detailsMap = new Map();
+
+  products.forEach((product) => {
+    const key = getProductDetailKey(product);
+
+    if(key){
+      detailsMap.set(key, product);
+    }
+  });
+
+  return detailsMap;
+}
+
+function getEmbeddedImportedProductDetails(){
+  const embeddedProducts = getCatalogPayloadProducts(globalThis[IMPORTED_DETAILS_GLOBAL]);
+  return embeddedProducts.length ? buildImportedDetailsMap(embeddedProducts) : null;
 }
 
 function getProductRecencyValue(product){
@@ -1130,7 +1198,18 @@ async function fetchImportedProducts(){
   }
 
   try{
-    const response = await fetch(IMPORTED_CATALOG_URL, { cache:"no-store" });
+    await loadCatalogDataScript(IMPORTED_CATALOG_SCRIPT_URL, IMPORTED_CATALOG_GLOBAL);
+    const loadedProducts = getEmbeddedImportedProducts();
+
+    if(loadedProducts.length){
+      return loadedProducts;
+    }
+  }catch(error){
+    console.error("Imported catalog script could not be loaded:", error);
+  }
+
+  try{
+    const response = await fetch(IMPORTED_CATALOG_URL, { cache:"force-cache" });
 
     if(!response.ok){
       throw new Error(`HTTP ${response.status}`);
@@ -1143,17 +1222,63 @@ async function fetchImportedProducts(){
   }
 }
 
+async function ensureImportedProductDetails(){
+  if(importedProductDetailsById){
+    return importedProductDetailsById;
+  }
+
+  const embeddedDetails = getEmbeddedImportedProductDetails();
+
+  if(embeddedDetails){
+    importedProductDetailsById = embeddedDetails;
+    return importedProductDetailsById;
+  }
+
+  if(importedProductDetailsPromise){
+    return importedProductDetailsPromise;
+  }
+
+  importedProductDetailsPromise = (async () => {
+    try{
+      await loadCatalogDataScript(IMPORTED_DETAILS_SCRIPT_URL, IMPORTED_DETAILS_GLOBAL).catch(() => null);
+      const loadedDetails = getEmbeddedImportedProductDetails();
+
+      if(loadedDetails){
+        importedProductDetailsById = loadedDetails;
+        return importedProductDetailsById;
+      }
+
+      const response = await fetch(IMPORTED_DETAILS_URL, { cache:"force-cache" });
+
+      if(!response.ok){
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      importedProductDetailsById = buildImportedDetailsMap(getCatalogPayloadProducts(await response.json()));
+    }catch(error){
+      console.error("Imported product details could not be loaded:", error);
+      importedProductDetailsById = new Map();
+    }
+
+    return importedProductDetailsById;
+  })();
+
+  return importedProductDetailsPromise;
+}
+
 function renderResultsMeta(totalCount){
   const meta = document.getElementById("resultsMeta");
+  const loadingNote = isImportedCatalogLoading ? " • جاري تحميل باقي المنتجات..." : "";
+  const errorNote = !isImportedCatalogLoading && importedCatalogError ? " • تعذر تحميل جزء من الكتالوج." : "";
 
   if(totalCount === 0){
-    meta.textContent = "";
+    meta.textContent = isImportedCatalogLoading ? "جاري تحميل باقي المنتجات..." : importedCatalogError ? "تعذر تحميل الكتالوج المستورد." : "";
     return;
   }
 
   const start = ((currentPageNumber - 1) * PRODUCTS_PAGE_SIZE) + 1;
   const end = Math.min(start + PRODUCTS_PAGE_SIZE - 1, totalCount);
-  meta.textContent = `عرض ${start}-${end} من ${totalCount} منتج`;
+  meta.textContent = `عرض ${start}-${end} من ${totalCount} منتج${loadingNote}${errorNote}`;
 }
 
 function renderPagination(totalCount){
@@ -1253,23 +1378,72 @@ window.goToProductsPage = function(pageNumber){
   window.scrollTo({ top:0, behavior:"smooth" });
 }
 
-document.getElementById("sortSelect").addEventListener("change", function(){
+function getSearchableProductText(product){
+  return [
+    product.name,
+    product.category,
+    product.use,
+    product.description
+  ]
+    .map(normalizeSearchText)
+    .join(" ");
+}
 
-  let sorted = [...currentList];
+function sortProductsList(list){
+  const sorted = [...list];
 
-  if(this.value === "low"){
+  if(activeSortValue === "low"){
     sorted.sort((a,b)=> a.price - b.price);
-  }
-
-  else if(this.value === "high"){
+  }else if(activeSortValue === "high"){
     sorted.sort((a,b)=> b.price - a.price);
-  }
-
-  else if(this.value === "new"){
+  }else if(activeSortValue === "new"){
     sorted.sort((a,b)=> getProductRecencyValue(b) - getProductRecencyValue(a));
   }
 
-  renderProducts(sorted);
+  return sorted;
+}
+
+function getVisibleProductsList(){
+  if(activeSearchQuery){
+    const normalizedQuery = normalizeSearchText(activeSearchQuery);
+
+    return sortProductsList(
+      allProducts.filter((product) => getSearchableProductText(product).includes(normalizedQuery))
+    );
+  }
+
+  if(activeCategoryFilter !== "الكل"){
+    return sortProductsList(
+      allProducts.filter((product) =>
+        getCategoryGroupLabel(product.category).toLowerCase() === activeCategoryFilter.trim().toLowerCase()
+      )
+    );
+  }
+
+  return sortProductsList(allProducts);
+}
+
+function updateCategoryTitle(){
+  const title = document.getElementById("categoryTitle");
+
+  if(activeSearchQuery){
+    title.textContent = `نتائج البحث عن: ${activeSearchQuery}`;
+    return;
+  }
+
+  title.innerHTML = activeCategoryFilter === "الكل"
+    ? "عرض جميع المنتجات"
+    : `عرض منتجات: <span style="color:var(--accent)">${activeCategoryFilter}</span>`;
+}
+
+function refreshProductsView(options = {}){
+  updateCategoryTitle();
+  renderProducts(getVisibleProductsList(), options);
+}
+
+document.getElementById("sortSelect").addEventListener("change", function(){
+  activeSortValue = this.value;
+  refreshProductsView();
 });
 
 /* ===== CATEGORIES ===== */
@@ -1289,7 +1463,7 @@ function renderCategories(){
   });
 
   const categories = [...categoriesCountMap.entries()]
-    .sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    .sort((a,b) => a[0].localeCompare(b[0], undefined, { numeric:true, sensitivity:"base" }));
 
   list.innerHTML = "";
 
@@ -1310,7 +1484,7 @@ function renderCategories(){
 
     li.append(label, countBadge);
 
-    if(cat === "الكل" && !activeSearchQuery){
+    if(cat === activeCategoryFilter && !activeSearchQuery){
       li.classList.add("active");
     }
 
@@ -1322,7 +1496,8 @@ function renderCategories(){
   });
 }
 
-function filterCategory(cat, el){
+function filterCategory(cat){
+  activeCategoryFilter = cat;
   activeSearchQuery = "";
 
   if(searchInput){
@@ -1332,23 +1507,7 @@ function filterCategory(cat, el){
   updateSearchUrl("");
 
   setActiveCategory(cat);
-
-  let filtered;
-
-  if(cat === "الكل"){
-    filtered = allProducts;
-  }else{
-    filtered = allProducts.filter(p => 
-      getCategoryGroupLabel(p.category).toLowerCase() === cat.trim().toLowerCase()
-    );
-  }
-
-  renderProducts(filtered);
-
-  const title = document.getElementById("categoryTitle");
-  title.innerHTML = cat==="الكل"
-    ? "عرض جميع المنتجات"
-    : `عرض منتجات: <span style="color:var(--accent)">${cat}</span>`;
+  refreshProductsView();
 
   if(window.innerWidth <= 768){
     setSidebarOpen(false);
@@ -1394,6 +1553,7 @@ function applySearch(queryText, options = {}){
   const { syncInput = true, syncUrl = false } = options;
   const cleanQuery = queryText.trim();
   activeSearchQuery = cleanQuery;
+  activeCategoryFilter = "الكل";
 
   if(syncInput && searchInput){
     searchInput.value = cleanQuery;
@@ -1404,31 +1564,13 @@ function applySearch(queryText, options = {}){
   }
 
   if(!cleanQuery){
-    renderProducts(allProducts);
-    document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
     setActiveCategory("الكل");
+    refreshProductsView();
     return;
   }
 
   clearCategorySelection();
-
-  const normalizedQuery = normalizeSearchText(cleanQuery);
-  const filtered = allProducts.filter((product) => {
-    const searchableText = [
-      product.name,
-      product.category,
-      product.use,
-      product.description
-    ]
-      .map(normalizeSearchText)
-      .join(" ");
-
-    return searchableText.includes(normalizedQuery);
-  });
-
-  renderProducts(filtered);
-  document.getElementById("categoryTitle").textContent =
-    `نتائج البحث عن: ${cleanQuery}`;
+  refreshProductsView();
 }
 
 searchInput.addEventListener("input", function(){
@@ -1511,6 +1653,7 @@ window.location.href = "checkout.html";
 
 
 window.closePopup = function(){
+  currentPopupProductKey = "";
   document.getElementById("productPopup").style.display = "none";
 }
 
@@ -1528,24 +1671,67 @@ document.addEventListener("keydown", function(e){
   }
 });
 /* ===== POPUP FUNCTIONS ===== */
-function openPopup(product){
+async function openPopup(product){
+  currentPopupProductKey = getProductDetailKey(product);
+  const requestedPopupKey = currentPopupProductKey;
 
   document.getElementById("popupImg").src = product.fullImage || product.image || product.img || "images/no-image.png";
-
   document.getElementById("popupTitle").innerText = product.name;
-
   document.getElementById("popupDesc").innerText =
-    product.use || product.description || "";
-
-  document.getElementById("popupPrice").innerText =
-    product.price + " EGP";
-
+    product.use || product.description || (product.sourceSite === "makerselectronics.com" ? "جاري تحميل التفاصيل..." : "");
+  document.getElementById("popupPrice").innerText = product.price + " EGP";
   document.getElementById("productPopup").style.display = "flex";
+
+  if(product.sourceSite !== "makerselectronics.com" || (product.use || product.description) && product.fullImage){
+    return;
+  }
+
+  const detailsMap = await ensureImportedProductDetails();
+  const detailedProduct = detailsMap.get(requestedPopupKey);
+
+  if(!detailedProduct){
+    if(currentPopupProductKey === requestedPopupKey && !product.use && !product.description){
+      document.getElementById("popupDesc").innerText = "لا توجد تفاصيل إضافية متاحة الآن.";
+    }
+    return;
+  }
+
+  if(currentPopupProductKey !== requestedPopupKey){
+    return;
+  }
+
+  if(document.getElementById("productPopup").style.display !== "flex"){
+    return;
+  }
+
+  document.getElementById("popupImg").src = detailedProduct.fullImage || detailedProduct.image || product.image || "images/no-image.png";
+  document.getElementById("popupDesc").innerText =
+    detailedProduct.use || detailedProduct.description || product.use || product.description || "";
 }
 
 /* ===== INIT ===== */
 document.getElementById("categoryTitle").innerHTML = "عرض جميع المنتجات";
 
+
+async function hydrateImportedProducts(){
+  isImportedCatalogLoading = true;
+  importedCatalogError = "";
+  renderResultsMeta(currentList.length);
+
+  try{
+    const importedProducts = await fetchImportedProducts();
+    allProducts = mergeProducts(localProductsCache, importedProducts);
+    renderCategories();
+    refreshProductsView({ preservePage:true });
+  }catch(error){
+    console.error(error);
+    importedCatalogError = "Imported catalog unavailable";
+    renderResultsMeta(currentList.length);
+  }finally{
+    isImportedCatalogLoading = false;
+    renderResultsMeta(currentList.length);
+  }
+}
 
 async function loadProducts(){
   const q = query(
@@ -1554,22 +1740,20 @@ async function loadProducts(){
     orderBy("createdAt","asc")
   );
 
-  const [snapshot, importedProducts] = await Promise.all([
-    getDocs(q),
-    fetchImportedProducts()
-  ]);
-
-  const localProducts = [];
+  const snapshot = await getDocs(q);
+  localProductsCache = [];
 
   snapshot.forEach(doc=>{
-    localProducts.push({
+    localProductsCache.push({
       id: doc.id,
       ...doc.data()
     });
   });
 
-  allProducts = mergeProducts(localProducts, importedProducts);
+  allProducts = [...localProductsCache];
   currentList = [...allProducts];
+  isImportedCatalogLoading = true;
+  importedCatalogError = "";
 
   renderCategories();
 
@@ -1580,7 +1764,17 @@ async function loadProducts(){
   if(initialSearchQuery){
     applySearch(initialSearchQuery, { syncInput:false, syncUrl:false });
   }else{
-    renderProducts(allProducts);
+    refreshProductsView();
+  }
+
+  if("requestIdleCallback" in window){
+    window.requestIdleCallback(() => {
+      hydrateImportedProducts();
+    }, { timeout:1200 });
+  }else{
+    setTimeout(() => {
+      hydrateImportedProducts();
+    }, 60);
   }
 }
 

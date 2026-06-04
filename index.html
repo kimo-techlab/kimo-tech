@@ -1934,7 +1934,7 @@ body{
 </footer>
 
 
-<script src="data/makers-electronics-products.js"></script>
+<script src="data/makers-electronics-products-lite.js"></script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -1962,8 +1962,13 @@ const db = getFirestore(app);
 let allProducts = [];
 let currentList = [];
 let featuredProducts = [];
-const IMPORTED_CATALOG_URL = "data/makers-electronics-products.json";
-const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
+let importedProductDetailsById = null;
+let importedProductDetailsPromise = null;
+let currentPopupProductKey = "";
+const IMPORTED_CATALOG_URL = "data/makers-electronics-products-lite.json";
+const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS_LITE__";
+const IMPORTED_DETAILS_URL = "data/makers-electronics-products.json";
+const IMPORTED_DETAILS_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS__";
 
 /* ===== CART (GLOBAL) ===== */
 const cartCount = document.getElementById("cart-count");
@@ -1989,6 +1994,37 @@ function getCatalogPayloadProducts(payload){
 
 function getEmbeddedImportedProducts(){
   return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
+}
+
+function getProductDetailKey(product){
+  if(product?.id){
+    return String(product.id);
+  }
+
+  if(product?.sourceProductId){
+    return `makers-${product.sourceProductId}`;
+  }
+
+  return "";
+}
+
+function buildImportedDetailsMap(products){
+  const detailsMap = new Map();
+
+  products.forEach((product) => {
+    const key = getProductDetailKey(product);
+
+    if(key){
+      detailsMap.set(key, product);
+    }
+  });
+
+  return detailsMap;
+}
+
+function getEmbeddedImportedProductDetails(){
+  const embeddedProducts = getCatalogPayloadProducts(globalThis[IMPORTED_DETAILS_GLOBAL]);
+  return embeddedProducts.length ? buildImportedDetailsMap(embeddedProducts) : null;
 }
 
 function mergeProducts(...groups){
@@ -2037,6 +2073,42 @@ async function fetchImportedProducts(){
     console.error("Imported catalog could not be loaded:", error);
     return [];
   }
+}
+
+async function ensureImportedProductDetails(){
+  if(importedProductDetailsById){
+    return importedProductDetailsById;
+  }
+
+  const embeddedDetails = getEmbeddedImportedProductDetails();
+
+  if(embeddedDetails){
+    importedProductDetailsById = embeddedDetails;
+    return importedProductDetailsById;
+  }
+
+  if(importedProductDetailsPromise){
+    return importedProductDetailsPromise;
+  }
+
+  importedProductDetailsPromise = (async () => {
+    try{
+      const response = await fetch(IMPORTED_DETAILS_URL, { cache:"force-cache" });
+
+      if(!response.ok){
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      importedProductDetailsById = buildImportedDetailsMap(getCatalogPayloadProducts(await response.json()));
+    }catch(error){
+      console.error("Imported product details could not be loaded:", error);
+      importedProductDetailsById = new Map();
+    }
+
+    return importedProductDetailsById;
+  })();
+
+  return importedProductDetailsPromise;
 }
 
 /* ===== RENDER PRODUCTS ===== */
@@ -2162,18 +2234,48 @@ document.getElementById("cartBtn").onclick = function(){
 
 /* ===== POPUP ===== */
 window.closePopup = function(){
+  currentPopupProductKey = "";
   document.getElementById("productPopup").style.display = "none";
 }
 
-function openPopup(product){
+async function openPopup(product){
+  currentPopupProductKey = getProductDetailKey(product);
+  const requestedPopupKey = currentPopupProductKey;
+
   document.getElementById("popupImg").src = product.fullImage || product.image || product.img || "images/no-image.png";
   document.getElementById("popupTitle").innerText = product.name;
   document.getElementById("popupDesc").innerText =
-    product.use || product.description || "";
+    product.use || product.description || (product.sourceSite === "makerselectronics.com" ? "جاري تحميل التفاصيل..." : "");
   document.getElementById("popupPrice").innerText =
     product.price + " EGP";
 
   document.getElementById("productPopup").style.display = "flex";
+
+  if(product.sourceSite !== "makerselectronics.com" || (product.use || product.description) && product.fullImage){
+    return;
+  }
+
+  const detailsMap = await ensureImportedProductDetails();
+  const detailedProduct = detailsMap.get(requestedPopupKey);
+
+  if(!detailedProduct){
+    if(currentPopupProductKey === requestedPopupKey && !product.use && !product.description){
+      document.getElementById("popupDesc").innerText = "لا توجد تفاصيل إضافية متاحة الآن.";
+    }
+    return;
+  }
+
+  if(currentPopupProductKey !== requestedPopupKey){
+    return;
+  }
+
+  if(document.getElementById("productPopup").style.display !== "flex"){
+    return;
+  }
+
+  document.getElementById("popupImg").src = detailedProduct.fullImage || detailedProduct.image || product.image || "images/no-image.png";
+  document.getElementById("popupDesc").innerText =
+    detailedProduct.use || detailedProduct.description || product.use || product.description || "";
 }
 
 document.addEventListener("keydown", function(e){

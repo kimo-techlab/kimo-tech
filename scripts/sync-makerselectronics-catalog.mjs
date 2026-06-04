@@ -10,7 +10,10 @@ const PAGE_SIZE = 100;
 const CONCURRENCY = 3;
 const OUTPUT_PATH = path.resolve(__dirname, "..", "data", "makers-electronics-products.json");
 const OUTPUT_JS_PATH = path.resolve(__dirname, "..", "data", "makers-electronics-products.js");
+const OUTPUT_LITE_PATH = path.resolve(__dirname, "..", "data", "makers-electronics-products-lite.json");
+const OUTPUT_LITE_JS_PATH = path.resolve(__dirname, "..", "data", "makers-electronics-products-lite.js");
 const EMBEDDED_GLOBAL_NAME = "__MAKERS_ELECTRONICS_PRODUCTS__";
+const EMBEDDED_LITE_GLOBAL_NAME = "__MAKERS_ELECTRONICS_PRODUCTS_LITE__";
 
 const NAMED_ENTITIES = {
   amp: "&",
@@ -22,6 +25,22 @@ const NAMED_ENTITIES = {
   mdash: "-",
   quot: "\""
 };
+
+const CATEGORY_GROUP_RULES = [
+  { label: "Resistors", pattern: /resistor/i },
+  { label: "Capacitors", pattern: /capacitor/i },
+  { label: "Diodes", pattern: /diode|zener|schottky|tvs/i },
+  { label: "Transistors & MOSFETs", pattern: /mosfet|transistor|bjt|darlington|igbt|triac|thyristor/i },
+  { label: "Connectors & Terminals", pattern: /connector|terminal block|pin header|jst|rj45|rj11|d-type|wago|audio\s*&\s*video connector|rf connectors/i },
+  { label: "Switches & Relays", pattern: /switch|relay/i },
+  { label: "Batteries & Chargers", pattern: /battery|batteries|charger|holders?\s*&\s*connectors/i },
+  { label: "ICs & Controllers", pattern: /\bic(s)?\b|74 series|40 series|op amp|memory\/eeprom|microcontroller|logic|controller|regulator|optocoupler|special purpose/i },
+  { label: "Modules & Boards", pattern: /modules?|development boards|arduino boards|boards?|ai-thinker/i },
+  { label: "Motors & Drivers", pattern: /motors?|servo|drivers/i },
+  { label: "LEDs & Displays", pattern: /\bleds?\b|led smd|7-segment|displays?/i },
+  { label: "Meters & Tools", pattern: /tools?|multimeter|meter|tester|measurement|soldering|fnirsi|uni-t|kyoritsu|sanwa/i },
+  { label: "Power Supplies & Converters", pattern: /power supply|converters?/i }
+];
 
 function decodeHtmlEntities(value) {
   return String(value ?? "").replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity) => {
@@ -62,13 +81,25 @@ function clampText(value, maxLength) {
   return `${text.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
 }
 
+function getCategoryGroupLabel(categoryName) {
+  const rawCategory = String(categoryName ?? "").trim();
+
+  if (!rawCategory) {
+    return "Other";
+  }
+
+  const matchingRule = CATEGORY_GROUP_RULES.find((rule) => rule.pattern.test(rawCategory));
+  return matchingRule ? matchingRule.label : rawCategory;
+}
+
 function normalizeCategory(categories) {
   if (!Array.isArray(categories) || categories.length === 0) {
     return "Other";
   }
 
   const firstNamed = categories.find((category) => String(category?.name ?? "").trim());
-  return decodeHtmlEntities(firstNamed?.name ?? "Other").trim() || "Other";
+  const normalizedName = decodeHtmlEntities(firstNamed?.name ?? "Other").trim() || "Other";
+  return getCategoryGroupLabel(normalizedName);
 }
 
 function mapProduct(product, sequence) {
@@ -99,6 +130,24 @@ function mapProduct(product, sequence) {
     inStock: Boolean(product?.is_in_stock),
     stockQty: product?.low_stock_remaining ?? null,
     order: 100000 + sequence
+  };
+}
+
+function toLiteProduct(product) {
+  return {
+    id: product.id,
+    sourceSite: product.sourceSite,
+    sourceProductId: product.sourceProductId,
+    sourceUrl: product.sourceUrl,
+    sku: product.sku,
+    name: product.name,
+    price: product.price,
+    category: product.category,
+    image: product.image,
+    badge: product.badge,
+    inStock: product.inStock,
+    stockQty: product.stockQty,
+    order: product.order
   };
 }
 
@@ -183,6 +232,14 @@ async function main() {
     products
   };
 
+  const litePayload = {
+    source: payload.source,
+    generatedAt: payload.generatedAt,
+    totalProducts: payload.totalProducts,
+    currency: payload.currency,
+    products: products.map(toLiteProduct)
+  };
+
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, JSON.stringify(payload, null, 2), "utf8");
   await writeFile(
@@ -190,9 +247,17 @@ async function main() {
     `globalThis.${EMBEDDED_GLOBAL_NAME} = ${JSON.stringify(payload, null, 2)};\n`,
     "utf8"
   );
+  await writeFile(OUTPUT_LITE_PATH, JSON.stringify(litePayload), "utf8");
+  await writeFile(
+    OUTPUT_LITE_JS_PATH,
+    `globalThis.${EMBEDDED_LITE_GLOBAL_NAME} = ${JSON.stringify(litePayload)};\n`,
+    "utf8"
+  );
 
   console.log(`Saved ${products.length} products to ${OUTPUT_PATH}`);
   console.log(`Saved embedded catalog to ${OUTPUT_JS_PATH}`);
+  console.log(`Saved ${litePayload.products.length} lite products to ${OUTPUT_LITE_PATH}`);
+  console.log(`Saved embedded lite catalog to ${OUTPUT_LITE_JS_PATH}`);
 }
 
 main().catch((error) => {

@@ -1013,7 +1013,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { 
   getFirestore, 
   collection, 
-  getDocs,
+  onSnapshot,
   query,
   orderBy 
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
@@ -1036,6 +1036,7 @@ let currentList = [];
 let activeSearchQuery = "";
 let currentPageNumber = 1;
 let localProductsCache = [];
+let importedProductsCache = [];
 let activeCategoryFilter = "الكل";
 let activeSortValue = "default";
 let isImportedCatalogLoading = false;
@@ -1043,6 +1044,8 @@ let importedCatalogError = "";
 let importedProductDetailsById = null;
 let importedProductDetailsPromise = null;
 let currentPopupProductKey = "";
+let hasLoadedLocalProducts = false;
+let storefrontViewInitialized = false;
 const PRODUCTS_PAGE_SIZE = 48;
 const IMPORTED_CATALOG_SCRIPT_URL = "data/makers-electronics-products-lite.js";
 const IMPORTED_CATALOG_URL = "data/makers-electronics-products-lite.json";
@@ -1090,6 +1093,43 @@ function getEmbeddedImportedProducts(){
   return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
 }
 
+function getImportedProductKey(product){
+  const explicitId = String(product?.id || "").trim();
+  const sourceSite = String(product?.sourceSite || "").trim().toLowerCase();
+  const sourceProductId = String(product?.sourceProductId || "").trim();
+
+  if(explicitId && (explicitId.startsWith("makers-") || (sourceSite && sourceProductId))){
+    return explicitId;
+  }
+
+  if(sourceSite && sourceProductId){
+    return `${sourceSite}::${sourceProductId}`;
+  }
+
+  return "";
+}
+
+function getProductMergeKey(product){
+  const importedKey = getImportedProductKey(product);
+
+  if(importedKey){
+    return `imported:${importedKey}`;
+  }
+
+  const docId = String(product?.id || "").trim();
+
+  if(docId){
+    return `doc:${docId}`;
+  }
+
+  return [
+    "fallback",
+    normalizeSearchText(product?.name),
+    normalizeSearchText(product?.category),
+    Number(product?.price) || 0
+  ].join("__");
+}
+
 const dataScriptLoaders = new Map();
 
 function loadCatalogDataScript(src, globalName){
@@ -1117,15 +1157,7 @@ function loadCatalogDataScript(src, globalName){
 }
 
 function getProductDetailKey(product){
-  if(product?.id){
-    return String(product.id);
-  }
-
-  if(product?.sourceProductId){
-    return `makers-${product.sourceProductId}`;
-  }
-
-  return "";
+  return getImportedProductKey(product) || String(product?.id || "").trim();
 }
 
 function buildImportedDetailsMap(products){
@@ -1163,31 +1195,61 @@ function getProductRecencyValue(product){
   return 0;
 }
 
-function mergeProducts(...groups){
-  const merged = [];
-  const seen = new Set();
+function mergeProducts(localProducts = [], importedProducts = []){
+  const mergedByKey = new Map();
 
-  groups.flat().forEach((product) => {
+  localProducts.forEach((product) => {
     if(!product){
       return;
     }
 
-    const key = [
-      String(product.sourceSite || ""),
-      String(product.sourceProductId || ""),
-      normalizeSearchText(product.name),
-      Number(product.price) || 0
-    ].join("__");
+    mergedByKey.set(getProductMergeKey(product), product);
+  });
 
-    if(seen.has(key)){
+  importedProducts.forEach((product) => {
+    if(!product){
       return;
     }
 
-    seen.add(key);
-    merged.push(product);
+    const mergeKey = getProductMergeKey(product);
+
+    if(mergedByKey.has(mergeKey)){
+      return;
+    }
+
+    mergedByKey.set(mergeKey, product);
   });
 
-  return merged;
+  return Array.from(mergedByKey.values())
+    .filter((product) => product?.deleted !== true);
+}
+
+function syncMergedProducts(options = {}){
+  if(!hasLoadedLocalProducts){
+    return;
+  }
+
+  const { preservePage = storefrontViewInitialized } = options;
+
+  allProducts = mergeProducts(localProductsCache, importedProductsCache);
+  renderCategories();
+
+  if(!storefrontViewInitialized){
+    if(searchInput){
+      searchInput.value = initialSearchQuery;
+    }
+
+    if(initialSearchQuery){
+      applySearch(initialSearchQuery, { syncInput:false, syncUrl:false });
+    }else{
+      refreshProductsView({ preservePage:false });
+    }
+
+    storefrontViewInitialized = true;
+    return;
+  }
+
+  refreshProductsView({ preservePage });
 }
 
 async function fetchImportedProducts(){
@@ -1719,10 +1781,8 @@ async function hydrateImportedProducts(){
   renderResultsMeta(currentList.length);
 
   try{
-    const importedProducts = await fetchImportedProducts();
-    allProducts = mergeProducts(localProductsCache, importedProducts);
-    renderCategories();
-    refreshProductsView({ preservePage:true });
+    importedProductsCache = await fetchImportedProducts();
+    syncMergedProducts({ preservePage:true });
   }catch(error){
     console.error(error);
     importedCatalogError = "Imported catalog unavailable";
@@ -1733,39 +1793,30 @@ async function hydrateImportedProducts(){
   }
 }
 
-async function loadProducts(){
+function loadProducts(){
   const q = query(
     collection(db,"products"),
     orderBy("order","asc"),
     orderBy("createdAt","asc")
   );
 
-  const snapshot = await getDocs(q);
-  localProductsCache = [];
-
-  snapshot.forEach(doc=>{
-    localProductsCache.push({
-      id: doc.id,
-      ...doc.data()
-    });
-  });
-
-  allProducts = [...localProductsCache];
-  currentList = [...allProducts];
   isImportedCatalogLoading = true;
   importedCatalogError = "";
+  onSnapshot(q, (snapshot) => {
+    localProductsCache = [];
 
-  renderCategories();
+    snapshot.forEach((docSnap) => {
+      localProductsCache.push({
+        id: docSnap.id,
+        ...docSnap.data()
+      });
+    });
 
-  if(searchInput){
-    searchInput.value = initialSearchQuery;
-  }
-
-  if(initialSearchQuery){
-    applySearch(initialSearchQuery, { syncInput:false, syncUrl:false });
-  }else{
-    refreshProductsView();
-  }
+    hasLoadedLocalProducts = true;
+    syncMergedProducts();
+  }, (error) => {
+    console.error("Products snapshot could not be loaded:", error);
+  });
 
   if("requestIdleCallback" in window){
     window.requestIdleCallback(() => {
@@ -1801,5 +1852,6 @@ links.forEach(link => {
     <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>
   </div>
 </div>
+<script src="scripts/bridge-network.js"></script>
 </body>
 </html>

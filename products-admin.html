@@ -656,6 +656,22 @@ function getEmbeddedImportedProducts(){
   return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
 }
 
+function getImportedProductKey(product){
+  const explicitId = String(product?.id || "").trim();
+  const sourceSite = String(product?.sourceSite || "").trim().toLowerCase();
+  const sourceProductId = String(product?.sourceProductId || "").trim();
+
+  if(explicitId && (explicitId.startsWith("makers-") || (sourceSite && sourceProductId))){
+    return explicitId;
+  }
+
+  if(sourceSite && sourceProductId){
+    return `${sourceSite}::${sourceProductId}`;
+  }
+
+  return "";
+}
+
 function findCatalogItemByPath(path){
   const normalizedPath = normalizePath(path);
   return localImageCatalog.find((item) => normalizePath(item.path) === normalizedPath) || null;
@@ -841,6 +857,8 @@ function buildImportedFirestoreProduct(product, existsAlready){
     description: product.description || product.use || "",
     badge: product.badge || "",
     inStock: product.inStock !== false,
+    deleted: false,
+    hiddenFromImport: false,
     stockQty: Number.isFinite(Number(product.stockQty)) ? Math.max(0, Number(product.stockQty)) : null,
     order: Number.isFinite(Number(product.order)) ? Number(product.order) : 9999,
     sourceSite: product.sourceSite || MAKERS_SOURCE_SITE,
@@ -937,10 +955,16 @@ function startProductsListener(){
     allProducts = [];
 
     snapshot.forEach(docSnap=>{
-      allProducts.push({
+      const product = {
         id: docSnap.id,
         ...docSnap.data()
-      });
+      };
+
+      if(product.deleted === true){
+        return;
+      }
+
+      allProducts.push(product);
     });
 
     // 🔥 نحط order = 9999 للقديم (مرة واحدة)
@@ -1264,7 +1288,7 @@ window.importMakersCatalogToFirestore = async function(){
       const batch = writeBatch(db);
 
       chunk.forEach((product) => {
-        const docId = String(product.id || `makers-${product.sourceProductId || ""}`);
+        const docId = String(getImportedProductKey(product) || `makers-${product.sourceProductId || ""}`);
         const existsAlready = existingIds.has(docId);
         const docRef = doc(db, "products", docId);
         const firestoreProduct = buildImportedFirestoreProduct(product, existsAlready);
@@ -1313,6 +1337,12 @@ window.saveProduct = async function(){
   }
 
   try{
+    const currentProduct = editId
+      ? allProducts.find((product) => product.id === editId) || null
+      : null;
+    const nextFullImage = image
+      ? (currentProduct?.image === image ? (currentProduct.fullImage || image) : image)
+      : LOCAL_FALLBACK_IMAGE;
 
     if(editId){
       await updateDoc(doc(db,"products",editId),{
@@ -1320,9 +1350,12 @@ window.saveProduct = async function(){
         price,
         category,
         image,
+        fullImage: nextFullImage,
         use,
+        description: use,
         badge,
-        inStock
+        inStock,
+        updatedAt: serverTimestamp()
       });
       showToast("تم التعديل ✅","success");
     }else{
@@ -1403,6 +1436,100 @@ window.bulkUpload = async function(){
     showToast("حصل خطأ ❌","error");
   }
 }
+window.deleteProduct = async function(id){
+  if(!confirm("هل أنت متأكد من الحذف؟")) return;
+
+  const product = allProducts.find((item) => item.id === id);
+
+  try{
+    if(product && getImportedProductKey(product)){
+      await updateDoc(doc(db,"products",id),{
+        deleted: true,
+        hiddenFromImport: true,
+        updatedAt: serverTimestamp()
+      });
+    }else{
+      await deleteDoc(doc(db,"products",id));
+    }
+
+    showToast("تم الحذف","success");
+  }catch(error){
+    console.error(error);
+    showToast("في مشكلة أثناء الحذف","error");
+  }
+};
+
+window.saveProduct = async function(){
+
+  const name = document.getElementById("pName").value.trim();
+  const price = Number(document.getElementById("pPrice").value);
+  const category = document.getElementById("pCategory").value.trim();
+  const image = document.getElementById("pImage").value.trim();
+  const use = document.getElementById("pUse").value.trim();
+  const badge = document.getElementById("pBadge").value.trim();
+  const inStock = document.getElementById("pStock").checked;
+
+  if(!name || price <= 0){
+    alert("الاسم والسعر مطلوبين");
+    return;
+  }
+
+  try{
+    const currentProduct = editId
+      ? allProducts.find((product) => product.id === editId) || null
+      : null;
+    const nextFullImage = image
+      ? (currentProduct?.image === image ? (currentProduct.fullImage || image) : image)
+      : LOCAL_FALLBACK_IMAGE;
+
+    if(editId){
+      await updateDoc(doc(db,"products",editId),{
+        name,
+        price,
+        category,
+        image,
+        fullImage: nextFullImage,
+        use,
+        description: use,
+        badge,
+        inStock,
+        deleted: false,
+        hiddenFromImport: false,
+        updatedAt: serverTimestamp()
+      });
+
+      showToast("تم التعديل ✅","success");
+    }else{
+      await addDoc(collection(db,"products"),{
+        name,
+        price,
+        category,
+        image,
+        fullImage: image || LOCAL_FALLBACK_IMAGE,
+        use,
+        description: use,
+        badge,
+        inStock,
+        deleted: false,
+        hiddenFromImport: false,
+        order: 9999,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      showToast("تمت الإضافة ✅","success");
+    }
+
+    editId = null;
+    resetForm();
+    closeModal();
+
+  }catch(error){
+    console.error(error);
+    showToast("في مشكلة أثناء الحفظ","error");
+  }
+};
+
 function resetForm(){
   document.getElementById("pName").value = "";
   document.getElementById("pPrice").value = "";

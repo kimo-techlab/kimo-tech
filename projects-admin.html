@@ -154,6 +154,8 @@ img{
   padding:10px 15px;
   border-radius:8px;
   display:none;
+  max-width:calc(100vw - 24px);
+  z-index:9999;
 }
 #bulkInput{
   width:100%;
@@ -169,20 +171,27 @@ img{
   resize:vertical;
 }
 </style>
+<link rel="stylesheet" href="admin-ui.css">
+<script src="admin-ui.js" defer></script>
 </head>
 
-<body>
+<body class="admin-page" data-admin-page="projects">
 
 <div class="container">
-<h1>🧠 إدارة المشاريع</h1>
+<div class="admin-page-header">
+  <div>
+    <h1>🧠 إدارة المشروعات</h1>
+    <p class="admin-page-subtitle">نظّم المشروعات وعدّل السعر والوصف والصورة وحالة التوفر بسهولة.</p>
+  </div>
+</div>
 
 <div class="top-bar">
 <button class="back-btn" onclick="window.location.href='./admin.html'">
 ⬅ رجوع
 </button>
   <div>
-    <input type="text" id="searchInput" class="search" placeholder="🔍 بحث">
-    <select id="categoryFilter" class="search">
+    <input type="search" id="searchInput" class="search" placeholder="ابحث في المشروعات" aria-label="البحث في المشروعات">
+    <select id="categoryFilter" class="search" aria-label="فلترة المشروعات حسب التصنيف">
   <option value="all">كل التصنيفات</option>
 </select>
     <button class="add-btn" onclick="openModal()">➕ إضافة مشروع</button>
@@ -191,7 +200,7 @@ img{
 
 <div class="table">
 <div class="table-header">
-  <div>Order</div>
+  <div>الترتيب</div>
   <div>الصورة</div>
   <div>الاسم</div>
   <div>السعر</div>
@@ -199,12 +208,14 @@ img{
   <div>الحالة</div>
   <div>إجراءات</div>
 </div>
-  <div id="projectsContainer"></div>
+  <div id="projectsContainer" aria-live="polite">
+    <div class="admin-loading">جاري تحميل المشروعات...</div>
+  </div>
 </div>
 </div>
 
 <!-- Modal -->
-<div class="modal" id="projectModal">
+<div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-content">
 <h3 id="modalTitle">إضافة مشروع</h3>
 
@@ -216,22 +227,22 @@ img{
 
 <select id="pBadge">
   <option value="">بدون Badge</option>
-  <option value="Original">Original</option>
-  <option value="New">New</option>
-  <option value="Popular">Popular</option>
-  <option value="Student">Student</option>
+  <option value="Original">أصلي</option>
+  <option value="New">جديد</option>
+  <option value="Popular">الأكثر طلبًا</option>
+  <option value="Student">مناسب للطلاب</option>
 </select>
 
 <label style="display:flex;align-items:center;gap:8px;">
   <input type="checkbox" id="pStock" checked>
-  In Stock
+  متاح
 </label>
 
-<button class="add-btn" onclick="saveProject()">حفظ</button>
+<button class="add-btn" id="projectSaveBtn" type="button" onclick="saveProject()">حفظ</button>
 <button onclick="closeModal()">إلغاء</button>
 <hr>
 
-<h4>🚀 Developer Bulk Mode</h4>
+<h4>إضافة مجموعة مشروعات</h4>
 
 <textarea id="bulkInput" 
   placeholder='[
@@ -242,7 +253,7 @@ img{
 
 <button onclick="bulkUpload()" 
   style="background:#111;color:#fff;padding:10px;border-radius:10px;">
-  Bulk Upload
+  رفع المجموعة
 </button>
   </div>
 </div>
@@ -284,6 +295,8 @@ const auth = getAuth(app);
 
 let currentRole = null;
 let allprojects = [];
+let projectsLoaded = false;
+let projectsLoadFailed = false;
 document.getElementById("searchInput").addEventListener("keyup", filterprojects);
 
 function escapeHtml(text){
@@ -293,6 +306,15 @@ function escapeHtml(text){
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function getOrderValue(value){
+  if(value === null || value === undefined || value === ""){
+    return 9999;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 9999;
 }
 
 function parseBulkCollectionInput(raw){
@@ -314,6 +336,9 @@ function parseBulkCollectionInput(raw){
 }
 
 function filterprojects(){
+  if(!projectsLoaded || projectsLoadFailed){
+    return;
+  }
 
   const q = document.getElementById("searchInput").value.toLowerCase();
   const selectedCategory = document.getElementById("categoryFilter").value;
@@ -342,65 +367,70 @@ let editId = null;
 /* ================= حماية الصفحة ================= */
 
 onAuthStateChanged(auth, async (user) => {
-
   if (!user) {
     window.location.href = "admin-login.html";
     return;
   }
 
-  const userDoc = await getDoc(doc(db,"users",user.uid));
+  try{
+    const userDoc = await getDoc(doc(db,"users",user.uid));
 
-  if(!userDoc.exists()){
-    window.location.href = "admin-login.html";
-    return;
+    if(!userDoc.exists()){
+      window.location.href = "admin-login.html";
+      return;
+    }
+
+    currentRole = String(userDoc.data().role || "").trim().toLowerCase();
+
+    if(currentRole !== "owner"){
+      alert("غير مصرح لك بالدخول");
+      window.location.href = "dashboard.html";
+      return;
+    }
+
+    sessionStorage.setItem("adminRole", currentRole);
+    window.setAdminNavigationRole?.(currentRole);
+    startprojectsListener();
+  }catch(error){
+    console.error(error);
+    showProjectsState("تعذر التحقق من صلاحية الدخول. تأكد من اتصال الإنترنت ثم حدّث الصفحة.");
   }
-
-  currentRole = userDoc.data().role;
-
-  if(currentRole !== "owner"){
-    alert("غير مصرح لك بالدخول");
-    window.location.href = "dashboard.html";
-    return;
-  }
-
-  startprojectsListener();
 });
 
 /* ================= تحميل مشروع ================= */
 
+function showProjectsState(message){
+  projectsLoaded = true;
+  projectsLoadFailed = true;
+  document.getElementById("projectsContainer").innerHTML = `
+    <div class="admin-empty">${escapeHtml(message)}</div>
+  `;
+}
+
 function startprojectsListener(){
-
-  onSnapshot(collection(db,"projects"), async snapshot=>{
-
-    allprojects = [];
-
-    snapshot.forEach(docSnap=>{
-      allprojects.push({
+  onSnapshot(collection(db,"projects"), snapshot=>{
+    allprojects = snapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...docSnap.data()
-      });
-    });
+    }));
 
-    // 🔥 نحط order = 9999 للقديم (مرة واحدة)
-    for(const p of allprojects){
-      if(p.order === undefined){
-        await updateDoc(doc(db,"projects",p.id),{
-          order: 9999
-        });
-      }
-    }
-
-    // 🔥 هنا بقى الترتيب الصح
     allprojects.sort((a,b)=>{
-      if(a.order === b.order){
+      const orderA = getOrderValue(a.order);
+      const orderB = getOrderValue(b.order);
+
+      if(orderA === orderB){
         return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
       }
-      return (a.order || 9999) - (b.order || 9999);
+      return orderA - orderB;
     });
 
+    projectsLoaded = true;
+    projectsLoadFailed = false;
     populateCategories();
     filterprojects();
-
+  }, error=>{
+    console.error(error);
+    showProjectsState("تعذر تحميل المشروعات من قاعدة البيانات. حاول تحديث الصفحة.");
   });
 }
 
@@ -426,14 +456,15 @@ window.updateOrder = async function(id, newOrder){
 
   const orderNumber = Number(newOrder);
 
-  if(isNaN(orderNumber)){
+  if(String(newOrder).trim() === "" || !Number.isFinite(orderNumber)){
     showToast("رقم غير صحيح ❌","error");
     return;
   }
 
   try{
     await updateDoc(doc(db,"projects",id),{
-      order: orderNumber
+      order: orderNumber,
+      updatedAt: serverTimestamp()
     });
 
     showToast("تم تحديث الترتيب ✅","success");
@@ -449,16 +480,27 @@ function renderprojects(list){
   const container = document.getElementById("projectsContainer");
   container.innerHTML = "";
 
+  if(!list.length){
+    const hasActiveFilters =
+      document.getElementById("searchInput").value.trim() ||
+      document.getElementById("categoryFilter").value !== "all";
+    const emptyMessage = hasActiveFilters
+      ? "لا توجد مشروعات مطابقة للبحث أو التصنيف الحالي."
+      : "لا توجد مشروعات مضافة حتى الآن.";
+    container.innerHTML = `<div class="admin-empty">${emptyMessage}</div>`;
+    return;
+  }
+
   list.forEach(p=>{
-    const orderValue = Number.isFinite(Number(p.order)) ? Number(p.order) : 9999;
+    const orderValue = getOrderValue(p.order);
     const imageUrl = escapeHtml(p.image || "images/no-image.png");
     const name = escapeHtml(p.name || "");
     const badge = escapeHtml(p.badge || "");
     const category = escapeHtml(p.category || "-");
-    const priceLabel = Number.isFinite(Number(p.price)) ? `${Number(p.price)} EGP` : "—";
+    const priceLabel = Number.isFinite(Number(p.price)) ? `${Number(p.price)} ج.م` : "—";
     const stockClass = p.inStock ? "stock-yes" : "stock-no";
-    const stockLabel = p.inStock ? "In Stock" : "Out";
-    const projectId = JSON.stringify(p.id);
+    const stockLabel = p.inStock ? "متاح" : "غير متاح";
+    const projectId = escapeHtml(JSON.stringify(p.id));
 
     container.innerHTML += `
   <div class="table-row">
@@ -472,7 +514,7 @@ function renderprojects(list){
   >
 </div>
     <div>
-      <img src="${imageUrl}" alt="${name}"
+      <img src="${imageUrl}" alt="${name}" onerror="this.src='images/no-image.png';this.onerror=null;"
       style="width:60px;height:60px;object-fit:cover;border-radius:10px;">
     </div>
 
@@ -489,9 +531,9 @@ function renderprojects(list){
         </div>
 
         <div>
-          <button class="action-btn toggle" onclick='toggleStock(${projectId}, ${Boolean(p.inStock)})'>Toggle</button>
-          <button class="action-btn edit" onclick='editProduct(${projectId})'>Edit</button>
-          <button class="action-btn delete" onclick='deleteProduct(${projectId})'>🗑</button>
+          <button class="action-btn toggle" type="button" onclick='toggleStock(${projectId}, ${Boolean(p.inStock)})'>تبديل الحالة</button>
+          <button class="action-btn edit" type="button" onclick='editProduct(${projectId})'>تعديل</button>
+          <button class="action-btn delete" type="button" onclick='deleteProduct(${projectId})'>حذف</button>
         </div>
       </div>
     `;
@@ -502,15 +544,27 @@ function renderprojects(list){
 
 window.deleteProduct = async function(id){
   if(!confirm("متأكد من الحذف؟")) return;
-  await deleteDoc(doc(db,"projects",id));
-  showToast("تم الحذف");
+
+  try{
+    await deleteDoc(doc(db,"projects",id));
+    showToast("تم حذف المشروع","success");
+  }catch(error){
+    console.error(error);
+    showToast("تعذر حذف المشروع","error");
+  }
 }
 
 window.toggleStock = async function(id,current){
-  await updateDoc(doc(db,"projects",id),{
-    inStock: !current
-  });
-  showToast("تم التحديث");
+  try{
+    await updateDoc(doc(db,"projects",id),{
+      inStock: !current,
+      updatedAt: serverTimestamp()
+    });
+    showToast("تم تحديث حالة المشروع","success");
+  }catch(error){
+    console.error(error);
+    showToast("تعذر تحديث حالة المشروع","error");
+  }
 }
 
 
@@ -518,6 +572,11 @@ window.toggleStock = async function(id,current){
 
 window.editProduct = function(id){
   const p = allprojects.find(x=>x.id===id);
+  if(!p){
+    showToast("تعذر العثور على المشروع","error");
+    return;
+  }
+
   editId = id;
 
   document.getElementById("modalTitle").innerText = "تعديل مشروع";
@@ -555,11 +614,14 @@ window.saveProject = async function(){
   const badge = document.getElementById("pBadge").value.trim();
   const inStock = document.getElementById("pStock").checked;
 
-  if(!name)
-  {
+  if(!name || !Number.isFinite(price) || price <= 0){
     alert("الاسم والسعر مطلوبين");
     return;
   }
+
+  const saveButton = document.getElementById("projectSaveBtn");
+  saveButton.disabled = true;
+  saveButton.textContent = "جاري الحفظ...";
 
   try{
 
@@ -571,7 +633,8 @@ if(editId){
     image,
     description, // ✅ الصح
     badge,
-    inStock
+    inStock,
+    updatedAt: serverTimestamp()
   });
       showToast("تم التعديل ✅","success");
     }else{
@@ -584,7 +647,8 @@ await addDoc(collection(db,"projects"),{
   badge,
   inStock,
   order: 9999,
-  createdAt: serverTimestamp()
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
 });
       showToast("تمت الإضافة ✅","success");
     }
@@ -592,11 +656,14 @@ await addDoc(collection(db,"projects"),{
     // 👇 هنا السر
     editId = null;
     resetForm();
-    closeModal();
+    window.closeModal();
 
   }catch(error){
     console.error(error);
     showToast("في مشكلة ❌","error");
+  }finally{
+    saveButton.disabled = false;
+    saveButton.textContent = "حفظ";
   }
 }
 window.bulkUpload = async function(){
@@ -622,20 +689,32 @@ window.bulkUpload = async function(){
     return;
   }
 
+  const invalidIndex = projects.findIndex((project) =>
+    !String(project?.name || "").trim() ||
+    !Number.isFinite(Number(project?.price)) ||
+    Number(project.price) <= 0
+  );
+
+  if(invalidIndex !== -1){
+    alert(`المشروع رقم ${invalidIndex + 1} يحتاج اسمًا وسعرًا صحيحًا أكبر من صفر`);
+    return;
+  }
+
   try{
 
     for(const p of projects){
 
      await addDoc(collection(db,"projects"),{
-  name: p.name,
+  name: String(p.name).trim(),
   price: Number(p.price),
   category: p.cat || p.category || "",
   image: p.image || p.img || "",
   description: p.description || "", // ✅ المهم
   badge: p.badge || "",
-  inStock: true,
-  order: 9999, // 👈 مهم
-  createdAt: serverTimestamp()
+  inStock: p.inStock !== false,
+  order: getOrderValue(p.order),
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
 });
 
     }
@@ -660,18 +739,31 @@ function resetForm(){
 }
 
 
-window.showToast = function(message){
+function showToast(message, type = "success"){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.background = type === "error" ? "#dc2626" : "#111827";
+  toast.style.display = "block";
 
-const toast = document.getElementById("toast");
-
-toast.innerText = message;
-toast.style.display = "block";
-
-setTimeout(()=>{
-toast.style.display="none";
-},3000);
-
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(()=>{
+    toast.style.display = "none";
+  },3000);
 }
+
+window.showToast = showToast;
+
+document.getElementById("projectModal").addEventListener("click", (event) => {
+  if(event.target === event.currentTarget){
+    window.closeModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if(event.key === "Escape" && document.getElementById("projectModal").style.display === "flex"){
+    window.closeModal();
+  }
+});
 </script>
 
 </body>

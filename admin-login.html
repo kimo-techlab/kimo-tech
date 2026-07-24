@@ -7,81 +7,53 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Login | KIMO TECH</title>
+<title>تسجيل دخول الإدارة | KIMO TECH</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
-<style>
-body{
-  margin:0;
-  font-family:'Cairo',sans-serif;
-  background:#0f172a;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-.login-box{
-  background:#fff;
-  padding:40px;
-  border-radius:20px;
-  width:350px;
-  text-align:center;
-  box-shadow:0 15px 40px rgba(0,0,0,.2);
-}
-
-h2{
-  margin-bottom:20px;
-}
-
-input{
-  width:100%;
-  padding:12px;
-  margin-top:15px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:14px;
-}
-
-button{
-  width:100%;
-  padding:12px;
-  margin-top:20px;
-  border:none;
-  border-radius:10px;
-  background:#22c55e;
-  color:#fff;
-  font-weight:bold;
-  font-size:15px;
-  cursor:pointer;
-  transition:.3s;
-}
-
-button:hover{
-  background:#16a34a;
-}
-
-.small{
-  font-size:12px;
-  color:#64748b;
-  margin-top:10px;
-}
-</style>
+<link rel="stylesheet" href="admin-ui.css">
+<script src="admin-ui.js" defer></script>
 </head>
 
-<body>
+<body class="admin-page admin-login-page" data-admin-page="login">
 
 <div class="login-box">
-  <h2>لوحة تحكم KIMO 👑</h2>
+  <div class="login-brand">
+    <span class="login-brand-mark" aria-hidden="true">K</span>
+    <span class="login-eyebrow">KIMO TECH</span>
+    <h1>تسجيل دخول الإدارة</h1>
+    <p class="login-description">أدخل بيانات الحساب الإداري للوصول إلى لوحة التحكم.</p>
+  </div>
 
-  <input type="email" id="adminEmail" placeholder="البريد الإلكتروني">
+  <form id="adminLoginForm" class="login-form" novalidate>
+    <div class="login-field">
+      <label for="adminEmail">البريد الإلكتروني</label>
+      <input
+        type="email"
+        id="adminEmail"
+        name="email"
+        placeholder="name@example.com"
+        autocomplete="username"
+        inputmode="email"
+        required
+      >
+    </div>
 
-  <input type="password" id="adminPass" placeholder="كلمة المرور">
+    <div class="login-field">
+      <label for="adminPass">كلمة المرور</label>
+      <input
+        type="password"
+        id="adminPass"
+        name="password"
+        placeholder="أدخل كلمة المرور"
+        autocomplete="current-password"
+        required
+      >
+    </div>
 
-  <button onclick="login()">دخول</button>
-
-  <div class="small">لو نسيت الباسورد غيره من Firebase</div>
+    <button type="submit" id="loginButton">تسجيل الدخول</button>
+    <p id="loginStatus" class="login-status" role="status" aria-live="polite"></p>
+  </form>
 </div>
 
 <script type="module">
@@ -90,8 +62,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { 
   getAuth, 
   signInWithEmailAndPassword,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
@@ -102,31 +80,150 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-/* لو المستخدم مسجل دخول بالفعل يدخل مباشرة */
-onAuthStateChanged(auth, (user) => {
-  if(user){
-    window.location.href = "admin.html";
+const form = document.getElementById("adminLoginForm");
+const emailInput = document.getElementById("adminEmail");
+const passwordInput = document.getElementById("adminPass");
+const loginButton = document.getElementById("loginButton");
+const loginStatus = document.getElementById("loginStatus");
+const allowedRoles = new Set(["owner", "admin"]);
+let submitting = false;
+let logoutRequested = new URLSearchParams(window.location.search).get("logout") === "1";
+
+function setStatus(message = "", type = ""){
+  loginStatus.textContent = message;
+  loginStatus.className = `login-status${type ? ` ${type}` : ""}`;
+}
+
+function setLoading(isLoading){
+  loginButton.disabled = isLoading;
+  loginButton.textContent = isLoading ? "جارٍ التحقق..." : "تسجيل الدخول";
+  form.setAttribute("aria-busy", String(isLoading));
+}
+
+async function getAllowedRole(user){
+  const userSnapshot = await getDoc(doc(db, "users", user.uid));
+  const role = userSnapshot.exists()
+    ? String(userSnapshot.data().role || "").trim().toLowerCase()
+    : "";
+
+  return allowedRoles.has(role) ? role : null;
+}
+
+async function verifyAdminAccess(user){
+  const role = await getAllowedRole(user);
+
+  if(!role){
+    sessionStorage.removeItem("adminRole");
+    await signOut(auth).catch(()=>{});
+    setStatus("هذا الحساب غير مصرح له بالدخول إلى لوحة الإدارة.", "error");
+    return false;
   }
-});
 
-window.login = async function(){
+  sessionStorage.setItem("adminRole", role);
+  setStatus("تم التحقق. جارٍ فتح لوحة الإدارة...", "success");
+  window.location.replace("admin.html");
+  return true;
+}
 
-  const email = document.getElementById("adminEmail").value.trim();
-  const pass  = document.getElementById("adminPass").value.trim();
+const storedMessage = sessionStorage.getItem("adminAuthMessage");
+if(storedMessage){
+  sessionStorage.removeItem("adminAuthMessage");
+  setStatus(storedMessage, "error");
+}
 
-  if(!email || !pass){
-    alert("من فضلك املأ البيانات");
+onAuthStateChanged(auth, async (user) => {
+  if(logoutRequested){
+    sessionStorage.removeItem("adminRole");
+
+    if(user){
+      setLoading(true);
+      setStatus("جارٍ تسجيل الخروج...");
+
+      try{
+        await signOut(auth);
+        logoutRequested = false;
+        window.history.replaceState(null, "", "admin-login.html");
+        setLoading(false);
+        setStatus("تم تسجيل الخروج بنجاح.", "success");
+      }catch(error){
+        console.error("Logout failed:", error);
+        logoutRequested = false;
+        window.history.replaceState(null, "", "admin-login.html");
+        setLoading(false);
+        setStatus("تعذر تسجيل الخروج. حاول مرة أخرى.", "error");
+      }
+
+      return;
+    }
+
+    logoutRequested = false;
+    window.history.replaceState(null, "", "admin-login.html");
+    setLoading(false);
+    setStatus("تم تسجيل الخروج بنجاح.", "success");
     return;
   }
 
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-    window.location.href="admin.html";
-  }catch(err){
-    alert("بيانات غير صحيحة أو الحساب غير موجود");
+  if(!user || submitting){
+    if(!user){
+      sessionStorage.removeItem("adminRole");
+    }
+    return;
   }
-}
+
+  setLoading(true);
+  setStatus("جارٍ التحقق من صلاحية الحساب...");
+
+  try{
+    await verifyAdminAccess(user);
+  }catch(error){
+    console.error("Admin access check failed:", error);
+    await signOut(auth).catch(()=>{});
+    setStatus("تعذر التحقق من صلاحية الحساب. حاول مرة أخرى.", "error");
+  }finally{
+    setLoading(false);
+  }
+});
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if(!email || !password){
+    setStatus("من فضلك أدخل البريد الإلكتروني وكلمة المرور.", "error");
+    (!email ? emailInput : passwordInput).focus();
+    return;
+  }
+
+  submitting = true;
+  setLoading(true);
+  setStatus("جارٍ تسجيل الدخول...");
+
+  try{
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    await verifyAdminAccess(credential.user);
+  }catch(error){
+    console.error("Admin login failed:", error);
+
+    if(auth.currentUser){
+      await signOut(auth).catch(()=>{});
+    }
+
+    sessionStorage.removeItem("adminRole");
+    setStatus(
+      error?.code === "auth/too-many-requests"
+        ? "تم إيقاف المحاولات مؤقتًا. حاول لاحقًا."
+        : "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "error"
+    );
+  }finally{
+    submitting = false;
+    setLoading(false);
+  }
+});
 
 </script>
 

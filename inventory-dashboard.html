@@ -104,6 +104,10 @@ body{
   margin-bottom:18px;
 }
 
+body.admin-page[data-admin-page="inventory"] .stats-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
 .stat-card{
   background:rgba(255,255,255,.1);
   border:1px solid rgba(255,255,255,.12);
@@ -319,11 +323,46 @@ body{
   font-size:13px;
 }
 
+.inventory-field-label{
+  display:none;
+}
+
 .empty-state{
   padding:28px 16px;
   text-align:center;
   color:var(--muted);
   background:#fff;
+}
+
+.inventory-footer{
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  background:#fff;
+  border-top:1px solid var(--line);
+  font-size:13px;
+  font-weight:800;
+}
+
+.inventory-pagination{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+}
+
+.inventory-pagination button{
+  min-width:92px;
+  color:#fff;
+  background:#0f172a;
+}
+
+.inventory-page-status{
+  color:var(--text);
 }
 
 .toast{
@@ -350,7 +389,7 @@ body{
 .toast.error{background:#dc2626;}
 
 @media(max-width:1180px){
-  .stats-grid{
+  body.admin-page[data-admin-page="inventory"] .stats-grid{
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
@@ -361,7 +400,34 @@ body{
   .stock-row{
     grid-template-columns:1fr;
     gap:10px;
-    border-top:1px solid var(--line);
+    padding:16px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:0 8px 24px rgba(15,23,42,.06);
+  }
+
+  #inventoryRows{
+    padding:12px;
+    display:grid;
+    gap:12px;
+  }
+
+  .stock-row > div:not(.product-cell){
+    padding:10px 12px;
+    background:#f8fafc;
+    border-radius:12px;
+  }
+
+  .inventory-field-label{
+    margin-bottom:5px;
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    font-weight:900;
+  }
+
+  .row-actions .inventory-field-label{
+    width:100%;
   }
 }
 
@@ -374,7 +440,7 @@ body{
     grid-template-columns:1fr;
   }
 
-  .stats-grid{
+  body.admin-page[data-admin-page="inventory"] .stats-grid{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
@@ -384,8 +450,8 @@ body{
     padding:22px 12px 36px;
   }
 
-  .stats-grid{
-    grid-template-columns:1fr;
+  body.admin-page[data-admin-page="inventory"] .stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
   .product-cell{
@@ -400,13 +466,29 @@ body{
     flex:1;
     width:auto;
   }
+
+  .inventory-footer{
+    align-items:stretch;
+  }
+
+  .inventory-pagination{
+    justify-content:space-between;
+  }
+}
+
+@media(max-width:380px){
+  body.admin-page[data-admin-page="inventory"] .stats-grid{
+    grid-template-columns:1fr;
+  }
 }
 </style>
+<link rel="stylesheet" href="admin-ui.css">
+<script src="admin-ui.js" defer></script>
 </head>
-<body>
+<body class="admin-page" data-admin-page="inventory">
 
 <div class="container">
-  <div class="page-head">
+  <div class="page-head admin-page-header">
     <div>
       <h1>لوحة المخزون</h1>
       <p>تابع الكميات الموجودة وحدد بسرعة إيه اللي متاح، قليل، أو خلص.</p>
@@ -444,18 +526,18 @@ body{
 
   <section class="controls-panel">
     <div class="filters">
-      <input id="searchInput" class="search-input" type="text" placeholder="ابحث بالاسم أو التصنيف">
-      <select id="statusFilter" class="filter-select">
+      <input id="searchInput" class="search-input" type="search" placeholder="ابحث بالاسم أو التصنيف" aria-label="البحث في المخزون">
+      <select id="statusFilter" class="filter-select" aria-label="فلترة المخزون حسب الحالة">
         <option value="all">كل الحالات</option>
         <option value="available">متاح</option>
         <option value="low">قليل</option>
         <option value="out">خلصان</option>
         <option value="unknown">بدون كمية</option>
       </select>
-      <select id="categoryFilter" class="filter-select">
+      <select id="categoryFilter" class="filter-select" aria-label="فلترة المخزون حسب التصنيف">
         <option value="all">كل التصنيفات</option>
       </select>
-      <select id="sortFilter" class="filter-select">
+      <select id="sortFilter" class="filter-select" aria-label="ترتيب نتائج المخزون">
         <option value="name">ترتيب: الاسم</option>
         <option value="qty-desc">ترتيب: الأعلى كمية</option>
         <option value="qty-asc">ترتيب: الأقل كمية</option>
@@ -473,7 +555,17 @@ body{
         <div>إجراء</div>
       </div>
 
-      <div id="inventoryRows"></div>
+      <div id="inventoryRows" aria-live="polite">
+        <div class="admin-loading">جاري تحميل بيانات المخزون...</div>
+      </div>
+      <div class="inventory-footer">
+        <span id="inventorySummary">جاري التحميل...</span>
+        <div class="inventory-pagination">
+          <button id="prevInventoryPageBtn" type="button" onclick="changeInventoryPage(-1)" disabled>السابق</button>
+          <span class="inventory-page-status" id="inventoryPageStatus">صفحة 1 من 1</span>
+          <button id="nextInventoryPageBtn" type="button" onclick="changeInventoryPage(1)" disabled>التالي</button>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -506,6 +598,7 @@ const firebaseConfig = {
 };
 
 const LOW_STOCK_LIMIT = 5;
+const INVENTORY_PAGE_SIZE = 50;
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -518,11 +611,15 @@ const sortFilter = document.getElementById("sortFilter");
 const rowsContainer = document.getElementById("inventoryRows");
 
 let allProducts = [];
+let filteredInventory = [];
+let currentInventoryPage = 1;
+let inventoryLoaded = false;
+let inventoryLoadFailed = false;
 
-searchInput.addEventListener("input", applyFilter);
-statusFilter.addEventListener("change", applyFilter);
-categoryFilter.addEventListener("change", applyFilter);
-sortFilter.addEventListener("change", applyFilter);
+searchInput.addEventListener("input", () => applyFilter({ resetPage:true }));
+statusFilter.addEventListener("change", () => applyFilter({ resetPage:true }));
+categoryFilter.addEventListener("change", () => applyFilter({ resetPage:true }));
+sortFilter.addEventListener("change", () => applyFilter({ resetPage:true }));
 
 onAuthStateChanged(auth, async (user) => {
   if(!user){
@@ -530,25 +627,36 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const userDoc = await getDoc(doc(db, "users", user.uid));
+  try{
+    const userDoc = await getDoc(doc(db, "users", user.uid));
 
-  if(!userDoc.exists()){
-    window.location.href = "admin-login.html";
-    return;
+    if(!userDoc.exists()){
+      window.location.href = "admin-login.html";
+      return;
+    }
+
+    const role = String(userDoc.data().role || "").trim().toLowerCase();
+
+    if(role !== "owner"){
+      alert("غير مصرح لك بالدخول");
+      window.location.href = "dashboard.html";
+      return;
+    }
+
+    sessionStorage.setItem("adminRole", role);
+    window.setAdminNavigationRole?.(role);
+    startInventoryListener();
+  }catch(error){
+    console.error(error);
+    showInventoryError("تعذر التحقق من صلاحية الدخول. تأكد من اتصال الإنترنت ثم حدّث الصفحة.");
   }
-
-  const role = userDoc.data().role;
-
-  if(role !== "owner"){
-    alert("غير مصرح لك بالدخول");
-    window.location.href = "dashboard.html";
-    return;
-  }
-
-  startInventoryListener();
 });
 
 function getStockQuantity(product){
+  if(product?.stockQty === null || product?.stockQty === undefined || product?.stockQty === ""){
+    return null;
+  }
+
   const parsed = Number(product.stockQty);
   return Number.isFinite(parsed) ? Math.max(0, parsed) : null;
 }
@@ -576,7 +684,7 @@ function formatDate(value){
 }
 
 function formatPrice(value){
-  return `${Number(value) || 0} EGP`;
+  return `${Number(value) || 0} ج.م`;
 }
 
 function escapeHtml(text){
@@ -597,6 +705,31 @@ function showToast(message, type = "success"){
   showToast.timer = setTimeout(() => {
     toast.className = `toast ${type}`;
   }, 2600);
+}
+
+function updateInventoryPager(totalProducts){
+  const totalPages = Math.max(1, Math.ceil(totalProducts / INVENTORY_PAGE_SIZE));
+  currentInventoryPage = Math.min(Math.max(currentInventoryPage, 1), totalPages);
+
+  const firstVisible = totalProducts ? ((currentInventoryPage - 1) * INVENTORY_PAGE_SIZE) + 1 : 0;
+  const lastVisible = totalProducts ? Math.min(currentInventoryPage * INVENTORY_PAGE_SIZE, totalProducts) : 0;
+
+  document.getElementById("inventorySummary").textContent =
+    `${totalProducts} منتج • المعروض ${firstVisible}-${lastVisible}`;
+  document.getElementById("inventoryPageStatus").textContent =
+    `صفحة ${currentInventoryPage} من ${totalPages}`;
+  document.getElementById("prevInventoryPageBtn").disabled = currentInventoryPage <= 1;
+  document.getElementById("nextInventoryPageBtn").disabled = currentInventoryPage >= totalPages;
+}
+
+function showInventoryError(message){
+  inventoryLoaded = true;
+  inventoryLoadFailed = true;
+  rowsContainer.innerHTML = `<div class="admin-empty">${escapeHtml(message)}</div>`;
+  document.getElementById("inventorySummary").textContent = message;
+  document.getElementById("inventoryPageStatus").textContent = "صفحة 1 من 1";
+  document.getElementById("prevInventoryPageBtn").disabled = true;
+  document.getElementById("nextInventoryPageBtn").disabled = true;
 }
 
 function populateCategories(){
@@ -671,16 +804,30 @@ function getFilteredProducts(){
 }
 
 function renderInventory(list){
+  updateInventoryPager(list.length);
+
   if(!list.length){
-    rowsContainer.innerHTML = `<div class="empty-state">لا توجد منتجات مطابقة للفلتر الحالي.</div>`;
+    const hasActiveFilters =
+      searchInput.value.trim() ||
+      statusFilter.value !== "all" ||
+      categoryFilter.value !== "all";
+    const emptyMessage = hasActiveFilters
+      ? "لا توجد منتجات مطابقة للفلتر الحالي."
+      : "لا توجد منتجات مضافة إلى المخزون حتى الآن.";
+    rowsContainer.innerHTML = `<div class="admin-empty">${emptyMessage}</div>`;
     return;
   }
 
-  rowsContainer.innerHTML = list.map((product) => {
+  const startIndex = (currentInventoryPage - 1) * INVENTORY_PAGE_SIZE;
+  const visibleProducts = list.slice(startIndex, startIndex + INVENTORY_PAGE_SIZE);
+
+  rowsContainer.innerHTML = visibleProducts.map((product) => {
     const qty = getStockQuantity(product);
     const status = getStockStatus(product);
     const value = qty === null ? "" : qty;
     const placeholder = product.inStock ? "حدد الكمية" : "0";
+    const productId = escapeHtml(JSON.stringify(product.id));
+    const quantityInputId = `qty-${escapeHtml(product.id)}`;
 
     return `
       <div class="stock-row">
@@ -692,21 +839,37 @@ function renderInventory(list){
           </div>
         </div>
 
-        <div>${escapeHtml(product.category || "-")}</div>
-        <div class="price-pill">${formatPrice(product.price)}</div>
-
-        <div class="stock-editor">
-          <button class="step-btn" type="button" onclick="adjustQty('${product.id}', -1)">-</button>
-          <input id="qty-${product.id}" class="qty-input" type="number" min="0" value="${value}" placeholder="${placeholder}">
-          <button class="step-btn" type="button" onclick="adjustQty('${product.id}', 1)">+</button>
+        <div>
+          <span class="inventory-field-label">التصنيف</span>
+          ${escapeHtml(product.category || "-")}
+        </div>
+        <div class="price-pill">
+          <span class="inventory-field-label">السعر</span>
+          ${formatPrice(product.price)}
         </div>
 
-        <div><span class="status-pill ${status.key}">${status.label}</span></div>
-        <div class="muted">${formatDate(product.stockUpdatedAt || product.createdAt)}</div>
+        <div>
+          <span class="inventory-field-label">الكمية</span>
+          <div class="stock-editor">
+            <button class="step-btn" type="button" onclick='adjustQty(${productId}, -1)' aria-label="تقليل الكمية">-</button>
+            <input id="${quantityInputId}" class="qty-input" type="number" min="0" step="1" inputmode="numeric" value="${value}" placeholder="${placeholder}" aria-label="كمية ${escapeHtml(product.name || "المنتج")}">
+            <button class="step-btn" type="button" onclick='adjustQty(${productId}, 1)' aria-label="زيادة الكمية">+</button>
+          </div>
+        </div>
+
+        <div>
+          <span class="inventory-field-label">الحالة</span>
+          <span class="status-pill ${status.key}">${status.label}</span>
+        </div>
+        <div class="muted">
+          <span class="inventory-field-label">آخر تحديث</span>
+          ${formatDate(product.stockUpdatedAt || product.createdAt)}
+        </div>
 
         <div class="row-actions">
-          <button class="save-btn" type="button" onclick="saveStock('${product.id}')">حفظ</button>
-          <button class="out-btn" type="button" onclick="markOut('${product.id}')">خلص</button>
+          <span class="inventory-field-label">الإجراءات</span>
+          <button class="save-btn" type="button" onclick='saveStock(${productId})'>حفظ</button>
+          <button class="out-btn" type="button" onclick='markOut(${productId})'>خلص</button>
         </div>
       </div>
     `;
@@ -718,29 +881,76 @@ function startInventoryListener(){
     allProducts = snapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data()
-    }));
+    })).filter((product) => product.deleted !== true);
 
+    inventoryLoaded = true;
+    inventoryLoadFailed = false;
     populateCategories();
     updateStats();
-    applyFilter();
+    applyFilter({ resetPage:false });
+  }, (error) => {
+    console.error(error);
+    showInventoryError("تعذر تحميل بيانات المخزون من قاعدة البيانات. حاول تحديث الصفحة.");
+    showToast("تعذر تحميل بيانات المخزون", "error");
   });
 }
 
-function applyFilter(){
-  renderInventory(getFilteredProducts());
+function applyFilter(options = {}){
+  if(!inventoryLoaded || inventoryLoadFailed){
+    return;
+  }
+
+  if(options.resetPage){
+    currentInventoryPage = 1;
+  }
+
+  filteredInventory = getFilteredProducts();
+  renderInventory(filteredInventory);
 }
 
 window.applyFilter = applyFilter;
 
+window.changeInventoryPage = function(direction){
+  const totalPages = Math.max(1, Math.ceil(filteredInventory.length / INVENTORY_PAGE_SIZE));
+  const nextPage = currentInventoryPage + Number(direction || 0);
+
+  if(nextPage < 1 || nextPage > totalPages){
+    return;
+  }
+
+  currentInventoryPage = nextPage;
+  renderInventory(filteredInventory);
+};
+
 window.adjustQty = function(id, delta){
   const input = document.getElementById(`qty-${id}`);
+  if(!input) return;
+
   const currentValue = Math.max(0, Number(input.value) || 0);
   input.value = currentValue + delta < 0 ? 0 : currentValue + delta;
 };
 
 window.saveStock = async function(id){
   const input = document.getElementById(`qty-${id}`);
-  const qty = Math.max(0, Number(input.value) || 0);
+  if(!input) return;
+
+  const rawValue = input.value.trim();
+  const parsedQuantity = Number(rawValue);
+
+  if(
+    rawValue === "" ||
+    !Number.isFinite(parsedQuantity) ||
+    !Number.isInteger(parsedQuantity) ||
+    parsedQuantity < 0
+  ){
+    showToast("اكتب كمية صحيحة تساوي صفر أو أكبر", "error");
+    input.focus();
+    return;
+  }
+
+  const qty = parsedQuantity;
+  const actionButtons = [...input.closest(".stock-row").querySelectorAll(".row-actions button")];
+  actionButtons.forEach((button) => button.disabled = true);
 
   try{
     await updateDoc(doc(db, "products", id), {
@@ -753,11 +963,15 @@ window.saveStock = async function(id){
   }catch(error){
     console.error(error);
     showToast("حصل خطأ في تحديث المخزون ❌", "error");
+  }finally{
+    actionButtons.forEach((button) => button.disabled = false);
   }
 };
 
 window.markOut = async function(id){
   const input = document.getElementById(`qty-${id}`);
+  if(!input) return;
+
   input.value = 0;
   await window.saveStock(id);
 };

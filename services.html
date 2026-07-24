@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>خدمات التصنيع والتصميم | KIMO TECH</title>
+  <meta name="description" content="خدمات KIMO TECH للطباعة ثلاثية الأبعاد، التصميمات الهندسية، والقطع والحفر بالليزر في الإسكندرية وجميع أنحاء مصر.">
+  <meta name="theme-color" content="#020617">
+  <meta property="og:title" content="خدمات التصنيع والتصميم | KIMO TECH">
+  <meta property="og:description" content="حوّل فكرتك إلى نموذج حقيقي: طباعة 3D، تصميم هندسي، وقطع بالليزر.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary:#0ea5e9;
+      --accent:#22c55e;
+      --accent-dark:#15803d;
+      --dark:#020617;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --surface:#ffffff;
+      --light:#f8fafc;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Cairo",sans-serif;
+      color:var(--ink);
+      background:var(--light);
+      overflow-x:hidden;
+    }
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+
+    .robot-bg{
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      background:
+        radial-gradient(circle at 50% 30%,rgba(14,165,233,.12),transparent 38%),
+        linear-gradient(rgba(2,6,23,.82),rgba(2,6,23,.92)),
+        url("images/robot-mark.png") center/72% no-repeat;
+      pointer-events:none;
+    }
+
+    .main-nav{
+      min-height:84px;
+      padding:14px 5%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+      position:sticky;
+      top:0;
+      z-index:50;
+      color:#fff;
+      background:rgba(2,6,23,.94);
+      border-bottom:1px solid rgba(148,163,184,.16);
+      backdrop-filter:blur(14px);
+    }
+    .logo{
+      flex:0 0 auto;
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:-1px;
+    }
+    .logo span{color:var(--accent)}
+    .nav-links{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:28px;
+      font-weight:800;
+    }
+    .nav-link{
+      padding:10px 0;
+      position:relative;
+      color:#e2e8f0;
+      transition:.2s ease;
+    }
+    .nav-link:hover,.nav-link.active{color:var(--accent)}
+    .nav-link::after{
+      content:"";
+      position:absolute;
+      right:0;
+      bottom:2px;
+      width:0;
+      height:3px;
+      border-radius:999px;
+      background:var(--accent);
+      transition:.2s ease;
+    }
+    .nav-link:hover::after,.nav-link.active::after{width:100%}
+    .cart-link{
+      min-height:44px;
+      padding:10px 17px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:14px;
+      background:rgba(255,255,255,.07);
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .hero{
+      min-height:520px;
+      padding:84px 5% 76px;
+      position:relative;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      overflow:hidden;
+      isolation:isolate;
+    }
+    .hero::before,.hero::after{
+      content:"";
+      position:absolute;
+      z-index:-1;
+      border-radius:50%;
+      filter:blur(8px);
+    }
+    .hero::before{
+      width:360px;height:360px;
+      top:-160px;right:-80px;
+      background:rgba(34,197,94,.17);
+    }
+    .hero::after{
+      width:430px;height:430px;
+      bottom:-260px;left:-100px;
+      background:rgba(14,165,233,.17);
+    }
+    .hero-content{
+      width:min(900px,100%);
+      text-align:center;
+    }
+    .eyebrow{
+      width:max-content;
+      max-width:100%;
+      margin:0 auto 18px;
+      padding:9px 16px;
+      color:#86efac;
+      background:rgba(34,197,94,.1);
+      border:1px solid rgba(134,239,172,.22);
+      border-radius:999px;
+      font-size:14px;
+      font-weight:800;
+    }
+    .hero h1{
+      margin:0;
+      font-size:clamp(38px,6vw,70px);
+      line-height:1.18;
+      letter-spacing:-2px;
+      text-wrap:balance;
+    }
+    .hero h1 span{color:var(--accent)}
+    .hero p{
+      max-width:740px;
+      margin:22px auto 0;
+      color:#cbd5e1;
+      font-size:clamp(16px,2vw,20px);
+      line-height:1.9;
+    }
+    .hero-actions{
+      margin-top:30px;
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .primary-btn,.secondary-btn{
+      min-height:52px;
+      padding:12px 22px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
+      border:none;
+      border-radius:14px;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+    }
+    .primary-btn{
+      color:#04130a;
+      background:var(--accent);
+      box-shadow:0 12px 30px rgba(34,197,94,.25);
+    }
+    .primary-btn:hover{transform:translateY(-2px);background:#4ade80}
+    .secondary-btn{
+      color:#fff;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .secondary-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.13)}
+
+    .page-shell{
+      position:relative;
+      z-index:2;
+      background:var(--light);
+    }
+    .services-section,.process-section,.request-section{
+      width:min(1220px,calc(100% - 40px));
+      margin:auto;
+      padding:76px 0;
+    }
+    .section-heading{
+      max-width:760px;
+      margin:0 auto 38px;
+      text-align:center;
+    }
+    .section-heading small{
+      color:var(--accent-dark);
+      font-weight:900;
+    }
+    .section-heading h2{
+      margin:8px 0 10px;
+      font-size:clamp(28px,4vw,42px);
+      letter-spacing:-1px;
+    }
+    .section-heading p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+    }
+
+    .service-filters{
+      margin-bottom:28px;
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .filter-btn{
+      padding:10px 17px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:#334155;
+      background:#fff;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+    .filter-btn:hover,.filter-btn.active{
+      color:#fff;
+      background:var(--ink);
+      border-color:var(--ink);
+    }
+
+    .service-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:22px;
+    }
+    .service-card{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:26px;
+      box-shadow:0 15px 45px rgba(15,23,42,.08);
+      transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+    }
+    .service-card:hover{
+      transform:translateY(-6px);
+      border-color:#bbf7d0;
+      box-shadow:0 24px 55px rgba(15,23,42,.13);
+    }
+    .service-visual{
+      min-height:200px;
+      padding:28px;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 35%,rgba(34,197,94,.23),transparent 33%),
+        linear-gradient(145deg,#07111f,#020617);
+    }
+    .service-visual::after{
+      content:"";
+      width:190px;height:190px;
+      position:absolute;
+      border:1px solid rgba(125,211,252,.18);
+      border-radius:40px;
+      transform:rotate(35deg);
+    }
+    .service-icon{
+      position:relative;
+      z-index:1;
+      font-size:72px;
+      line-height:1;
+      filter:drop-shadow(0 16px 24px rgba(34,197,94,.25));
+    }
+    .service-number{
+      position:absolute;
+      top:18px;
+      right:20px;
+      z-index:1;
+      color:rgba(255,255,255,.45);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:1px;
+    }
+    .service-body{
+      flex:1;
+      padding:26px;
+      display:flex;
+      flex-direction:column;
+    }
+    .service-tag{
+      width:max-content;
+      max-width:100%;
+      margin-bottom:12px;
+      padding:6px 11px;
+      color:#166534;
+      background:#dcfce7;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+    }
+    .service-card h3{margin:0;font-size:24px}
+    .service-card .summary{
+      min-height:76px;
+      margin:10px 0 18px;
+      color:var(--muted);
+      line-height:1.8;
+    }
+    .feature-list{
+      margin:0 0 24px;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:10px;
+    }
+    .feature-list li{
+      display:flex;
+      align-items:flex-start;
+      gap:9px;
+      color:#334155;
+      font-size:14px;
+      line-height:1.7;
+    }
+    .feature-list li::before{
+      content:"✓";
+      flex:0 0 22px;
+      width:22px;height:22px;
+      display:grid;
+      place-items:center;
+      color:#166534;
+      background:#dcfce7;
+      border-radius:50%;
+      font-size:12px;
+      font-weight:900;
+    }
+    .service-card .primary-btn{width:100%;margin-top:auto}
+    .price-link{
+      width:100%;
+      margin:0 0 10px;
+      padding:10px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#166534;
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+      border-radius:13px;
+      font-weight:900;
+      transition:background .2s ease,border-color .2s ease;
+    }
+    .price-link:hover{
+      background:#dcfce7;
+      border-color:#86efac;
+    }
+
+    .pricing-panel{
+      margin-top:34px;
+      padding:32px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:26px;
+      box-shadow:0 15px 45px rgba(15,23,42,.08);
+      scroll-margin-top:110px;
+    }
+    .pricing-head{
+      margin-bottom:24px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:20px;
+    }
+    .pricing-head small{
+      color:var(--accent-dark);
+      font-weight:900;
+    }
+    .pricing-head h3{
+      margin:5px 0 0;
+      font-size:clamp(24px,3vw,34px);
+    }
+    .pricing-head p{
+      max-width:520px;
+      margin:0;
+      color:var(--muted);
+      line-height:1.8;
+    }
+    .pricing-grid{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:13px;
+    }
+    .price-card{
+      min-width:0;
+      padding:20px;
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(145deg,#f8fafc,#fff);
+      border:1px solid var(--line);
+      border-radius:19px;
+    }
+    .price-card::before{
+      content:"";
+      width:58px;
+      height:4px;
+      position:absolute;
+      top:0;
+      right:20px;
+      border-radius:0 0 999px 999px;
+      background:var(--accent);
+    }
+    .material-name{
+      margin:0 0 14px;
+      color:var(--ink);
+      font-size:21px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+    .gram-price{
+      padding-bottom:14px;
+      border-bottom:1px solid var(--line);
+      color:var(--accent-dark);
+      line-height:1.2;
+    }
+    .gram-price strong{
+      font-size:30px;
+      font-weight:900;
+    }
+    .gram-price span{font-size:12px;font-weight:800}
+    .price-details{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+      color:#475569;
+      font-size:13px;
+      line-height:1.65;
+    }
+    .price-details strong{
+      display:block;
+      color:var(--ink);
+      font-size:14px;
+    }
+    .pricing-note{
+      margin:20px 0 0;
+      padding:14px 16px;
+      color:#475569;
+      background:#f8fafc;
+      border-radius:14px;
+      font-size:13px;
+      line-height:1.8;
+    }
+
+    .process-wrap{background:#fff;border-block:1px solid var(--line)}
+    .process-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+      counter-reset:steps;
+    }
+    .process-card{
+      padding:24px;
+      position:relative;
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      counter-increment:steps;
+    }
+    .process-card::before{
+      content:counter(steps,decimal-leading-zero);
+      display:block;
+      margin-bottom:24px;
+      color:var(--accent);
+      font-weight:900;
+      font-size:20px;
+    }
+    .process-card h3{margin:0 0 8px;font-size:18px}
+    .process-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.8}
+
+    .request-section{padding-bottom:90px}
+    .request-box{
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:minmax(280px,.78fr) minmax(0,1.22fr);
+      color:#fff;
+      background:var(--dark);
+      border-radius:30px;
+      box-shadow:0 25px 65px rgba(15,23,42,.2);
+    }
+    .request-copy{
+      padding:44px;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 20% 20%,rgba(34,197,94,.26),transparent 35%),
+        linear-gradient(145deg,#07111f,#020617);
+    }
+    .request-copy h2{margin:0;font-size:clamp(28px,4vw,42px);line-height:1.35}
+    .request-copy p{margin:16px 0 0;color:#cbd5e1;line-height:1.9}
+    .contact-list{
+      margin-top:28px;
+      display:grid;
+      gap:12px;
+      color:#e2e8f0;
+      font-size:14px;
+    }
+    .request-form{
+      padding:40px;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+      background:#fff;
+      color:var(--ink);
+    }
+    .field{display:grid;gap:8px}
+    .field.full{grid-column:1/-1}
+    .field label{font-weight:800;font-size:14px}
+    .field input,.field select,.field textarea{
+      width:100%;
+      border:1px solid #cbd5e1;
+      border-radius:13px;
+      padding:13px 14px;
+      outline:none;
+      color:var(--ink);
+      background:#fff;
+      transition:border-color .2s ease,box-shadow .2s ease;
+    }
+    .field textarea{min-height:120px;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(34,197,94,.12);
+    }
+    .form-note{
+      grid-column:1/-1;
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+    .submit-btn{grid-column:1/-1}
+
+    footer{
+      padding:48px 5% 24px;
+      color:#cbd5e1;
+      background:#000;
+    }
+    .footer-grid{
+      width:min(1200px,100%);
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr;
+      gap:34px;
+    }
+    footer h3{margin:0 0 12px;color:#fff}
+    footer p{margin:7px 0;line-height:1.8}
+    .footer-bottom{
+      width:min(1200px,100%);
+      margin:30px auto 0;
+      padding-top:20px;
+      text-align:center;
+      border-top:1px solid #1e293b;
+      font-size:13px;
+    }
+
+    [hidden]{display:none!important}
+
+    @media(max-width:980px){
+      .nav-links{gap:16px;font-size:14px}
+      .service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .service-card:last-child{grid-column:1/-1;width:calc(50% - 11px);margin:auto}
+      .pricing-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .process-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .request-box{grid-template-columns:1fr}
+    }
+
+    @media(max-width:720px){
+      .main-nav{
+        padding:14px;
+        flex-wrap:wrap;
+        gap:12px;
+      }
+      .logo{width:100%;text-align:center;font-size:25px}
+      .nav-links{
+        flex:1;
+        min-width:0;
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:7px;
+      }
+      .nav-link{
+        min-width:0;
+        padding:9px 3px;
+        text-align:center;
+        white-space:nowrap;
+        font-size:12px;
+        border-radius:11px;
+        background:rgba(255,255,255,.06);
+      }
+      .nav-link:nth-child(n+5){display:none}
+      .nav-link::after{display:none}
+      .cart-link{padding:9px 12px;font-size:0}
+      .cart-link span{font-size:18px}
+      .hero{min-height:500px;padding:68px 18px}
+      .hero h1{letter-spacing:-1px}
+      .hero-actions{display:grid}
+      .hero-actions a{width:100%}
+      .services-section,.process-section,.request-section{
+        width:min(100% - 28px,1220px);
+        padding:58px 0;
+      }
+      .service-grid{grid-template-columns:1fr}
+      .service-card:last-child{grid-column:auto;width:100%}
+      .service-visual{min-height:170px}
+      .pricing-panel{padding:22px}
+      .pricing-head{align-items:flex-start;flex-direction:column}
+      .pricing-grid{grid-template-columns:1fr}
+      .process-grid{grid-template-columns:1fr}
+      .request-copy,.request-form{padding:26px}
+      .request-form{grid-template-columns:1fr}
+      .field.full,.form-note,.submit-btn{grid-column:auto}
+      .footer-grid{grid-template-columns:1fr}
+    }
+
+    @media(max-width:420px){
+      .nav-links{grid-template-columns:repeat(4,minmax(68px,1fr));overflow-x:auto}
+      .nav-link{font-size:11px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{
+        scroll-behavior:auto!important;
+        transition-duration:.01ms!important;
+        animation-duration:.01ms!important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="robot-bg" aria-hidden="true"></div>
+
+  <nav class="main-nav" aria-label="التنقل الرئيسي">
+    <a class="logo" href="index.html" aria-label="KIMO TECH الرئيسية">KIMO <span>TECH</span></a>
+
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">الرئيسية</a>
+      <a class="nav-link" href="products.html">المنتجات</a>
+      <a class="nav-link" href="projects.html">المشروعات</a>
+      <a class="nav-link active" href="services.html" aria-current="page">الخدمات</a>
+      <a class="nav-link" href="index.html#why">من نحن</a>
+      <a class="nav-link" href="index.html#contact">تواصل معنا</a>
+    </div>
+
+    <a class="cart-link" href="checkout.html" aria-label="الذهاب إلى السلة">
+      <span aria-hidden="true">🛒</span> السلة
+    </a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow">من الفكرة إلى منتج حقيقي</div>
+        <h1>خدمات تصنيع وتصميم <span>لمشروعك</span></h1>
+        <p>
+          ابعت فكرتك أو ملفك، وفريق KIMO TECH يساعدك في الطباعة ثلاثية الأبعاد،
+          التصميم الهندسي، والقطع والحفر بالليزر لجميع الخامات بدقة وجودة مناسبة لمشروعك.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#request">اطلب عرض سعر <span aria-hidden="true">←</span></a>
+          <a class="secondary-btn" href="#services-list">استعرض الخدمات</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="page-shell">
+      <section class="services-section" id="services-list">
+        <div class="section-heading">
+          <small>خدمات KIMO TECH</small>
+          <h2>اختار الخدمة المناسبة لمشروعك</h2>
+          <p>كل طلب بيتراجع قبل التنفيذ لتحديد الخامة، المقاس، الدقة، والوقت المتوقع بشكل واضح.</p>
+        </div>
+
+        <div class="service-filters" role="group" aria-label="تصفية الخدمات">
+          <button class="filter-btn active" type="button" data-filter="all" aria-pressed="true">كل الخدمات</button>
+          <button class="filter-btn" type="button" data-filter="manufacturing" aria-pressed="false">تصنيع</button>
+          <button class="filter-btn" type="button" data-filter="design" aria-pressed="false">تصميم</button>
+        </div>
+
+        <div class="service-grid">
+          <article class="service-card" id="printing" data-category="manufacturing">
+            <div class="service-visual">
+              <span class="service-number">SERVICE 01</span>
+              <span class="service-icon" aria-hidden="true">🧊</span>
+            </div>
+            <div class="service-body">
+              <span class="service-tag">تصنيع حسب الطلب</span>
+              <h3>الطباعة ثلاثية الأبعاد</h3>
+              <p class="summary">طباعة نماذج وقطع مخصصة من ملف جاهز أو تصميم يتم تجهيزه معك.</p>
+              <ul class="feature-list">
+                <li>خامات PLA وABS وPETG وTPU وResin</li>
+                <li>نماذج أولية وقطع ميكانيكية ومجسمات</li>
+                <li>مراجعة الملف قبل الطباعة وتقدير الاستهلاك</li>
+                <li>تشطيب وتجميع بسيط حسب طبيعة القطعة</li>
+              </ul>
+              <a class="price-link" href="#printing-prices">عرض أسعار الخامات</a>
+              <button class="primary-btn service-order" type="button" data-service="الطباعة ثلاثية الأبعاد">اطلب الخدمة</button>
+            </div>
+          </article>
+
+          <article class="service-card" id="engineering-design" data-category="design">
+            <div class="service-visual">
+              <span class="service-number">SERVICE 02</span>
+              <span class="service-icon" aria-hidden="true">📐</span>
+            </div>
+            <div class="service-body">
+              <span class="service-tag">CAD & 3D Modeling</span>
+              <h3>التصميمات الهندسية</h3>
+              <p class="summary">تحويل فكرتك أو مقاساتك إلى موديل هندسي قابل للتصنيع والطباعة.</p>
+              <ul class="feature-list">
+                <li>تصميم أجزاء ومنتجات ثلاثية الأبعاد</li>
+                <li>رسومات تنفيذية ومقاسات دقيقة</li>
+                <li>تعديل وتحسين ملفات التصميم الحالية</li>
+                <li>تجهيز ملفات STL وSTEP وDXF حسب الطلب</li>
+              </ul>
+              <button class="primary-btn service-order" type="button" data-service="التصميمات الهندسية">اطلب الخدمة</button>
+            </div>
+          </article>
+
+          <article class="service-card" id="laser-cutting" data-category="manufacturing">
+            <div class="service-visual">
+              <span class="service-number">SERVICE 03</span>
+              <span class="service-icon" aria-hidden="true">⚡</span>
+            </div>
+            <div class="service-body">
+              <span class="service-tag">قص وحفر دقيق</span>
+              <h3>القطع بالليزر</h3>
+              <p class="summary">قص وحفر تصميماتك بالليزر على جميع الخامات بدقة، بما فيها الأكريليك.</p>
+              <ul class="feature-list">
+                <li>جميع الخامات، بما فيها الأكريليك والخشب وMDF</li>
+                <li>قص أشكال وحفر أسماء وشعارات</li>
+                <li>تجهيز ومراجعة ملفات DXF وSVG</li>
+                <li>تحديد الخامة والسُمك قبل اعتماد السعر</li>
+              </ul>
+              <button class="primary-btn service-order" type="button" data-service="القطع بالليزر">اطلب الخدمة</button>
+            </div>
+          </article>
+        </div>
+
+        <section class="pricing-panel" id="printing-prices" aria-labelledby="printing-prices-title">
+          <div class="pricing-head">
+            <div>
+              <small>أسعار الطباعة ثلاثية الأبعاد</small>
+              <h3 id="printing-prices-title">الخامات المتاحة وسعر كل خامة</h3>
+            </div>
+            <p>اختار الخامة المناسبة، والسعر النهائي بيتأكد بعد مراجعة الملف ووقت الطباعة.</p>
+          </div>
+
+          <div class="pricing-grid">
+            <article class="price-card">
+              <h4 class="material-name">PLA</h4>
+              <div class="gram-price"><strong>4</strong> <span>جنيه / جرام</span></div>
+              <div class="price-details">
+                <div><strong>50 جنيه</strong>الحد الأدنى للطلب</div>
+                <div><strong>50 جنيه / ساعة</strong>للطباعة الأقل من 100 جم</div>
+              </div>
+            </article>
+
+            <article class="price-card">
+              <h4 class="material-name">ABS</h4>
+              <div class="gram-price"><strong>7</strong> <span>جنيه / جرام</span></div>
+              <div class="price-details">
+                <div><strong>100 جنيه</strong>الحد الأدنى للطلب</div>
+                <div><strong>100 جنيه / ساعة</strong>للطباعة الأقل من 100 جم</div>
+              </div>
+            </article>
+
+            <article class="price-card">
+              <h4 class="material-name">PETG</h4>
+              <div class="gram-price"><strong>8</strong> <span>جنيه / جرام</span></div>
+              <div class="price-details">
+                <div><strong>100 جنيه</strong>الحد الأدنى للطلب</div>
+                <div><strong>100 جنيه / ساعة</strong>للطباعة الأقل من 100 جم</div>
+              </div>
+            </article>
+
+            <article class="price-card">
+              <h4 class="material-name">TPU</h4>
+              <div class="gram-price"><strong>10</strong> <span>جنيه / جرام</span></div>
+              <div class="price-details">
+                <div><strong>150 جنيه</strong>الحد الأدنى للطلب</div>
+                <div><strong>150 جنيه / ساعة</strong>للطباعة الأقل من 100 جم</div>
+              </div>
+            </article>
+
+            <article class="price-card">
+              <h4 class="material-name">Resin</h4>
+              <div class="gram-price"><strong>25</strong> <span>جنيه / جرام</span></div>
+              <div class="price-details">
+                <div><strong>300 جنيه</strong>الحد الأدنى للطلب</div>
+                <div><strong>دقة وتفاصيل عالية</strong>السعر يُحسب بالجرام</div>
+              </div>
+            </article>
+          </div>
+
+          <p class="pricing-note">
+            السعر النهائي قد يتأثر بحجم القطعة، نسبة الحشو، الدعامات، الدقة المطلوبة، ووقت التشغيل.
+          </p>
+        </section>
+
+      </section>
+
+      <div class="process-wrap">
+        <section class="process-section">
+          <div class="section-heading">
+            <small>خطوات بسيطة وواضحة</small>
+            <h2>إزاي بنبدأ شغلك؟</h2>
+          </div>
+
+          <div class="process-grid">
+            <article class="process-card">
+              <h3>ابعت التفاصيل</h3>
+              <p>حدد الخدمة والمقاسات والخامة وارفق رابط الملف إن وجد.</p>
+            </article>
+            <article class="process-card">
+              <h3>مراجعة الطلب</h3>
+              <p>بنراجع قابلية التنفيذ ونتواصل معك لأي تفاصيل ناقصة.</p>
+            </article>
+            <article class="process-card">
+              <h3>السعر والمدة</h3>
+              <p>هيوصلك عرض واضح بالتكلفة ووقت التنفيذ المتوقع.</p>
+            </article>
+            <article class="process-card">
+              <h3>التنفيذ والاستلام</h3>
+              <p>بعد التأكيد نبدأ التنفيذ ونتفق معك على الاستلام أو التوصيل.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <section class="request-section" id="request">
+        <div class="request-box">
+          <div class="request-copy">
+            <h2>جاهز تحوّل فكرتك لواقع؟</h2>
+            <p>املأ البيانات المختصرة، وهيتجه طلبك إلى واتساب علشان نراجعه معك ونحدد السعر والمدة.</p>
+            <div class="contact-list">
+              <span>📞 01555735099</span>
+              <span>📍 الإسكندرية، مصر</span>
+              <span>🕙 يوميًا من 10 ص حتى 10 م</span>
+            </div>
+          </div>
+
+          <form class="request-form" id="serviceRequestForm">
+            <div class="field">
+              <label for="customerName">الاسم</label>
+              <input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="اكتب اسمك" required>
+            </div>
+
+            <div class="field">
+              <label for="customerPhone">رقم الموبايل</label>
+              <input id="customerPhone" name="customerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="مثال: 01000000000" required>
+            </div>
+
+            <div class="field full">
+              <label for="serviceType">الخدمة المطلوبة</label>
+              <select id="serviceType" name="serviceType" required>
+                <option value="">اختار الخدمة</option>
+                <option value="الطباعة ثلاثية الأبعاد">الطباعة ثلاثية الأبعاد</option>
+                <option value="التصميمات الهندسية">التصميمات الهندسية</option>
+                <option value="القطع بالليزر">القطع بالليزر</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="requestDetails">تفاصيل الطلب</label>
+              <textarea id="requestDetails" name="requestDetails" placeholder="اكتب المقاسات، العدد، الخامة، وأي تفاصيل مهمة..." required></textarea>
+            </div>
+
+            <div class="field full">
+              <label for="fileLink">رابط الملف أو الصور <span style="font-weight:400;color:#64748b">(اختياري)</span></label>
+              <input id="fileLink" name="fileLink" type="url" inputmode="url" placeholder="Google Drive أو أي رابط متاح">
+            </div>
+
+            <p class="form-note">بالضغط على إرسال، هيفتح واتساب بالبيانات اللي كتبتها. راجع الرسالة قبل إرسالها.</p>
+            <button class="primary-btn submit-btn" type="submit">إرسال الطلب عبر واتساب</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <h3>KIMO TECH</h3>
+        <p>حلول تصنيع وتصميم وإلكترونيات تساعدك تنفذ مشروعك من الفكرة لحد المنتج.</p>
+      </div>
+      <div>
+        <h3>تواصل معنا</h3>
+        <p>📞 01555735099</p>
+        <p>📍 الإسكندرية، مصر</p>
+      </div>
+      <div>
+        <h3>ساعات العمل</h3>
+        <p>يوميًا من 10 ص حتى 10 م</p>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 KIMO TECH – All Rights Reserved</div>
+  </footer>
+
+  <script>
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const serviceCards = document.querySelectorAll(".service-card");
+    const serviceSelect = document.getElementById("serviceType");
+    const requestSection = document.getElementById("request");
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+
+        filterButtons.forEach((item) => {
+          const isActive = item === button;
+          item.classList.toggle("active", isActive);
+          item.setAttribute("aria-pressed", String(isActive));
+        });
+
+        serviceCards.forEach((card) => {
+          card.hidden = filter !== "all" && card.dataset.category !== filter;
+        });
+      });
+    });
+
+    document.querySelectorAll(".service-order").forEach((button) => {
+      button.addEventListener("click", () => {
+        serviceSelect.value = button.dataset.service;
+        requestSection.scrollIntoView({ behavior:"smooth", block:"start" });
+        window.setTimeout(() => document.getElementById("customerName").focus(), 450);
+      });
+    });
+
+    document.getElementById("serviceRequestForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+      const service = serviceSelect.value;
+      const details = document.getElementById("requestDetails").value.trim();
+      const fileLink = document.getElementById("fileLink").value.trim();
+
+      const message = [
+        "طلب خدمة جديد من موقع KIMO TECH",
+        "",
+        `الاسم: ${name}`,
+        `رقم الموبايل: ${phone}`,
+        `الخدمة: ${service}`,
+        `التفاصيل: ${details}`,
+        fileLink ? `رابط الملف: ${fileLink}` : ""
+      ].filter(Boolean).join("\n");
+
+      window.open(`https://wa.me/201555735099?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+    });
+  </script>
+</body>
+</html>

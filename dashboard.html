@@ -2,126 +2,193 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#07101f">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
-<title>إدارة الفواتير</title>
+<title>إدارة الفواتير | KIMO TECH</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-
-<style>
-body{
-  margin:0;
-  font-family:'Cairo',sans-serif;
-  background:linear-gradient(135deg,#1303fa,#fcfcfc);
-}
-
-.container{
-  max-width:1100px;
-  margin:40px auto;
-  padding:20px;
-}
-
-h1{
-  text-align:center;
-  margin-bottom:30px;
-  font-weight:900;
-}
-
-.top-bar{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:20px;
-}
-
-button{
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.add-btn{background:#16a34a;color:#fff;}
-.back-btn{background:#5726dc;color:#fff;}
-
-.table{
-  background:#ffffff;
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 15px 40px rgba(0,0,0,.08);
-}
-
-.table-header,
-.table-row{
-  display:grid;
-  grid-template-columns: 120px 1fr 120px 120px 150px;
-  padding:12px;
-  align-items:center;
-}
-
-.table-row:hover{
-  background:#f8fafc;
-  transform:scale(1.01);
-}
-
-.table-row{border-bottom:1px solid #eee;}
-.table-row:last-child{border-bottom:none;}
-
-.action-btn{
-  padding:6px 10px;
-  border-radius:8px;
-  font-size:12px;
-  margin-left:5px;
-}
-
-.delete{background:#dc2626;color:#fff;}
-.view{background:#38bdf8;}
-
-.search{
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  width:250px;
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-ui.css">
+<script src="admin-ui.js" defer></script>
 </head>
 
-<body>
+<body class="admin-page" data-admin-page="invoices">
 
-<div class="container">
-<h1>📄 إدارة الفواتير</h1>
+<a class="admin-skip-link" href="#main-content">تخطي إلى المحتوى</a>
 
-<div class="top-bar">
-<button class="back-btn" onclick="window.location.href='./admin.html'">
-⬅ رجوع
-</button>
+<main id="main-content" class="container invoice-dashboard-container">
+  <section class="invoice-dashboard-hero" aria-labelledby="invoiceDashboardTitle">
+    <div class="invoice-dashboard-heading">
+      <span class="invoice-dashboard-mark" aria-hidden="true">K</span>
+      <div>
+        <span class="invoice-dashboard-eyebrow">المبيعات والفواتير</span>
+        <h1 id="invoiceDashboardTitle">إدارة الفواتير</h1>
+        <p class="admin-page-subtitle">تابع مبيعاتك، ابحث في السجل، وافتح أي فاتورة للتعديل من مكان واحد.</p>
+      </div>
+    </div>
 
-<input type="text" id="searchInput" class="search" placeholder="🔍 بحث">
-</div>
+    <a class="invoice-create-action" href="new_invoice.html?mode=new">
+      <span class="invoice-create-icon" aria-hidden="true">＋</span>
+      <span>
+        <strong>فاتورة جديدة</strong>
+        <small>إنشاء فاتورة بيع</small>
+      </span>
+    </a>
+  </section>
 
-<div class="table">
+  <section class="invoice-dashboard-stats" aria-label="ملخص الفواتير">
+    <article class="invoice-stat-card" data-tone="blue">
+      <span class="invoice-stat-icon" aria-hidden="true">🧾</span>
+      <div>
+        <span>إجمالي الفواتير</span>
+        <strong id="invoiceTotalCount">—</strong>
+        <small>كل الفواتير المحفوظة</small>
+      </div>
+    </article>
 
-<div class="table-header">
-  <div>Invoice</div>
-  <div>Customer</div>
-  <div>Total</div>
-  <div>Date</div>
-  <div>Actions</div>
-</div>
+    <article class="invoice-stat-card" data-tone="green">
+      <span class="invoice-stat-icon" aria-hidden="true">↗</span>
+      <div>
+        <span>إجمالي المبيعات</span>
+        <strong id="invoiceTotalRevenue">—</strong>
+        <small>بالجنيه المصري</small>
+      </div>
+    </article>
 
-<div id="invoiceContainer"></div>
+    <article class="invoice-stat-card" data-tone="amber">
+      <span class="invoice-stat-icon" aria-hidden="true">◷</span>
+      <div>
+        <span>فواتير اليوم</span>
+        <strong id="invoiceTodayCount">—</strong>
+        <small>حسب تاريخ إصدار الفاتورة</small>
+      </div>
+    </article>
 
-</div>
-</div>
+    <article class="invoice-stat-card" data-tone="violet">
+      <span class="invoice-stat-icon" aria-hidden="true">≈</span>
+      <div>
+        <span>متوسط الفاتورة</span>
+        <strong id="invoiceAverageValue">—</strong>
+        <small>متوسط الفواتير السليمة</small>
+      </div>
+    </article>
+  </section>
+
+  <section class="invoice-list-panel" aria-labelledby="invoiceListTitle">
+    <header class="invoice-list-header">
+      <div>
+        <span class="invoice-list-kicker">سجل المبيعات</span>
+        <h2 id="invoiceListTitle">كل الفواتير</h2>
+        <p>استخدم البحث والفلاتر للوصول إلى الفاتورة المطلوبة بسرعة.</p>
+      </div>
+      <span id="invoiceSummary" class="invoice-results-count" role="status" aria-live="polite" aria-atomic="true">
+        جاري تحميل الفواتير…
+      </span>
+    </header>
+
+    <div class="invoice-dashboard-toolbar">
+      <label class="invoice-toolbar-field invoice-search-field" for="searchInput">
+        <span>البحث</span>
+        <span class="invoice-search-control">
+          <span class="invoice-search-icon" aria-hidden="true">⌕</span>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="رقم الفاتورة، العميل، الهاتف أو التاريخ"
+            aria-describedby="invoiceSummary"
+            autocomplete="off"
+            disabled
+          >
+          <button id="clearSearchButton" class="invoice-clear-search" type="button" aria-label="مسح البحث" hidden>×</button>
+        </span>
+      </label>
+
+      <label class="invoice-toolbar-field" for="periodFilter">
+        <span>الفترة</span>
+        <select id="periodFilter" disabled>
+          <option value="all">كل الفترات</option>
+          <option value="today">اليوم</option>
+          <option value="month">هذا الشهر</option>
+          <option value="year">هذا العام</option>
+        </select>
+      </label>
+
+      <label class="invoice-toolbar-field" for="sortInvoices">
+        <span>الترتيب</span>
+        <select id="sortInvoices" disabled>
+          <option value="newest">الأحدث إصدارًا</option>
+          <option value="oldest">الأقدم إصدارًا</option>
+          <option value="total-desc">الأعلى قيمة</option>
+          <option value="total-asc">الأقل قيمة</option>
+          <option value="customer">اسم العميل</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="invoice-filter-status">
+      <span id="invoiceFilterHint">يتم تحديث السجل تلقائيًا عند حفظ أي فاتورة.</span>
+      <button id="resetInvoiceFilters" type="button" hidden>مسح البحث والفلاتر</button>
+    </div>
+
+    <div class="invoice-table-scroll">
+      <table class="invoice-dashboard-table">
+        <caption class="sr-only">قائمة فواتير KIMO TECH</caption>
+        <thead>
+          <tr>
+            <th scope="col">رقم الفاتورة</th>
+            <th scope="col">بيانات العميل</th>
+            <th scope="col">الإجمالي</th>
+            <th scope="col">التاريخ</th>
+            <th scope="col">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceContainer" aria-busy="true">
+          <tr class="invoice-table-state-row">
+            <td colspan="5">
+              <div class="invoice-list-state loading" role="status">
+                <span class="invoice-state-spinner" aria-hidden="true"></span>
+                <strong>جاري تحميل الفواتير</strong>
+                <p>لحظات ويتم تجهيز سجل المبيعات.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button id="loadMoreInvoices" class="invoice-load-more" type="button" hidden>عرض المزيد</button>
+  </section>
+</main>
+
+<dialog id="deleteInvoiceDialog" class="invoice-delete-dialog" aria-labelledby="deleteInvoiceTitle">
+  <div class="invoice-dialog-icon" aria-hidden="true">!</div>
+  <h2 id="deleteInvoiceTitle">حذف الفاتورة؟</h2>
+  <p>سيتم حذف الفاتورة نهائيًا ولا يمكن التراجع عن هذه الخطوة.</p>
+  <strong id="deleteInvoiceTarget" class="invoice-delete-target"></strong>
+  <p id="deleteInvoiceError" class="invoice-dialog-error" role="alert" hidden></p>
+  <div class="invoice-dialog-actions">
+    <button id="cancelInvoiceDelete" type="button" class="invoice-dialog-cancel">إلغاء</button>
+    <button id="confirmInvoiceDelete" type="button" class="invoice-dialog-confirm">حذف نهائي</button>
+  </div>
+</dialog>
+
+<div id="dashboardToast" class="invoice-dashboard-toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { 
-  getFirestore, collection, onSnapshot, deleteDoc, doc 
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  deleteDoc,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
@@ -131,66 +198,757 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+const PAGE_SIZE = 50;
+const container = document.getElementById("invoiceContainer");
+const summary = document.getElementById("invoiceSummary");
+const searchInput = document.getElementById("searchInput");
+const clearSearchButton = document.getElementById("clearSearchButton");
+const periodFilter = document.getElementById("periodFilter");
+const sortInvoices = document.getElementById("sortInvoices");
+const resetFiltersButton = document.getElementById("resetInvoiceFilters");
+const filterHint = document.getElementById("invoiceFilterHint");
+const loadMoreButton = document.getElementById("loadMoreInvoices");
+const deleteDialog = document.getElementById("deleteInvoiceDialog");
+const deleteTarget = document.getElementById("deleteInvoiceTarget");
+const deleteError = document.getElementById("deleteInvoiceError");
+const cancelDeleteButton = document.getElementById("cancelInvoiceDelete");
+const confirmDeleteButton = document.getElementById("confirmInvoiceDelete");
+const dashboardToast = document.getElementById("dashboardToast");
+
+const countFormatter = new Intl.NumberFormat("ar-EG");
+const moneyFormatter = new Intl.NumberFormat("ar-EG", { maximumFractionDigits:2 });
+const dateFormatter = new Intl.DateTimeFormat("ar-EG", {
+  year:"numeric",
+  month:"short",
+  day:"numeric"
+});
 
 let allInvoices = [];
+let lastFilteredInvoices = [];
+let visibleLimit = PAGE_SIZE;
+let loadState = "loading";
+let stopInvoices = null;
+let searchTimer = 0;
+let toastTimer = 0;
+let pendingDelete = null;
+let deleteInProgress = false;
+let pendingFocusInvoiceId = "";
 
-onSnapshot(collection(db,"invoices"), snapshot=>{
+function toEnglishDigits(value){
+  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
 
-  allInvoices = [];
+  return String(value ?? "")
+    .replace(/[٠-٩]/g, (digit) => String(arabicDigits.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String(persianDigits.indexOf(digit)));
+}
 
-  snapshot.forEach(docSnap=>{
-    allInvoices.push({
-      id: docSnap.id,
-      ...docSnap.data()
-    });
+function normalizeSearchValue(value){
+  return toEnglishDigits(value)
+    .normalize("NFKD")
+    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+    .replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase("ar-EG");
+}
+
+function getTimestampMillis(value){
+  if(value && typeof value.toMillis === "function"){
+    const milliseconds = Number(value.toMillis());
+    return Number.isFinite(milliseconds) ? milliseconds : 0;
+  }
+
+  if(value instanceof Date){
+    const milliseconds = value.getTime();
+    return Number.isFinite(milliseconds) ? milliseconds : 0;
+  }
+
+  return 0;
+}
+
+function parseInvoiceDate(value){
+  const normalized = toEnglishDigits(value)
+    .replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+    .trim();
+
+  if(!normalized) return 0;
+
+  const localizedDate = normalized.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+  if(localizedDate){
+    const day = Number(localizedDate[1]);
+    const month = Number(localizedDate[2]);
+    const year = Number(localizedDate[3]);
+    const date = new Date(year, month - 1, day);
+
+    if(
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    ){
+      return date.getTime();
+    }
+  }
+
+  const parsed = Date.parse(normalized);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getInvoiceIssuedTime(invoice){
+  for(const field of ["issuedAt", "dateKey"]){
+    const timestamp = getTimestampMillis(invoice[field]) || parseInvoiceDate(invoice[field]);
+    if(timestamp) return timestamp;
+  }
+
+  const invoiceDate = parseInvoiceDate(invoice.date);
+  if(invoiceDate) return invoiceDate;
+
+  const createdAt = getTimestampMillis(invoice.createdAt);
+  if(createdAt) return createdAt;
+
+  const sortTimestamp = Number(invoice.sortTimestamp);
+  if(Number.isFinite(sortTimestamp) && sortTimestamp > 0) return sortTimestamp;
+
+  return getTimestampMillis(invoice.updatedAt);
+}
+
+function getInvoiceTotal(invoice){
+  const storedTotal = Number(invoice.total);
+  if(Number.isFinite(storedTotal) && storedTotal >= 0) return storedTotal;
+  if(!Array.isArray(invoice.items)) return null;
+
+  let totalInPiasters = 0;
+  let hasValidItem = false;
+
+  invoice.items.forEach((item) => {
+    const price = Number(item?.price);
+    const quantity = Number(item?.qty);
+    if(!Number.isFinite(price) || price < 0 || !Number.isInteger(quantity) || quantity < 1) return;
+
+    totalInPiasters += Math.round(price * 100) * quantity;
+    hasValidItem = true;
   });
 
-  renderInvoices(allInvoices);
-});
+  return hasValidItem ? totalInPiasters / 100 : null;
+}
 
-// تأكد أن دالة renderInvoices تستخدم i.id بشكل صحيح
+function formatMoney(value){
+  return value === null ? "غير متاح" : `${moneyFormatter.format(value)} ج.م`;
+}
+
+function formatInvoiceDate(invoice){
+  const time = getInvoiceIssuedTime(invoice);
+  if(time) return dateFormatter.format(new Date(time));
+  return String(invoice.date || "غير محدد");
+}
+
+function isSameDay(firstTime, secondTime){
+  if(!firstTime || !secondTime) return false;
+  const first = new Date(firstTime);
+  const second = new Date(secondTime);
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
+}
+
+function matchesPeriod(invoice, period){
+  if(period === "all") return true;
+
+  const invoiceTime = getInvoiceIssuedTime(invoice);
+  if(!invoiceTime) return false;
+
+  const invoiceDate = new Date(invoiceTime);
+  const now = new Date();
+
+  if(period === "today") return isSameDay(invoiceTime, now.getTime());
+  if(period === "month"){
+    return invoiceDate.getFullYear() === now.getFullYear() &&
+      invoiceDate.getMonth() === now.getMonth();
+  }
+  if(period === "year") return invoiceDate.getFullYear() === now.getFullYear();
+
+  return true;
+}
+
+function compareInvoiceNumbers(first, second){
+  return String(first.number || first.docId).localeCompare(
+    String(second.number || second.docId),
+    "ar",
+    { numeric:true, sensitivity:"base" }
+  );
+}
+
+function sortInvoiceList(list, mode){
+  return [...list].sort((first, second) => {
+    if(mode === "oldest"){
+      return getInvoiceIssuedTime(first) - getInvoiceIssuedTime(second) ||
+        compareInvoiceNumbers(first, second);
+    }
+
+    if(mode === "total-desc" || mode === "total-asc"){
+      const firstTotal = getInvoiceTotal(first);
+      const secondTotal = getInvoiceTotal(second);
+      const firstValue = firstTotal === null ? -1 : firstTotal;
+      const secondValue = secondTotal === null ? -1 : secondTotal;
+      const difference = mode === "total-desc"
+        ? secondValue - firstValue
+        : firstValue - secondValue;
+      return difference || compareInvoiceNumbers(first, second);
+    }
+
+    if(mode === "customer"){
+      return String(first.customer || "").localeCompare(
+        String(second.customer || ""),
+        "ar",
+        { sensitivity:"base" }
+      ) || compareInvoiceNumbers(first, second);
+    }
+
+    return getInvoiceIssuedTime(second) - getInvoiceIssuedTime(first) ||
+      compareInvoiceNumbers(first, second);
+  });
+}
+
+function getCustomerInitials(customer){
+  const words = String(customer || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  return words.length ? words.map((word) => word[0]).join("") : "ع";
+}
+
+function getInvoiceSearchText(invoice){
+  const itemNames = Array.isArray(invoice.items)
+    ? invoice.items.map((item) => item?.name || "").join(" ")
+    : "";
+  const total = getInvoiceTotal(invoice);
+
+  return normalizeSearchValue([
+    invoice.number,
+    invoice.customer,
+    invoice.phone,
+    invoice.date,
+    total === null ? "" : total,
+    itemNames
+  ].join(" "));
+}
+
+function getFilteredInvoices(){
+  const query = normalizeSearchValue(searchInput.value);
+  const period = periodFilter.value;
+
+  const filtered = allInvoices.filter((invoice) => (
+    (!query || getInvoiceSearchText(invoice).includes(query)) &&
+    matchesPeriod(invoice, period)
+  ));
+
+  return sortInvoiceList(filtered, sortInvoices.value);
+}
+
+function updateStatistics(){
+  const validTotals = allInvoices
+    .map(getInvoiceTotal)
+    .filter((total) => total !== null);
+  const totalRevenue = validTotals.reduce((sum, total) => sum + total, 0);
+  const average = validTotals.length ? totalRevenue / validTotals.length : null;
+  const now = Date.now();
+  const todayCount = allInvoices.filter((invoice) => (
+    isSameDay(getInvoiceIssuedTime(invoice), now)
+  )).length;
+
+  document.getElementById("invoiceTotalCount").textContent = countFormatter.format(allInvoices.length);
+  document.getElementById("invoiceTotalRevenue").textContent = formatMoney(totalRevenue);
+  document.getElementById("invoiceTodayCount").textContent = countFormatter.format(todayCount);
+  document.getElementById("invoiceAverageValue").textContent = formatMoney(average);
+}
+
+function resetStatistics(){
+  [
+    "invoiceTotalCount",
+    "invoiceTotalRevenue",
+    "invoiceTodayCount",
+    "invoiceAverageValue"
+  ].forEach((id) => {
+    document.getElementById(id).textContent = "—";
+  });
+}
+
+function setControlsDisabled(disabled){
+  [searchInput, periodFilter, sortInvoices].forEach((control) => {
+    control.disabled = disabled;
+  });
+}
+
+function createStateRow(type, title, message, action = null){
+  container.replaceChildren();
+  const row = document.createElement("tr");
+  row.className = "invoice-table-state-row";
+
+  const cell = document.createElement("td");
+  cell.colSpan = 5;
+
+  const state = document.createElement("div");
+  state.className = `invoice-list-state ${type}`;
+  state.setAttribute("role", type === "error" ? "alert" : "status");
+
+  const icon = document.createElement("span");
+  icon.className = type === "loading" ? "invoice-state-spinner" : "invoice-state-symbol";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = type === "empty" ? "🧾" : type === "error" ? "!" : "";
+
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+
+  const text = document.createElement("p");
+  text.textContent = message;
+
+  state.append(icon, heading, text);
+
+  if(action){
+    const actionElement = document.createElement(action.href ? "a" : "button");
+    actionElement.className = "invoice-state-action";
+    actionElement.textContent = action.label;
+
+    if(action.href){
+      actionElement.href = action.href;
+    }else{
+      actionElement.type = "button";
+      actionElement.dataset.action = action.action;
+    }
+
+    state.appendChild(actionElement);
+  }
+
+  cell.appendChild(state);
+  row.appendChild(cell);
+  container.appendChild(row);
+}
+
+function createInvoiceRow(invoice){
+  const number = String(invoice.number || "بدون رقم");
+  const customer = String(invoice.customer || "عميل غير محدد");
+  const phone = String(invoice.phone || "").trim();
+  const total = getInvoiceTotal(invoice);
+  const invoiceTime = getInvoiceIssuedTime(invoice);
+
+  const row = document.createElement("tr");
+  row.className = "invoice-record-row table-row";
+  row.dataset.docId = invoice.docId;
+
+  const numberCell = document.createElement("th");
+  numberCell.scope = "row";
+  numberCell.className = "invoice-number-cell";
+  numberCell.dataset.label = "رقم الفاتورة";
+  const numberBadge = document.createElement("bdi");
+  numberBadge.dir = "ltr";
+  numberBadge.className = "invoice-number-pill";
+  numberBadge.textContent = number;
+  numberCell.appendChild(numberBadge);
+
+  const customerCell = document.createElement("td");
+  customerCell.className = "invoice-customer-cell";
+  customerCell.dataset.label = "بيانات العميل";
+  const customerAvatar = document.createElement("span");
+  customerAvatar.className = "invoice-customer-avatar";
+  customerAvatar.setAttribute("aria-hidden", "true");
+  customerAvatar.textContent = getCustomerInitials(customer);
+  const customerCopy = document.createElement("span");
+  customerCopy.className = "invoice-customer-copy";
+  const customerName = document.createElement("strong");
+  customerName.textContent = customer;
+  const customerPhone = document.createElement("small");
+  customerPhone.dir = "ltr";
+  customerPhone.textContent = phone || "لا يوجد رقم هاتف";
+  customerCopy.append(customerName, customerPhone);
+  customerCell.append(customerAvatar, customerCopy);
+
+  const totalCell = document.createElement("td");
+  totalCell.className = total === null
+    ? "invoice-amount-cell unavailable"
+    : "invoice-amount-cell";
+  totalCell.dataset.label = "الإجمالي";
+  totalCell.textContent = formatMoney(total);
+
+  const dateCell = document.createElement("td");
+  dateCell.className = "invoice-date-cell";
+  dateCell.dataset.label = "التاريخ";
+  const dateElement = document.createElement("time");
+  dateElement.dir = "auto";
+  if(invoiceTime) dateElement.dateTime = new Date(invoiceTime).toISOString();
+  dateElement.textContent = formatInvoiceDate(invoice);
+  dateCell.appendChild(dateElement);
+
+  const actionsCell = document.createElement("td");
+  actionsCell.className = "invoice-row-actions";
+  actionsCell.dataset.label = "الإجراءات";
+
+  const editLink = document.createElement("a");
+  editLink.className = "invoice-row-action edit-action";
+  editLink.href = `new_invoice.html?id=${encodeURIComponent(invoice.docId)}`;
+  editLink.setAttribute("aria-label", `تعديل الفاتورة ${number} للعميل ${customer}`);
+  editLink.innerHTML = '<span aria-hidden="true">✎</span><span>تعديل</span>';
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "invoice-row-action delete-action";
+  deleteButton.type = "button";
+  deleteButton.dataset.action = "delete";
+  deleteButton.dataset.id = invoice.docId;
+  deleteButton.setAttribute("aria-label", `حذف الفاتورة ${number} للعميل ${customer}`);
+  deleteButton.innerHTML = '<span aria-hidden="true">×</span><span>حذف</span>';
+
+  actionsCell.append(editLink, deleteButton);
+  row.append(numberCell, customerCell, totalCell, dateCell, actionsCell);
+  return row;
+}
+
+function updateFilterControls(){
+  const hasSearch = Boolean(searchInput.value.trim());
+  const hasPeriodFilter = periodFilter.value !== "all";
+  const hasCustomSort = sortInvoices.value !== "newest";
+
+  clearSearchButton.hidden = !hasSearch;
+  resetFiltersButton.hidden = !(hasSearch || hasPeriodFilter || hasCustomSort);
+}
+
+function focusAfterListUpdate(){
+  if(!pendingFocusInvoiceId || deleteDialog.open) return;
+
+  const focusTarget = [...container.querySelectorAll("[data-id]")]
+    .find((element) => element.dataset.id === pendingFocusInvoiceId);
+  pendingFocusInvoiceId = "";
+  (focusTarget || searchInput).focus();
+}
+
 function renderInvoices(list){
-  const container = document.getElementById("invoiceContainer");
-  container.innerHTML = "";
-  list.forEach(i => {
-    container.innerHTML += `
-      <div class="table-row">
-        <div>${i.number || '-'}</div>
-        <div>${i.customer || '-'}</div>
-        <div>${i.total || 0} EGP</div>
-        <div>${i.date || '-'}</div>
-        <div>
-          <button class="action-btn view" onclick="editInvoice('${i.id}')">Edit</button>
-          <button class="action-btn delete" onclick="deleteInvoice('${i.id}')">Delete</button>
-        </div>
-      </div>
-    `;
+  container.replaceChildren();
+  container.setAttribute("aria-busy", "false");
+  lastFilteredInvoices = list;
+  updateFilterControls();
+
+  const shownCount = Math.min(list.length, visibleLimit);
+  const totalCount = allInvoices.length;
+
+  summary.textContent = list.length === totalCount
+    ? `عرض ${countFormatter.format(shownCount)} من ${countFormatter.format(totalCount)} فاتورة`
+    : `عرض ${countFormatter.format(shownCount)} من ${countFormatter.format(list.length)} نتيجة — الإجمالي ${countFormatter.format(totalCount)}`;
+
+  if(!list.length){
+    loadMoreButton.hidden = true;
+
+    if(allInvoices.length){
+      createStateRow(
+        "empty",
+        "لا توجد نتائج مطابقة",
+        "جرّب كلمة بحث أخرى أو امسح الفلاتر الحالية.",
+        { label:"مسح البحث والفلاتر", action:"reset-filters" }
+      );
+    }else{
+      createStateRow(
+        "empty",
+        "لا توجد فواتير محفوظة",
+        "أنشئ أول فاتورة لتظهر هنا تلقائيًا.",
+        { label:"إنشاء أول فاتورة", href:"new_invoice.html?mode=new" }
+      );
+    }
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  list.slice(0, visibleLimit).forEach((invoice) => {
+    fragment.appendChild(createInvoiceRow(invoice));
   });
+  container.appendChild(fragment);
+
+  const remaining = list.length - shownCount;
+  loadMoreButton.hidden = remaining <= 0;
+  loadMoreButton.textContent = remaining > 0
+    ? `عرض المزيد (${countFormatter.format(remaining)})`
+    : "عرض المزيد";
+
+  requestAnimationFrame(focusAfterListUpdate);
 }
 
-window.deleteInvoice = async function(id){
-  if(!confirm("متأكد من الحذف؟")) return;
-  await deleteDoc(doc(db,"invoices",id));
-}
-window.editInvoice = function(id){
-  localStorage.setItem("invoiceId", id);
-  window.location.href = "new_invoice.html";
-}
+function applyFilters({ resetLimit = false } = {}){
+  if(loadState !== "ready") return;
+  if(resetLimit) visibleLimit = PAGE_SIZE;
 
-document.getElementById("searchInput").addEventListener("input", e=>{
-
-  const val = e.target.value.toLowerCase();
-
-  const filtered = allInvoices.filter(i => {
-    return (
-      (i.customer || "").toLowerCase().includes(val) ||
-      (i.number || "").toLowerCase().includes(val) ||
-      (i.date || "").toLowerCase().includes(val)
-    );
-  });
-
+  const filtered = getFilteredInvoices();
   renderInvoices(filtered);
+
+  filterHint.textContent = filtered.length === allInvoices.length
+    ? "يتم تحديث السجل تلقائيًا عند حفظ أي فاتورة."
+    : `تم تطبيق البحث أو الفلتر على ${countFormatter.format(allInvoices.length)} فاتورة.`;
+}
+
+function resetInvoiceFilters(){
+  clearTimeout(searchTimer);
+  searchInput.value = "";
+  periodFilter.value = "all";
+  sortInvoices.value = "newest";
+  visibleLimit = PAGE_SIZE;
+  applyFilters();
+  searchInput.focus();
+}
+
+function showDashboardToast(message, type = "success", duration = 3800){
+  clearTimeout(toastTimer);
+  dashboardToast.hidden = false;
+  dashboardToast.className = `invoice-dashboard-toast ${type}`;
+  dashboardToast.setAttribute("role", type === "error" ? "alert" : "status");
+  dashboardToast.textContent = message;
+
+  toastTimer = window.setTimeout(() => {
+    dashboardToast.hidden = true;
+  }, duration);
+}
+
+function getNextInvoiceFocusId(docId){
+  const index = lastFilteredInvoices.findIndex((invoice) => invoice.docId === docId);
+  return lastFilteredInvoices[index + 1]?.docId ||
+    lastFilteredInvoices[index - 1]?.docId ||
+    "";
+}
+
+function openDeleteDialog(invoice, trigger){
+  if(!invoice || deleteInProgress) return;
+
+  pendingDelete = {
+    invoice,
+    trigger,
+    nextFocusId:getNextInvoiceFocusId(invoice.docId)
+  };
+
+  deleteTarget.textContent = `${invoice.number || "بدون رقم"} — ${invoice.customer || "عميل غير محدد"}`;
+  deleteError.hidden = true;
+  deleteError.textContent = "";
+  confirmDeleteButton.disabled = false;
+  cancelDeleteButton.disabled = false;
+
+  if(typeof deleteDialog.showModal === "function"){
+    deleteDialog.returnValue = "";
+    deleteDialog.showModal();
+    cancelDeleteButton.focus();
+  }else{
+    const shouldDelete = window.confirm(`حذف الفاتورة ${invoice.number || ""} نهائيًا؟`);
+    if(shouldDelete) confirmInvoiceDeletion();
+  }
+}
+
+async function confirmInvoiceDeletion(){
+  if(!pendingDelete || deleteInProgress) return;
+
+  deleteInProgress = true;
+  confirmDeleteButton.disabled = true;
+  cancelDeleteButton.disabled = true;
+  confirmDeleteButton.textContent = "جاري الحذف…";
+  deleteError.hidden = true;
+  const target = pendingDelete;
+
+  try{
+    pendingFocusInvoiceId = target.nextFocusId;
+    await deleteDoc(doc(db, "invoices", target.invoice.docId));
+    if(deleteDialog.open){
+      deleteDialog.close("deleted");
+    }else{
+      pendingDelete = null;
+      requestAnimationFrame(() => {
+        if(pendingFocusInvoiceId) focusAfterListUpdate();
+        else searchInput.focus();
+      });
+    }
+    showDashboardToast(`تم حذف الفاتورة ${target.invoice.number || ""} بنجاح.`);
+  }catch(error){
+    pendingFocusInvoiceId = "";
+    console.error("تعذر حذف الفاتورة:", error);
+    deleteError.textContent = getDeleteErrorMessage(error);
+    deleteError.hidden = false;
+    showDashboardToast(getDeleteErrorMessage(error), "error", 5200);
+    if(!deleteDialog.open) pendingDelete = null;
+  }finally{
+    deleteInProgress = false;
+    confirmDeleteButton.disabled = false;
+    cancelDeleteButton.disabled = false;
+    confirmDeleteButton.textContent = "حذف نهائي";
+  }
+}
+
+function getDeleteErrorMessage(error){
+  const code = String(error?.code || "");
+  if(code === "permission-denied") return "ليس لديك صلاحية لحذف هذه الفاتورة.";
+  if(code === "unavailable" || code === "deadline-exceeded"){
+    return "تعذر الاتصال الآن. تأكد من الإنترنت ثم جرّب مرة أخرى.";
+  }
+  return "تعذر حذف الفاتورة. جرّب مرة أخرى.";
+}
+
+function renderLoadingState(){
+  loadState = "loading";
+  setControlsDisabled(true);
+  resetStatistics();
+  container.setAttribute("aria-busy", "true");
+  summary.textContent = "جاري تحميل الفواتير…";
+  filterHint.textContent = "يتم الآن تجهيز سجل المبيعات.";
+  loadMoreButton.hidden = true;
+  createStateRow(
+    "loading",
+    "جاري تحميل الفواتير",
+    "لحظات ويتم تجهيز سجل المبيعات."
+  );
+}
+
+function renderLoadError(){
+  loadState = "error";
+  allInvoices = [];
+  lastFilteredInvoices = [];
+  setControlsDisabled(true);
+  resetStatistics();
+  container.setAttribute("aria-busy", "false");
+  summary.textContent = "تعذر تحميل الفواتير";
+  filterHint.textContent = "لم يتم عرض بيانات قديمة حتى لا تختلط عليك النتائج.";
+  loadMoreButton.hidden = true;
+  createStateRow(
+    "error",
+    "تعذر تحميل الفواتير",
+    "تأكد من الاتصال والصلاحيات ثم أعد المحاولة.",
+    { label:"إعادة المحاولة", action:"retry" }
+  );
+}
+
+function startInvoices(){
+  if(stopInvoices) stopInvoices();
+  renderLoadingState();
+
+  stopInvoices = onSnapshot(
+    collection(db, "invoices"),
+    (snapshot) => {
+      allInvoices = snapshot.docs.map((invoiceDoc) => ({
+        ...invoiceDoc.data(),
+        docId:invoiceDoc.id
+      }));
+      loadState = "ready";
+      setControlsDisabled(false);
+      updateStatistics();
+      applyFilters();
+    },
+    (error) => {
+      console.error("تعذر تحميل الفواتير:", error);
+      renderLoadError();
+    }
+  );
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if(!user){
+    window.location.replace("admin-login.html");
+    return;
+  }
+
+  try{
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    const role = userDoc.exists()
+      ? String(userDoc.data().role || "").trim().toLowerCase()
+      : null;
+
+    if(role !== "owner" && role !== "admin"){
+      window.location.replace("admin-login.html");
+      return;
+    }
+
+    window.setAdminNavigationRole?.(role);
+    startInvoices();
+  }catch(error){
+    console.error("تعذر التحقق من صلاحية المستخدم:", error);
+    renderLoadError();
+    summary.textContent = "تعذر التحقق من الصلاحيات";
+  }
 });
+
+searchInput.addEventListener("input", () => {
+  clearSearchButton.hidden = !searchInput.value;
+  clearTimeout(searchTimer);
+  searchTimer = window.setTimeout(() => applyFilters({ resetLimit:true }), 140);
+});
+
+clearSearchButton.addEventListener("click", () => {
+  clearTimeout(searchTimer);
+  searchInput.value = "";
+  applyFilters({ resetLimit:true });
+  searchInput.focus();
+});
+
+periodFilter.addEventListener("change", () => applyFilters({ resetLimit:true }));
+sortInvoices.addEventListener("change", () => applyFilters({ resetLimit:true }));
+resetFiltersButton.addEventListener("click", resetInvoiceFilters);
+
+loadMoreButton.addEventListener("click", () => {
+  visibleLimit += PAGE_SIZE;
+  renderInvoices(lastFilteredInvoices);
+});
+
+container.addEventListener("click", (event) => {
+  const action = event.target.closest("[data-action]");
+  if(!action) return;
+
+  if(action.dataset.action === "retry"){
+    startInvoices();
+    return;
+  }
+
+  if(action.dataset.action === "reset-filters"){
+    resetInvoiceFilters();
+    return;
+  }
+
+  if(action.dataset.action !== "delete") return;
+
+  const invoice = allInvoices.find((item) => item.docId === action.dataset.id);
+  openDeleteDialog(invoice, action);
+});
+
+cancelDeleteButton.addEventListener("click", () => {
+  if(!deleteInProgress && deleteDialog.open) deleteDialog.close("cancelled");
+});
+
+confirmDeleteButton.addEventListener("click", confirmInvoiceDeletion);
+
+deleteDialog.addEventListener("click", (event) => {
+  if(event.target === deleteDialog && !deleteInProgress){
+    deleteDialog.close("cancelled");
+  }
+});
+
+deleteDialog.addEventListener("close", () => {
+  const trigger = pendingDelete?.trigger;
+  const wasDeleted = deleteDialog.returnValue === "deleted";
+  pendingDelete = null;
+
+  if(wasDeleted){
+    requestAnimationFrame(() => {
+      if(pendingFocusInvoiceId) focusAfterListUpdate();
+      else searchInput.focus();
+    });
+  }else if(trigger?.isConnected){
+    trigger.focus();
+  }
+});
+
+deleteDialog.addEventListener("cancel", (event) => {
+  if(deleteInProgress) event.preventDefault();
+});
+
+window.addEventListener("beforeunload", () => {
+  if(stopInvoices) stopInvoices();
+});
+
 </script>
 
 </body>

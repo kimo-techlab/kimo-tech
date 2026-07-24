@@ -877,6 +877,69 @@ background:#16a34a;
   }
 }
 
+/* ===== 2026 UI polish ===== */
+.loading-state,.empty-state{
+  grid-column:1/-1;
+  min-height:260px;
+  display:grid;
+  place-items:center;
+  gap:14px;
+  padding:32px;
+  color:#64748b;
+  background:linear-gradient(135deg,#fff,#f8fafc);
+  border:1px solid #e5e7eb;
+  border-radius:22px;
+  font-weight:700;
+  text-align:center;
+}
+.loading-state::before{
+  content:"";
+  width:44px;height:44px;
+  border:4px solid #d1fae5;
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:kimo-spin .8s linear infinite;
+}
+@keyframes kimo-spin{to{transform:rotate(360deg)}}
+.card{transition:transform .22s ease,box-shadow .22s ease}
+.card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(15,23,42,.14)}
+
+@media(max-width:768px){
+  .main-nav{height:auto;min-height:72px;padding:12px 14px;gap:10px;align-items:center}
+  .nav-left{
+    flex:1;
+    min-width:0;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:7px;
+    overflow:visible;
+  }
+  .nav-left .nav-link{display:none}
+  .nav-left .nav-link:nth-child(-n+4){
+    display:block;
+    min-width:0;
+    padding:10px 5px;
+    font-size:11.5px;
+    text-align:center;
+    white-space:nowrap;
+    border-radius:13px;
+    background:rgba(255,255,255,.06);
+  }
+  .nav-right{position:static;flex:0 0 46px;width:46px;height:46px}
+  .top-bar{font-size:12px;padding:9px 12px}
+  header{padding:16px 14px;gap:14px;flex-direction:column}
+  header .logo{order:1}
+  .search-box{order:2;width:100%;max-width:none}
+  .container{padding:14px}
+  .main{min-width:0}
+  .top-controls{gap:9px;flex-wrap:wrap}
+  .control-btn{min-height:44px}
+  .grid{gap:12px}
+  .card-info h3{font-size:14px;line-height:1.5}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
 </style>
 
 </head>
@@ -889,7 +952,7 @@ background:#16a34a;
     <a href="index.html" class="nav-link">الرئيسية</a>
     <a href="products.html" class="nav-link">المنتجات</a>
     <a href="projects.html" class="nav-link">المشروعات</a>
-<a href="index.html#services" class="nav-link">الخدمات</a>
+<a href="services.html" class="nav-link">الخدمات</a>
 <a href="index.html#why" class="nav-link">من نحن</a>
 <a href="index.html#contact" class="nav-link">تواصل معنا</a>
   </div>
@@ -941,7 +1004,9 @@ background:#16a34a;
 
 </div>
 
-<div class="grid" id="productGrid"></div>
+<div class="grid" id="productGrid">
+  <div class="loading-state" role="status" aria-live="polite">جاري تحميل المشروعات...</div>
+</div>
  </main>
 </div>
 
@@ -1253,7 +1318,7 @@ document.addEventListener("keydown", function(e){
 /* ===== POPUP FUNCTIONS ===== */
 function openPopup(product){
 
-  document.getElementById("popupImg").src = product.image || product.img;
+  document.getElementById("popupImg").src = product.image || product.img || "images/no-image.png";
 
   document.getElementById("popupTitle").innerText = product.name;
 
@@ -1355,7 +1420,7 @@ links.forEach(link => {
 <div id="productPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; width:90%; max-width:500px; border-radius:20px; padding:25px; position:relative; text-align:center;">
     <span onclick="closePopup()" style="position:absolute; top:10px; left:15px; cursor:pointer; font-weight:bold; font-size:18px;">✖</span>
-    <img id="popupImg" style="width:200px; margin-bottom:15px;">
+    <img id="popupImg" src="images/no-image.png" alt="صورة المشروع" style="width:200px; margin-bottom:15px;">
     <h2 id="popupTitle"></h2>
     <p id="popupDesc" style="color:#555; margin:10px 0;"></p>
     <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>

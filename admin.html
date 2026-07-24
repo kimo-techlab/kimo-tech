@@ -7,7 +7,7 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard | KIMO TECH</title>
+<title>إدارة الطلبات | KIMO TECH</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 
@@ -356,6 +356,143 @@ select,input{
   color:#64748b;
 }
 
+.admin-header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.admin-header-actions a,
+.admin-header-actions button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.logout-action{
+  color:#fff;
+  background:#dc2626;
+}
+
+.orders-section-heading{
+  margin:0 0 12px;
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.orders-section-heading h2,
+.chart-panel h2{
+  margin:0;
+}
+
+.orders-section-heading p,
+.chart-panel p{
+  margin:5px 0 0;
+  color:#64748b;
+  font-size:13px;
+}
+
+.filter-field{
+  min-width:150px;
+  display:grid;
+  gap:6px;
+}
+
+.filter-field--grow{
+  flex:1 1 240px;
+}
+
+.filter-field span{
+  color:#475569;
+  font-size:12px;
+  font-weight:800;
+}
+
+.filter-actions{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  align-self:flex-end;
+}
+
+.apply-filter-action{
+  color:#fff;
+  background:#0284c7;
+}
+
+.export-action{
+  color:#fff;
+  background:#16a34a;
+}
+
+#ordersContainer{
+  display:grid;
+  gap:12px;
+}
+
+.order-card{
+  display:grid;
+  gap:13px;
+}
+
+.order-card:focus-visible{
+  outline:3px solid rgba(14,165,233,.28);
+  outline-offset:2px;
+}
+
+.order-card-top,
+.order-card-main,
+.order-card-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.order-card-main strong{
+  font-size:18px;
+}
+
+.order-card-total{
+  color:#15803d;
+  font-size:18px;
+  font-weight:900;
+}
+
+.order-card-meta{
+  padding-top:11px;
+  color:#64748b;
+  border-top:1px solid #e2e8f0;
+  font-size:13px;
+}
+
+.orders-feedback-error{
+  color:#b91c1c;
+  border-color:#fecaca;
+  background:#fff7f7;
+}
+
+.chart-panel{
+  width:min(620px,100%);
+  margin:24px auto 0;
+  padding:20px;
+  background:#fff;
+  border:1px solid #dfe7f1;
+  border-radius:20px;
+  box-shadow:0 16px 42px rgba(15,23,42,.09);
+}
+
+.chart-panel canvas{
+  display:block;
+  max-width:380px;
+  max-height:380px;
+  margin:18px auto 0;
+}
+
 @media(max-width:700px){
   .order-popup{
     padding:16px 10px;
@@ -400,6 +537,23 @@ select,input{
   .popup-actions button{
     flex:1 1 calc(50% - 5px);
   }
+
+  .admin-header-actions,
+  .admin-header-actions button,
+  .filter-actions,
+  .filter-actions button,
+  .filter-field{
+    width:100%;
+  }
+
+  .filters{
+    align-items:stretch;
+  }
+
+  .order-card-main{
+    align-items:flex-start;
+    flex-direction:column;
+  }
 }
 
 @keyframes slideIn{
@@ -407,57 +561,33 @@ select,input{
   to{transform:translateX(0);opacity:1;}
 }
 </style>
+<link rel="stylesheet" href="admin-ui.css">
+<script src="admin-ui.js" defer></script>
 </head>
 
 
-<body>
+<body class="admin-page" data-admin-page="orders">
 
 
 
 <div class="container">
-<div style="display:flex;justify-content:space-between;align-items:center;">
-  <h1>لوحة تحكم KIMO 👑</h1>
-</div>
+<header class="admin-page-header">
+  <div>
+    <h1>إدارة الطلبات</h1>
+    <p class="admin-page-subtitle">تابع الطلبات، حدّث حالتها وراجع إجمالي المبيعات من مكان واحد.</p>
+  </div>
+  <div class="admin-header-actions">
+    <a class="primary-btn" href="new_invoice.html?mode=new">➕ إنشاء فاتورة</a>
+    <button type="button" id="logoutButton" class="logout-action">تسجيل الخروج</button>
+  </div>
+</header>
 
-<!-- 👇 الأزرار هنا -->
-<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;">
-
-  <a href="products-admin.html"
-  style="padding:8px 15px;background:#16a34a;color:#fff;border-radius:8px;text-decoration:none;">
-  📦 إدارة المنتجات
-  </a>
-
-  <a href="projects-admin.html"
-  style="padding:8px 15px;background:#0ea5e9;color:#fff;border-radius:8px;text-decoration:none;">
-  🧠 إدارة المشاريع
-  </a>
-
-  <!-- الجديد -->
-  <a href="new_invoice.html"
-  style="padding:8px 15px;background:#22c55e;color:#fff;border-radius:8px;text-decoration:none;">
-  📄 إنشاء فاتورة
-  </a>
-
-  <a href="dashboard.html"
-  style="padding:8px 15px;background:#f59e0b;color:#fff;border-radius:8px;text-decoration:none;">
-  📊 داشبورد الفواتير
-  </a>
-
-  <a href="inventory-dashboard.html"
-  style="padding:8px 15px;background:#06b6d4;color:#fff;border-radius:8px;text-decoration:none;">
-  📦 لوحة المخزون
-  </a>
-
-  <a href="https://community.kimo-techlab.com/admin.html"
-  style="padding:8px 15px;background:#ec4899;color:#fff;border-radius:8px;text-decoration:none;">
-  👥 داشبورد المجتمع
-  </a>
-
-  <button onclick="logout()"
-  style="padding:8px 15px;border:none;border-radius:8px;cursor:pointer;background:#5726dc;color:#fff;">
-  🚪 Logout
-  </button>
-
+<div class="admin-local-actions" aria-label="اختصارات الإدارة">
+  <a href="products-admin.html" data-admin-owner-only>📦 إدارة المنتجات</a>
+  <a href="projects-admin.html" data-admin-owner-only>🧠 إدارة المشروعات</a>
+  <a href="inventory-dashboard.html" data-admin-owner-only>📊 إدارة المخزون</a>
+  <a href="dashboard.html">🧾 إدارة الفواتير</a>
+  <a href="https://community.kimo-techlab.com/admin.html" target="_blank" rel="noopener">👥 إدارة المجتمع</a>
 </div>
 
 <div class="dashboard">
@@ -467,40 +597,72 @@ select,input{
   </div>
 
   <div class="card">
-    <h3>Pending</h3>
+    <h3>قيد الانتظار</h3>
     <h2 id="pendingCount">0</h2>
   </div>
 
   <div class="card">
-    <h3>Completed</h3>
+    <h3>الطلبات المكتملة</h3>
     <h2 id="completedCount">0</h2>
   </div>
 
   <div class="card">
-    <h3>إجمالي الأرباح</h3>
-    <h2 id="totalRevenue">0 EGP</h2>
+    <h3>إجمالي المبيعات المكتملة</h3>
+    <h2 id="totalRevenue">0 ج.م</h2>
   </div>
 </div>
 
-
-<div id="productsList"></div>
-<div class="filters">
-    <input type="text" id="searchInput" placeholder="🔍 بحث عن العميل">
-  <select id="statusFilter">
-    <option value="all">كل الحالات</option>
-    <option value="pending">Pending</option>
-    <option value="shipped">Shipped</option>
-    <option value="completed">Completed</option>
-  </select>
-
-  <input type="date" id="fromDate">
-  <input type="date" id="toDate">
-
-  <button onclick="renderOrders()">فلترة</button>
-  <button onclick="exportExcel()">تصدير Excel</button>
+<section aria-labelledby="ordersTitle">
+<div class="orders-section-heading">
+  <div>
+    <h2 id="ordersTitle">قائمة الطلبات</h2>
+    <p>استخدم البحث والفلاتر للوصول إلى الطلب المطلوب.</p>
+  </div>
 </div>
 
-<div id="ordersContainer"></div>
+<div class="filters">
+  <label class="filter-field filter-field--grow">
+    <span>البحث بالاسم أو الهاتف</span>
+    <input type="search" id="searchInput" placeholder="اكتب اسم العميل أو رقم الهاتف">
+  </label>
+
+  <label class="filter-field">
+    <span>حالة الطلب</span>
+    <select id="statusFilter">
+      <option value="all">كل الحالات</option>
+      <option value="pending">قيد الانتظار</option>
+      <option value="shipped">تم الشحن</option>
+      <option value="completed">مكتمل</option>
+    </select>
+  </label>
+
+  <label class="filter-field">
+    <span>من تاريخ</span>
+    <input type="date" id="fromDate">
+  </label>
+
+  <label class="filter-field">
+    <span>إلى تاريخ</span>
+    <input type="date" id="toDate">
+  </label>
+
+  <div class="filter-actions">
+    <button type="button" id="applyFiltersButton" class="apply-filter-action">تطبيق الفلاتر</button>
+    <button type="button" id="exportOrdersButton" class="export-action">تصدير CSV</button>
+  </div>
+</div>
+
+<div id="ordersFeedback" class="admin-loading" role="status" aria-live="polite">
+  جارٍ تحميل الطلبات...
+</div>
+<div id="ordersContainer" hidden></div>
+</section>
+
+<section class="chart-panel" aria-labelledby="ordersChartTitle">
+  <h2 id="ordersChartTitle">توزيع حالات الطلبات</h2>
+  <p>مقارنة عدد الطلبات حسب الحالة الحالية.</p>
+  <canvas id="salesChart" aria-label="رسم يوضح حالات الطلبات" role="img"></canvas>
+</section>
 
 </div>
 
@@ -511,17 +673,19 @@ select,input{
 <script type="module">
   
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { 
   getFirestore,
   collection,
-  getDocs,
-  addDoc,
   deleteDoc,
   updateDoc,
   doc,
-  serverTimestamp,
-  onSnapshot
+  onSnapshot,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -537,151 +701,236 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-import { signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-window.logout = async function(){
-  await signOut(auth);
-  window.location.href = "admin-login.html";
-}
-
-import { getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
 let currentRole = null;
 let allOrders = [];
 let unsubscribe = null;
-let unsubscribeNotifications = null;
 let activeOrderDetails = null;
 let notificationsPrimed = false;
+let ordersLoadState = "loading";
+const allowedRoles = new Set(["owner", "admin"]);
+const counterTimers = new Map();
 const audio = new Audio("notification.mp3");
-onAuthStateChanged(auth, async (user) => {
 
-  if (!user) {
-    if(unsubscribe){
-      unsubscribe();
-      unsubscribe = null;
-    }
+function setOrdersFeedback(message, type = "empty"){
+  const feedback = document.getElementById("ordersFeedback");
+  const container = document.getElementById("ordersContainer");
 
-    if(unsubscribeNotifications){
-      unsubscribeNotifications();
-      unsubscribeNotifications = null;
-    }
+  feedback.textContent = message;
+  feedback.className = type === "loading"
+    ? "admin-loading"
+    : `admin-empty${type === "error" ? " orders-feedback-error" : ""}`;
+  feedback.hidden = false;
+  container.hidden = true;
+}
 
-    notificationsPrimed = false;
-    window.location.href = "admin-login.html";
-    return;
-  }
+function showOrdersContainer(){
+  document.getElementById("ordersFeedback").hidden = true;
+  document.getElementById("ordersContainer").hidden = false;
+}
 
-  const userDoc = await getDoc(doc(db, "users", user.uid));
-
-  if(userDoc.exists()){
-    currentRole = userDoc.data().role;
-  }
-
-  if(currentRole === "owner"){
-    autoDeleteOldOrders();
-  }
-
+function stopOrdersSubscription(){
   if(unsubscribe){
     unsubscribe();
-  }
-
-  if(unsubscribeNotifications){
-    unsubscribeNotifications();
+    unsubscribe = null;
   }
 
   notificationsPrimed = false;
-  unsubscribe = onSnapshot(collection(db,"orders"), (snapshot)=>{
+}
 
-    allOrders = [];
+function redirectToLogin(message = ""){
+  if(message){
+    sessionStorage.setItem("adminAuthMessage", message);
+  }
 
-    snapshot.forEach(docSnap=>{
-      allOrders.push({
-        id: docSnap.id,
-        ...docSnap.data()
-      });
+  sessionStorage.removeItem("adminRole");
+  window.location.replace("admin-login.html");
+}
+
+function subscribeToOrders(){
+  stopOrdersSubscription();
+  ordersLoadState = "loading";
+  setOrdersFeedback("جارٍ تحميل الطلبات...", "loading");
+
+  unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
+    const hasNewOrder = notificationsPrimed &&
+      snapshot.docChanges().some((change) => change.type === "added");
+
+    allOrders = snapshot.docs.map((docSnapshot) => ({
+      id: docSnapshot.id,
+      ...docSnapshot.data()
+    }));
+
+    allOrders.sort((first, second) => {
+      const firstTime = getSafeDate(first.createdAt)?.getTime() || 0;
+      const secondTime = getSafeDate(second.createdAt)?.getTime() || 0;
+      return secondTime - firstTime;
     });
-  
+
+    notificationsPrimed = true;
+    ordersLoadState = "ready";
+    renderSummary();
     renderOrders();
-  });
 
-  unsubscribeNotifications = onSnapshot(collection(db,"orders"), (snapshot)=>{
-    if(!notificationsPrimed){
-      notificationsPrimed = true;
+    if(hasNewOrder){
+      audio.play().catch(()=>{});
+      window.showToast?.("وصل طلب جديد 🔥", "success");
+    }
+  }, (error) => {
+    console.error("Orders subscription failed:", error);
+    allOrders = [];
+    ordersLoadState = "error";
+    renderSummary();
+    setOrdersFeedback("تعذر تحميل الطلبات. تحقق من الاتصال والصلاحيات ثم أعد المحاولة.", "error");
+  });
+}
+
+onAuthStateChanged(auth, async (user) => {
+  stopOrdersSubscription();
+  currentRole = null;
+
+  if(!user){
+    redirectToLogin();
+    return;
+  }
+
+  setOrdersFeedback("جارٍ التحقق من صلاحية الحساب...", "loading");
+
+  try{
+    const userSnapshot = await getDoc(doc(db, "users", user.uid));
+    const role = userSnapshot.exists()
+      ? String(userSnapshot.data().role || "").trim().toLowerCase()
+      : "";
+
+    if(!allowedRoles.has(role)){
+      sessionStorage.setItem(
+        "adminAuthMessage",
+        "هذا الحساب غير مصرح له بالدخول إلى لوحة الإدارة."
+      );
+      await signOut(auth).catch(()=>{});
+      redirectToLogin();
       return;
     }
 
-    const hasNewOrder = snapshot.docChanges().some((change)=> change.type === "added");
-
-    if(!hasNewOrder){
-      return;
-    }
-
-    audio.play().catch(()=>{});
-    showToast("طلب جديد وصل 🔥","success");
-  });
+    currentRole = role;
+    sessionStorage.setItem("adminRole", role);
+    window.setAdminNavigationRole?.(role);
+    subscribeToOrders();
+  }catch(error){
+    console.error("Admin authorization failed:", error);
+    sessionStorage.setItem(
+      "adminAuthMessage",
+      "تعذر التحقق من صلاحية الحساب. حاول تسجيل الدخول مرة أخرى."
+    );
+    await signOut(auth).catch(()=>{});
+    redirectToLogin();
+  }
 });
 
+async function logout(){
+  const logoutButton = document.getElementById("logoutButton");
+  logoutButton.disabled = true;
 
+  try{
+    await signOut(auth);
+    redirectToLogin();
+  }catch(error){
+    console.error("Logout failed:", error);
+    logoutButton.disabled = false;
+    window.showToast?.("تعذر تسجيل الخروج. حاول مرة أخرى.", "error");
+  }
+}
 
-
-
-/* ================= صوت الإشعار ================= */
+document.getElementById("logoutButton").addEventListener("click", logout);
 
 document.addEventListener("click", () => {
-  audio.play().then(()=> audio.pause()).catch(()=>{});
-},{ once:true });
+  audio.play().then(() => {
+    audio.pause();
+    audio.currentTime = 0;
+  }).catch(()=>{});
+}, { once:true });
 
+function formatCounterValue(id, value){
+  const formattedValue = new Intl.NumberFormat("ar-EG", {
+    maximumFractionDigits:0
+  }).format(Math.floor(value));
 
+  return id === "totalRevenue" ? `${formattedValue} ج.م` : formattedValue;
+}
 
-/* ================= تحميل الطلبات ================= */
-
-let chartInstance = null;
 function animateCounter(id, target){
+  const element = document.getElementById(id);
+  const safeTarget = Number.isFinite(Number(target)) ? Math.max(0, Number(target)) : 0;
+
+  if(!element){
+    return;
+  }
+
+  if(counterTimers.has(id)){
+    clearInterval(counterTimers.get(id));
+  }
+
+  if(
+    safeTarget === 0 ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ){
+    element.textContent = formatCounterValue(id, safeTarget);
+    return;
+  }
+
   let start = 0;
   const duration = 800;
-  const increment = target / (duration / 16);
-
-  const element = document.getElementById(id);
+  const increment = safeTarget / (duration / 16);
 
   const counter = setInterval(()=>{
     start += increment;
-    if(start >= target){
-      start = target;
+    if(start >= safeTarget){
+      start = safeTarget;
       clearInterval(counter);
+      counterTimers.delete(id);
     }
-if(id === "totalRevenue"){
-  element.innerText = Math.floor(start) + " EGP";
-}else{
-  element.innerText = Math.floor(start);
-}  },16);
+
+    element.textContent = formatCounterValue(id, start);
+  },16);
+
+  counterTimers.set(id, counter);
 }
 
 let chart;
 
-function updateChart(revenue, pending, completed){
+function updateChart(pending, shipped, completed){
+  const canvas = document.getElementById("salesChart");
 
-  const ctx = document.getElementById('salesChart').getContext('2d');
+  if(!canvas || typeof window.Chart !== "function"){
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
 
   if(chart) chart.destroy();
 
-  chart = new Chart(ctx,{
-    type:'doughnut',
+  chart = new window.Chart(ctx,{
+    type:"doughnut",
     data:{
-      labels:['Revenue','Pending','Completed'],
+      labels:["قيد الانتظار", "تم الشحن", "مكتمل"],
       datasets:[{
-        data:[revenue, pending, completed],
+        data:[pending, shipped, completed],
         backgroundColor:[
-          '#22c55e',
-          '#facc15',
-          '#38bdf8'
+          "#facc15",
+          "#38bdf8",
+          "#22c55e"
         ]
       }]
     },
     options:{
+      responsive:true,
+      maintainAspectRatio:true,
       plugins:{
         legend:{
           labels:{
-            color:'#fff'
+            color:"#334155",
+            font:{
+              family:"Cairo"
+            }
           }
         }
       }
@@ -689,122 +938,272 @@ function updateChart(revenue, pending, completed){
   });
 }
 
-function renderOrders(){
-
-  const searchValue = document.getElementById("searchInput").value.toLowerCase();
-  const statusFilter = document.getElementById("statusFilter").value;
-  const fromDate = document.getElementById("fromDate").value;
-  const toDate = document.getElementById("toDate").value;
-  const fromDateLimit = fromDate ? new Date(fromDate) : null;
-  const toDateLimit = toDate ? new Date(toDate) : null;
-
-  if(fromDateLimit){
-    fromDateLimit.setHours(0, 0, 0, 0);
+function getSafeDate(value){
+  if(!value){
+    return null;
   }
 
-  if(toDateLimit){
-    toDateLimit.setHours(23, 59, 59, 999);
+  let date = null;
+
+  try{
+    if(value instanceof Date){
+      date = value;
+    }else if(typeof value.toDate === "function"){
+      date = value.toDate();
+    }else if(typeof value.seconds === "number"){
+      date = new Date(value.seconds * 1000);
+    }else if(typeof value === "string" || typeof value === "number"){
+      date = new Date(value);
+    }
+  }catch(error){
+    console.warn("Invalid order date:", error);
+    return null;
   }
 
-  let total=0;
-  let revenue=0;
-  let pending=0;
-  let completed=0;
+  return date instanceof Date && !Number.isNaN(date.getTime()) ? date : null;
+}
 
-  const container=document.getElementById("ordersContainer");
-  container.innerHTML="";
+function formatOrderDate(value){
+  const date = getSafeDate(value);
 
-  allOrders.forEach(data=>{
+  return date
+    ? date.toLocaleString("ar-EG", { dateStyle:"medium", timeStyle:"short" })
+    : "غير متوفر";
+}
 
-    const id = data.id;
-    const customerName = (data.customerName || "").toLowerCase();
-    const phone = String(data.phone || "");
+function normalizeStatus(status){
+  return ["pending", "shipped", "completed"].includes(status)
+    ? status
+    : "pending";
+}
+
+function renderSummary(){
+  let revenue = 0;
+  let pending = 0;
+  let shipped = 0;
+  let completed = 0;
+
+  allOrders.forEach((order) => {
+    const status = normalizeStatus(order.status);
+
+    if(status === "pending") pending++;
+    if(status === "shipped") shipped++;
+    if(status === "completed"){
+      completed++;
+      revenue += Number(order.total) || 0;
+    }
+  });
+
+  animateCounter("totalOrders", allOrders.length);
+  animateCounter("pendingCount", pending);
+  animateCounter("completedCount", completed);
+  animateCounter("totalRevenue", revenue);
+  updateChart(pending, shipped, completed);
+}
+
+function getFilteredOrders(){
+  const searchValue = document.getElementById("searchInput").value.trim().toLowerCase();
+  const selectedStatus = document.getElementById("statusFilter").value;
+  const fromValue = document.getElementById("fromDate").value;
+  const toValue = document.getElementById("toDate").value;
+  const fromDate = fromValue ? new Date(`${fromValue}T00:00:00`) : null;
+  const toDate = toValue ? new Date(`${toValue}T23:59:59.999`) : null;
+
+  if(fromDate && toDate && fromDate > toDate){
+    return {
+      orders:[],
+      error:"تاريخ البداية يجب أن يسبق تاريخ النهاية."
+    };
+  }
+
+  const orders = allOrders.filter((order) => {
+    const customerName = String(order.customerName || "").toLowerCase();
+    const phone = String(order.phone || "");
+    const status = normalizeStatus(order.status);
+    const orderDate = getSafeDate(order.createdAt);
 
     if(
       searchValue &&
       !customerName.includes(searchValue) &&
       !phone.includes(searchValue)
-    ) return;
-
-    const status=data.status || "pending";
-    let orderDate = data.createdAt ? data.createdAt.toDate() : null;
-
-    if(statusFilter !== "all" && status !== statusFilter) return;
-    if(fromDateLimit && orderDate && orderDate < fromDateLimit) return;
-    if(toDateLimit && orderDate && orderDate > toDateLimit) return;
-
-    total++;
-
-    if(status==="pending") pending++;
-    if(status==="completed"){
-      completed++;
-      revenue += Number(data.total) || 0;
+    ){
+      return false;
     }
 
-    const card=document.createElement("div");
-    card.className="order-card";
-    card.style.cursor="pointer";
-    card.onclick = () => openOrderDetails(data,id);
+    if(selectedStatus !== "all" && status !== selectedStatus){
+      return false;
+    }
 
-    card.innerHTML=`
-      <div class="order-id">Order ID: ${id.slice(0,8).toUpperCase()}</div>
-      <strong>${data.customerName || "Customer"}</strong>
-      <div class="status ${status}">${status.toUpperCase()}</div>
-      <div>💰 ${Number(data.total) || 0} EGP</div>
-    `;
+    if((fromDate || toDate) && !orderDate){
+      return false;
+    }
 
-    container.appendChild(card);
+    if(fromDate && orderDate < fromDate){
+      return false;
+    }
+
+    if(toDate && orderDate > toDate){
+      return false;
+    }
+
+    return true;
   });
 
-  animateCounter("totalOrders", total);
-  animateCounter("pendingCount", pending);
-  animateCounter("completedCount", completed);
-  animateCounter("totalRevenue", revenue);
-  updateChart(revenue, pending, completed);
+  return { orders, error:"" };
 }
 
-/* ================= تصدير Excel ================= */
+function createOrderCard(data){
+  const id = String(data.id || "");
+  const status = normalizeStatus(data.status);
+  const customerName = String(data.customerName || "عميل بدون اسم");
+  const phone = String(data.phone || "لا يوجد رقم هاتف");
+  const total = Number(data.total) || 0;
 
-window.exportExcel = async function(){
+  const card = document.createElement("article");
+  card.className = "order-card";
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-label", `فتح تفاصيل طلب ${customerName}`);
 
-  const snapshot = await getDocs(collection(db,"orders"));
-  let csv = "Name,Phone,Total,Status\n";
+  const top = document.createElement("div");
+  top.className = "order-card-top";
 
-  snapshot.forEach(doc=>{
-    const d = doc.data();
-    csv += `${d.customerName},${d.phone},${d.total},${d.status || "pending"}\n`;
+  const orderId = document.createElement("span");
+  orderId.className = "order-id";
+  orderId.textContent = `رقم الطلب: ${id.slice(0,8).toUpperCase() || "-"}`;
+
+  const statusBadge = document.createElement("span");
+  statusBadge.className = `status ${status}`;
+  statusBadge.textContent = getStatusLabel(status);
+  top.append(orderId, statusBadge);
+
+  const main = document.createElement("div");
+  main.className = "order-card-main";
+
+  const customer = document.createElement("strong");
+  customer.textContent = customerName;
+
+  const totalElement = document.createElement("span");
+  totalElement.className = "order-card-total";
+  totalElement.textContent = `${new Intl.NumberFormat("ar-EG", {
+    maximumFractionDigits:2
+  }).format(total)} ج.م`;
+  main.append(customer, totalElement);
+
+  const meta = document.createElement("div");
+  meta.className = "order-card-meta";
+
+  const phoneElement = document.createElement("span");
+  phoneElement.textContent = `الهاتف: ${phone}`;
+
+  const dateElement = document.createElement("span");
+  dateElement.textContent = `التاريخ: ${formatOrderDate(data.createdAt)}`;
+  meta.append(phoneElement, dateElement);
+
+  card.append(top, main, meta);
+  card.addEventListener("click", () => window.openOrderDetails(data, id));
+  card.addEventListener("keydown", (event) => {
+    if(event.key === "Enter" || event.key === " "){
+      event.preventDefault();
+      window.openOrderDetails(data, id);
+    }
   });
 
-  const blob = new Blob([csv], {type:'text/csv'});
+  return card;
+}
+
+function renderOrders(){
+  if(ordersLoadState !== "ready"){
+    return;
+  }
+
+  const container = document.getElementById("ordersContainer");
+  const { orders, error } = getFilteredOrders();
+  container.replaceChildren();
+
+  if(error){
+    setOrdersFeedback(error, "error");
+    return;
+  }
+
+  if(!orders.length){
+    setOrdersFeedback(
+      allOrders.length
+        ? "لا توجد طلبات مطابقة للفلاتر الحالية."
+        : "لا توجد طلبات حتى الآن.",
+      "empty"
+    );
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  orders.forEach((order) => fragment.appendChild(createOrderCard(order)));
+  container.appendChild(fragment);
+  showOrdersContainer();
+}
+
+function escapeCsvCell(value){
+  let text = String(value ?? "").replace(/\r?\n/g, " ");
+
+  if(/^[=+\-@]/.test(text.trimStart())){
+    text = `'${text}`;
+  }
+
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function exportOrders(){
+  if(ordersLoadState !== "ready"){
+    window.showToast?.("انتظر حتى يكتمل تحميل الطلبات.", "error");
+    return;
+  }
+
+  const { orders, error } = getFilteredOrders();
+
+  if(error){
+    window.showToast?.(error, "error");
+    return;
+  }
+
+  if(!orders.length){
+    window.showToast?.("لا توجد طلبات لتصديرها.", "error");
+    return;
+  }
+
+  const rows = [
+    ["رقم الطلب", "اسم العميل", "الهاتف", "الإجمالي", "الحالة", "التاريخ"],
+    ...orders.map((order) => [
+      String(order.id || "").slice(0,8).toUpperCase(),
+      order.customerName || "",
+      order.phone || "",
+      Number(order.total) || 0,
+      getStatusLabel(normalizeStatus(order.status)),
+      formatOrderDate(order.createdAt)
+    ])
+  ];
+  const csv = "\uFEFF" + rows
+    .map((row) => row.map(escapeCsvCell).join(","))
+    .join("\r\n");
+  const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "orders.csv";
+  a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.hidden = true;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+  window.showToast?.("تم تجهيز ملف الطلبات.", "success");
 }
 
-/* ================= حذف تلقائي بعد 30 يوم ================= */
+document.getElementById("searchInput").addEventListener("input", renderOrders);
+document.getElementById("statusFilter").addEventListener("change", renderOrders);
+document.getElementById("fromDate").addEventListener("change", renderOrders);
+document.getElementById("toDate").addEventListener("change", renderOrders);
+document.getElementById("applyFiltersButton").addEventListener("click", renderOrders);
+document.getElementById("exportOrdersButton").addEventListener("click", exportOrders);
 
-async function autoDeleteOldOrders(){
-
-  const snapshot = await getDocs(collection(db,"orders"));
-  const now = new Date();
-
-  snapshot.forEach(async (docSnap)=>{
-    const data = docSnap.data();
-    if(!data.createdAt) return;
-
-    const orderDate = data.createdAt.toDate();
-    const diff = (now - orderDate) / (1000*60*60*24);
-
-    if(diff > 30){
-      await deleteDoc(doc(db,"orders",docSnap.id));
-    }
-  });
-}
-
-
-document.getElementById("searchInput").addEventListener("keyup", renderOrders);
 function getStatusLabel(status){
   return {
     pending:"قيد الانتظار",
@@ -822,10 +1221,12 @@ function getPaymentLabel(method){
 }
 
 function getGroupedOrderItems(items){
-  return Array.from((items || []).reduce((map, item)=>{
-    const name = item.name || "منتج بدون اسم";
-    const unitPrice = Number(item.price) || 0;
-    const quantity = Number(item.quantity) || 1;
+  const safeItems = Array.isArray(items) ? items : [];
+
+  return Array.from(safeItems.reduce((map, item)=>{
+    const name = String(item?.name || "منتج بدون اسم");
+    const unitPrice = Number(item?.price) || 0;
+    const quantity = Number(item?.quantity) || 1;
     const key = `${name}__${unitPrice}`;
 
     if(!map.has(key)){
@@ -842,10 +1243,8 @@ function getGroupedOrderItems(items){
 }
 
 function getOrderDetailsState(data,id){
-  const status = data.status || "pending";
-  const orderDate = data.createdAt
-    ? data.createdAt.toDate().toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" })
-    : "غير متوفر";
+  const status = normalizeStatus(data.status);
+  const orderDate = formatOrderDate(data.createdAt);
   const groupedItems = getGroupedOrderItems(data.items);
   const totalPieces = groupedItems.reduce((sum,item)=> sum + item.quantity, 0);
   const totalAmount = Number(data.total) || 0;
@@ -861,6 +1260,22 @@ function getOrderDetailsState(data,id){
   };
 }
 
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  })[character]);
+}
+
+function formatMoney(value){
+  return new Intl.NumberFormat("ar-EG", {
+    maximumFractionDigits:2
+  }).format(Number(value) || 0);
+}
+
 function buildOrderItemsMarkup(groupedItems){
   return groupedItems.map(item=>{
     const lineTotal = item.unitPrice * item.quantity;
@@ -868,10 +1283,10 @@ function buildOrderItemsMarkup(groupedItems){
     return `
       <div class="popup-item">
         <div class="popup-item-main">
-          <strong class="popup-item-name">${item.name}</strong>
-          <span class="popup-item-qty">x${item.quantity}</span>
+          <strong class="popup-item-name">${escapeHtml(item.name)}</strong>
+          <span class="popup-item-qty">×${escapeHtml(item.quantity)}</span>
         </div>
-        <span class="popup-item-price">${lineTotal} EGP</span>
+        <span class="popup-item-price">${escapeHtml(formatMoney(lineTotal))} ج.م</span>
       </div>
     `;
   }).join("") || `<div class="popup-empty">لا توجد منتجات داخل هذا الطلب.</div>`;
@@ -885,10 +1300,10 @@ function buildPrintableInvoiceDocument(order){
     return `
       <div class="invoice-item">
         <div class="invoice-item-main">
-          <strong>${item.name}</strong>
-          <span class="invoice-qty">x${item.quantity}</span>
+          <strong>${escapeHtml(item.name)}</strong>
+          <span class="invoice-qty">×${escapeHtml(item.quantity)}</span>
         </div>
-        <span class="invoice-price">${lineTotal} EGP</span>
+        <span class="invoice-price">${escapeHtml(formatMoney(lineTotal))} ج.م</span>
       </div>
     `;
   }).join("") || `<div class="invoice-empty">لا توجد منتجات داخل هذا الطلب.</div>`;
@@ -898,7 +1313,7 @@ function buildPrintableInvoiceDocument(order){
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>فاتورة طلب ${order.id.slice(0,8).toUpperCase()}</title>
+      <title>فاتورة طلب ${escapeHtml(String(order.id).slice(0,8).toUpperCase())}</title>
       <style>
         @page{
           size:A4;
@@ -1150,7 +1565,7 @@ function buildPrintableInvoiceDocument(order){
             <div>
               <span class="invoice-eyebrow">KIMO TECH</span>
               <h1>فاتورة طلب</h1>
-              <p>رقم الطلب: ${order.id.slice(0,8).toUpperCase()}</p>
+              <p>رقم الطلب: ${escapeHtml(String(order.id).slice(0,8).toUpperCase())}</p>
             </div>
             <div class="invoice-brand">
               <img src="${logoUrl}" alt="KIMO TECH" onerror="this.style.display='none'">
@@ -1162,34 +1577,34 @@ function buildPrintableInvoiceDocument(order){
           </div>
 
           <div class="invoice-chip-row">
-            <span class="invoice-chip status">${getStatusLabel(order.status)}</span>
-            <span class="invoice-chip date">${order.orderDate}</span>
+            <span class="invoice-chip status">${escapeHtml(getStatusLabel(order.status))}</span>
+            <span class="invoice-chip date">${escapeHtml(order.orderDate)}</span>
           </div>
 
           <div class="invoice-meta">
             <div class="invoice-meta-card">
               <span>اسم العميل</span>
-              <strong>${order.data.customerName || "عميل بدون اسم"}</strong>
+              <strong>${escapeHtml(order.data.customerName || "عميل بدون اسم")}</strong>
             </div>
             <div class="invoice-meta-card">
               <span>رقم الهاتف</span>
-              <strong>${order.data.phone || "-"}</strong>
+              <strong>${escapeHtml(order.data.phone || "-")}</strong>
             </div>
             <div class="invoice-meta-card">
               <span>طريقة الدفع</span>
-              <strong>${getPaymentLabel(order.data.paymentMethod)}</strong>
+              <strong>${escapeHtml(getPaymentLabel(order.data.paymentMethod))}</strong>
             </div>
             <div class="invoice-meta-card">
               <span>العنوان</span>
-              <strong>${order.data.address || "لا يوجد عنوان"}</strong>
+              <strong>${escapeHtml(order.data.address || "لا يوجد عنوان")}</strong>
             </div>
             <div class="invoice-meta-card">
               <span>الأصناف والقطع</span>
-              <strong>${order.groupedItems.length} نوع / ${order.totalPieces} قطعة</strong>
+              <strong>${escapeHtml(order.groupedItems.length)} نوع / ${escapeHtml(order.totalPieces)} قطعة</strong>
             </div>
             <div class="invoice-meta-card">
               <span>وقت الطباعة</span>
-              <strong>${new Date().toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" })}</strong>
+              <strong>${escapeHtml(new Date().toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" }))}</strong>
             </div>
           </div>
 
@@ -1200,7 +1615,7 @@ function buildPrintableInvoiceDocument(order){
 
           <div class="invoice-total">
             <span>الإجمالي النهائي</span>
-            <strong>${order.totalAmount} EGP</strong>
+            <strong>${escapeHtml(formatMoney(order.totalAmount))} ج.م</strong>
           </div>
         </div>
       </div>
@@ -1213,37 +1628,38 @@ window.openOrderDetails = function(data,id){
 
   const order = getOrderDetailsState(data,id);
   const itemsHTML = buildOrderItemsMarkup(order.groupedItems);
+  const popupContent = document.getElementById("popupContent");
 
   activeOrderDetails = order;
 
-  document.getElementById("popupContent").innerHTML = `
+  popupContent.innerHTML = `
     <div class="popup-header">
       <div>
         <span class="popup-eyebrow">تفاصيل الطلب</span>
-        <h3 class="popup-title">طلب ${id.slice(0,8).toUpperCase()}</h3>
-        <p class="popup-subtitle">${order.orderDate}</p>
+        <h3 class="popup-title">طلب ${escapeHtml(String(id).slice(0,8).toUpperCase())}</h3>
+        <p class="popup-subtitle">${escapeHtml(order.orderDate)}</p>
       </div>
-      <div class="status ${order.status}">${getStatusLabel(order.status)}</div>
+      <div class="status ${order.status}">${escapeHtml(getStatusLabel(order.status))}</div>
     </div>
 
     <div class="popup-customer">
-      <h4 class="popup-customer-name">${data.customerName || "عميل بدون اسم"}</h4>
+      <h4 class="popup-customer-name">${escapeHtml(data.customerName || "عميل بدون اسم")}</h4>
       <div class="popup-meta">
         <div class="popup-meta-card">
           <span>رقم الهاتف</span>
-          <strong>${data.phone || "-"}</strong>
+          <strong>${escapeHtml(data.phone || "-")}</strong>
         </div>
         <div class="popup-meta-card">
           <span>طريقة الدفع</span>
-          <strong>${getPaymentLabel(data.paymentMethod)}</strong>
+          <strong>${escapeHtml(getPaymentLabel(data.paymentMethod))}</strong>
         </div>
         <div class="popup-meta-card">
           <span>العنوان</span>
-          <strong>${data.address || "لا يوجد عنوان"}</strong>
+          <strong>${escapeHtml(data.address || "لا يوجد عنوان")}</strong>
         </div>
         <div class="popup-meta-card">
           <span>الأصناف والقطع</span>
-          <strong>${order.groupedItems.length} نوع / ${order.totalPieces} قطعة</strong>
+          <strong>${escapeHtml(order.groupedItems.length)} نوع / ${escapeHtml(order.totalPieces)} قطعة</strong>
         </div>
       </div>
     </div>
@@ -1255,38 +1671,59 @@ window.openOrderDetails = function(data,id){
 
     <div class="popup-total">
       <span>الإجمالي النهائي</span>
-      <strong>${order.totalAmount} EGP</strong>
+      <strong>${escapeHtml(formatMoney(order.totalAmount))} ج.م</strong>
     </div>
 
     <div class="popup-actions">
-      <button class="status-action pending" onclick="changeStatus('${id}','pending')">قيد الانتظار</button>
-      <button class="status-action shipped" onclick="changeStatus('${id}','shipped')">تم الشحن</button>
-      <button class="status-action completed" onclick="changeStatus('${id}','completed')">مكتمل</button>
-      <button class="print-action" onclick="printOrder()">طباعة</button>
-      ${currentRole === "owner" ? `<button class="delete-action" onclick="deleteOrder('${id}')">حذف الطلب</button>` : ``}
+      <button type="button" class="status-action pending" data-order-status="pending">قيد الانتظار</button>
+      <button type="button" class="status-action shipped" data-order-status="shipped">تم الشحن</button>
+      <button type="button" class="status-action completed" data-order-status="completed">مكتمل</button>
+      <button type="button" class="print-action" data-order-action="print">طباعة</button>
+      ${currentRole === "owner" ? `<button type="button" class="delete-action" data-order-action="delete">حذف الطلب</button>` : ``}
     </div>
   `;
 
-  document.getElementById("orderPopup").style.display="flex";
+  popupContent.querySelectorAll("[data-order-status]").forEach((button) => {
+    button.addEventListener("click", () => {
+      window.changeStatus(id, button.dataset.orderStatus);
+    });
+  });
+
+  popupContent.querySelector('[data-order-action="print"]')
+    ?.addEventListener("click", window.printOrder);
+  popupContent.querySelector('[data-order-action="delete"]')
+    ?.addEventListener("click", () => window.deleteOrder(id));
+
+  const popup = document.getElementById("orderPopup");
+  popup.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  document.getElementById("closeOrderPopupButton").focus();
 }
 
 
 window.changeStatus = async function(id,newStatus){
+  if(!allowedRoles.has(currentRole)){
+    window.showToast?.("غير مسموح لك بتعديل الطلبات.", "error");
+    return;
+  }
+
+  if(!["pending", "shipped", "completed"].includes(newStatus)){
+    window.showToast?.("حالة الطلب غير صالحة.", "error");
+    return;
+  }
 
   try{
-
     await updateDoc(doc(db,"orders",id),{
       status:newStatus
     });
 
-    showToast("تم تحديث حالة الطلب ✅","success");
-
-    closePopup();
+    window.showToast?.("تم تحديث حالة الطلب ✅","success");
+    window.closePopup();
 
   }catch(error){
 
     console.error(error);
-    showToast("حصل خطأ في تحديث الطلب ❌","error");
+    window.showToast?.("حصل خطأ في تحديث الطلب ❌","error");
 
   }
 }
@@ -1294,6 +1731,10 @@ window.changeStatus = async function(id,newStatus){
 
 
 window.deleteOrder = async function(id){
+  if(currentRole !== "owner"){
+    window.showToast?.("حذف الطلبات متاح للمالك فقط.", "error");
+    return;
+  }
 
   if(!confirm("هل أنت متأكد من حذف الطلب؟")){
     return;
@@ -1301,33 +1742,35 @@ window.deleteOrder = async function(id){
 
   try{
     await deleteDoc(doc(db,"orders",id));
-    showToast("تم حذف الطلب 🗑","success");
-    closePopup();
+    window.showToast?.("تم حذف الطلب 🗑","success");
+    window.closePopup();
   }catch(error){
     console.error(error);
-    showToast("غير مسموح بالحذف ❌","error");
+    window.showToast?.("غير مسموح بالحذف ❌","error");
   }
 }
 
 window.closePopup = function(){
-  document.getElementById("orderPopup").style.display="none";
+  document.getElementById("orderPopup").style.display = "none";
+  document.body.style.overflow = "";
+  activeOrderDetails = null;
 }
 
 document.addEventListener("keydown", (event)=>{
   if(event.key === "Escape"){
-    closePopup();
+    window.closePopup();
   }
 });
 
 window.printOrder = function(){
   if(!activeOrderDetails){
-    showToast("افتح الطلب أولاً قبل الطباعة","error");
+    window.showToast?.("افتح الطلب أولاً قبل الطباعة","error");
     return;
   }
 
   const printWindow = window.open("", "", "width=800,height=600");
   if(!printWindow){
-    showToast("اسمح بفتح نافذة الطباعة أولاً","error");
+    window.showToast?.("اسمح بفتح نافذة الطباعة أولاً","error");
     return;
   }
 
@@ -1343,11 +1786,16 @@ window.printOrder = function(){
 
 
 </script>
-<canvas id="salesChart" style="max-width:400px;margin:30px auto;"></canvas>
 
-<div id="orderPopup" class="order-popup" onclick="if(event.target === this) closePopup()">
+<div
+  id="orderPopup"
+  class="order-popup"
+  role="dialog"
+  aria-modal="true"
+  aria-label="تفاصيل الطلب"
+>
 <div class="popup-shell">
-<button type="button" class="popup-close" onclick="closePopup()" aria-label="إغلاق">
+<button type="button" id="closeOrderPopupButton" class="popup-close" aria-label="إغلاق">
 &times;
 </button>
 
@@ -1356,18 +1804,13 @@ window.printOrder = function(){
 </div>
 </div>
 
-<script>
-function toggleTheme(){
-  document.body.classList.toggle("light-mode");
-}
-</script>
-<div id="toastContainer"></div>
+<div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 
 window.showToast = function(message,type="success"){
 
-const container = document.getElementById("toastContainer");
+  const container = document.getElementById("toastContainer");
 
   const toast = document.createElement("div");
   toast.className = "toast " + type;
@@ -1379,14 +1822,17 @@ const container = document.getElementById("toastContainer");
     toast.remove();
   },3000);
 }
+
+document.getElementById("closeOrderPopupButton").addEventListener("click", () => {
+  window.closePopup?.();
+});
+
+document.getElementById("orderPopup").addEventListener("click", (event) => {
+  if(event.target === event.currentTarget){
+    window.closePopup?.();
+  }
+});
 </script>
-
-
-
-</button>
-
-</div>
-</div>
 
 </body>
 </html>

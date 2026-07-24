@@ -912,6 +912,257 @@ footer{
     gap:18px;
   }
 }
+/* ===== 2026 UI polish ===== */
+.loading-state,.empty-state{
+  grid-column:1/-1;
+  min-height:260px;
+  display:grid;
+  place-items:center;
+  gap:14px;
+  padding:32px;
+  color:#64748b;
+  background:linear-gradient(135deg,#fff,#f8fafc);
+  border:1px solid #e5e7eb;
+  border-radius:22px;
+  font-weight:700;
+  text-align:center;
+}
+.loading-state::before{
+  content:"";
+  width:44px;height:44px;
+  border:4px solid #d1fae5;
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:kimo-spin .8s linear infinite;
+}
+@keyframes kimo-spin{to{transform:rotate(360deg)}}
+.card{transition:transform .22s ease,box-shadow .22s ease}
+.card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(15,23,42,.14)}
+
+/* ===== Expandable category tree ===== */
+.sidebar{width:330px}
+#categoryList{
+  gap:9px;
+  padding:0 2px;
+  flex:1 1 auto;
+  min-height:0;
+  align-content:start;
+  grid-auto-rows:max-content;
+}
+#categoryList li,
+#categoryList li:hover,
+#categoryList li.active{
+  min-height:0;
+  padding:0;
+  display:block;
+  cursor:default;
+  color:inherit;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  transform:none;
+}
+#categoryList li::before{display:none}
+.category-all-button,
+.category-select-button{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  padding:9px 11px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:#1e293b;
+  background:transparent;
+  border:0;
+  border-radius:10px;
+  text-align:right;
+  cursor:pointer;
+  transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.category-all-button::before,
+.category-child-select::before{
+  content:"";
+  width:9px;
+  height:9px;
+  flex:0 0 9px;
+  background:#cbd5e1;
+  border:0;
+  border-radius:50%;
+  box-shadow:0 0 0 4px #f1f5f9;
+  transition:.2s ease;
+}
+.category-all-button{
+  min-height:50px;
+  padding:11px 13px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  font-weight:900;
+}
+.category-all-button:hover,
+.category-select-button:hover{color:#0369a1;background:#f0f9ff}
+.category-all-button.active,
+.category-select-button.active{
+  color:#075985;
+  background:#ecfeff;
+}
+.category-all-button.active::before,
+.category-child-select.active::before{
+  background:var(--accent);
+  box-shadow:0 0 0 4px #dcfce7;
+}
+.category-parent-toggle{
+  width:100%;
+  min-height:58px;
+  padding:10px 12px;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) auto 24px;
+  align-items:center;
+  gap:9px;
+  color:#1e293b;
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  text-align:right;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(15,23,42,.04);
+  transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.category-parent-toggle:hover{
+  background:#f8fafc;
+  border-color:#bae6fd;
+}
+.category-group.expanded .category-parent-toggle{
+  color:#fff;
+  background:linear-gradient(135deg,#0f172a,#020617);
+  border-color:#0f172a;
+  box-shadow:0 10px 20px rgba(15,23,42,.18);
+}
+.category-parent-icon{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  background:#f0f9ff;
+  border-radius:10px;
+  font-size:18px;
+}
+.category-group.expanded .category-parent-icon{background:rgba(255,255,255,.12)}
+.category-parent-label{
+  min-width:0;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.5;
+}
+.category-parent-count{
+  padding:4px 7px;
+  color:#0369a1;
+  background:#e0f2fe;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.category-group.expanded .category-parent-count{
+  color:#d1fae5;
+  background:rgba(34,197,94,.16);
+}
+.category-expand-icon{
+  width:24px;
+  display:grid;
+  place-items:center;
+  font-size:20px;
+  font-weight:700;
+  line-height:1;
+}
+.category-children{
+  margin:5px 0 2px;
+  padding:6px 14px 7px 0;
+  display:grid;
+  gap:3px;
+  list-style:none;
+  border-right:2px solid #bae6fd;
+}
+.category-children[hidden]{display:none}
+.category-child-select{
+  min-height:40px;
+  padding:7px 9px;
+  color:#475569;
+  font-size:12.5px;
+  font-weight:700;
+}
+.category-child-select .category-label{
+  min-width:0;
+  flex:1 1 auto;
+  line-height:1.45;
+}
+.category-child-select.category-parent-all{
+  margin-bottom:3px;
+  color:#075985;
+  background:#f0f9ff;
+  font-weight:900;
+}
+.category-count{
+  min-width:29px;
+  padding:3px 7px;
+  flex:0 0 auto;
+  font-size:10px;
+}
+.category-all-button:hover .category-count,
+.category-select-button:hover .category-count,
+.category-all-button.active .category-count,
+.category-select-button.active .category-count{
+  color:#0369a1;
+  background:#e0f2fe;
+}
+#categoryList li:hover .category-count{
+  color:#0369a1;
+  background:#e0f2fe;
+}
+
+@media(max-width:768px){
+  .sidebar{width:100vw}
+  body.sidebar-open .container{z-index:1001}
+  .main-nav{height:auto;min-height:72px;padding:12px 14px;gap:10px;align-items:center}
+  .nav-left{
+    flex:1;
+    min-width:0;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:7px;
+    overflow:visible;
+  }
+  .nav-left .nav-link{display:none}
+  .nav-left .nav-link:nth-child(-n+4){
+    display:block;
+    min-width:0;
+    padding:10px 5px;
+    font-size:11.5px;
+    text-align:center;
+    white-space:nowrap;
+    border-radius:13px;
+    background:rgba(255,255,255,.06);
+  }
+  .nav-right{position:static;flex:0 0 46px;width:46px;height:46px}
+  .top-bar{font-size:12px;padding:9px 12px}
+  header{padding:16px 14px;gap:14px;flex-direction:column}
+  header .logo{order:1}
+  .search-box{order:2;width:100%;max-width:none}
+  .container{padding:14px}
+  .main{min-width:0}
+  .top-controls{gap:9px;flex-wrap:wrap}
+  .control-btn{min-height:44px}
+  .grid{gap:12px}
+  .card-info h3{font-size:14px;line-height:1.5}
+  .category-parent-toggle{min-height:60px}
+  .category-all-button{min-height:50px}
+  .category-child-select{min-height:44px;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
 </style>
 
 </head>
@@ -924,7 +1175,7 @@ footer{
     <a href="index.html" class="nav-link">الرئيسية</a>
     <a href="products.html" class="nav-link">المنتجات</a>
     <a href="projects.html" class="nav-link">المشروعات</a>
-<a href="index.html#services" class="nav-link">الخدمات</a>
+<a href="services.html" class="nav-link">الخدمات</a>
 <a href="index.html#why" class="nav-link">من نحن</a>
 <a href="index.html#contact" class="nav-link">تواصل معنا</a>
   </div>
@@ -977,7 +1228,9 @@ footer{
 
 </div>
 
-<div class="grid" id="productGrid"></div>
+<div class="grid" id="productGrid">
+  <div class="loading-state" role="status" aria-live="polite">جاري تحميل المنتجات...</div>
+</div>
 <div class="results-meta" id="resultsMeta"></div>
 <div class="pagination" id="paginationControls"></div>
  </main>
@@ -1046,6 +1299,8 @@ let importedProductDetailsPromise = null;
 let currentPopupProductKey = "";
 let hasLoadedLocalProducts = false;
 let storefrontViewInitialized = false;
+let activeCategoryLevel = "all";
+const expandedCategoryParents = new Set(["المكونات الإلكترونية"]);
 const PRODUCTS_PAGE_SIZE = 48;
 const IMPORTED_CATALOG_SCRIPT_URL = "data/makers-electronics-products-lite.js";
 const IMPORTED_CATALOG_URL = "data/makers-electronics-products-lite.json";
@@ -1070,6 +1325,123 @@ const CATEGORY_GROUP_RULES = [
   { label:"Meters & Tools", pattern:/tools?|multimeter|meter|tester|measurement|soldering|fnirsi|uni-t|kyoritsu|sanwa/i },
   { label:"Power Supplies & Converters", pattern:/power supply|converters?/i }
 ];
+const CATEGORY_PARENT_RULES = [
+  {
+    label:"المكونات الإلكترونية",
+    pattern:/resistors?|capacitors?|diodes?|zener|transistors?|mosfets?|ics?\s*&|controllers?|integrated circuits?|inductors?|chokes?|crystals?|oscillators?|varistors?|fuses?|electronic components/i
+  },
+  {
+    label:"الباور والبطاريات",
+    pattern:/batteries|chargers?|power supplies|converters?|solar|dc power/i
+  },
+  {
+    label:"التوصيلات والكابلات",
+    pattern:/connectors?|terminals?|wires?|cables?|heat shrink|ffc|usb cable|hdmi|antenna/i
+  },
+  {
+    label:"البوردات والموديولات والحساسات",
+    pattern:/modules?|boards?|arduino|raspberry|sensors?|communication|ir\s*&\s*rf|avr|bridges?|elecrow/i
+  },
+  {
+    label:"المواتير والميكانيكا والطباعة 3D",
+    pattern:/motors?|drivers?|robotics|cnc|3d printer|mechanical|dc fan|ac fan|pumps?|nuts and bolts|machinery/i
+  },
+  {
+    label:"الشاشات والإضاءة والصوت",
+    pattern:/leds?|displays?|lcd|speakers?|microphone|buzzers?/i
+  },
+  {
+    label:"القياس والأدوات",
+    pattern:/meters?|tools?|oscilloscope|laser level|thermal imaging|soldering|heat sink|thermal paste|tape|sprays?|adhesives?|relife|goodwork|sanwa|uni-t|kyoritsu|fnirsi/i
+  },
+  {
+    label:"الأجهزة والإكسسوارات",
+    pattern:/devices?|accessories|photography|camera|tripod|bags?|boxes|kits|super-bag/i
+  }
+];
+const CATEGORY_PARENT_ICONS = new Map([
+  ["المكونات الإلكترونية", "🧩"],
+  ["الباور والبطاريات", "🔋"],
+  ["التوصيلات والكابلات", "🔌"],
+  ["البوردات والموديولات والحساسات", "🧠"],
+  ["المواتير والميكانيكا والطباعة 3D", "⚙️"],
+  ["الشاشات والإضاءة والصوت", "💡"],
+  ["القياس والأدوات", "🛠️"],
+  ["الأجهزة والإكسسوارات", "📦"],
+  ["تصنيفات أخرى", "🗂️"]
+]);
+const CATEGORY_LABEL_TRANSLATIONS = new Map([
+  ["Resistors", "المقاومات"],
+  ["Capacitors", "المكثفات"],
+  ["Diodes", "الدايودات"],
+  ["Transistors & MOSFETs", "الترانزستورات والموسفت"],
+  ["ICs & Controllers", "الدوائر المتكاملة ووحدات التحكم"],
+  ["Inductors", "الملفات"],
+  ["SMD Inductors & Chokes", "ملفات وخوانق SMD"],
+  ["Crystals & Oscillators", "الكريستالات والمذبذبات"],
+  ["Varistors", "الفاريستور"],
+  ["Fuses", "الفيوزات"],
+  ["SMD Fuse", "فيوزات SMD"],
+  ["Electronic Components (SMD)", "مكونات إلكترونية SMD"],
+  ["Electronic Components (Through-hole)", "مكونات إلكترونية Through-hole"],
+  ["Hydraulics & Pneumatics", "الهيدروليك والنيوماتيك"],
+  ["PTC Resettable Fuse", "فيوزات PTC قابلة لإعادة الضبط"],
+  ["SMD Crystal Oscillator", "مذبذبات كريستال SMD"],
+  ["Integrated Circuits (Through-hole)", "دوائر متكاملة Through-hole"],
+  ["Switches & Relays", "المفاتيح والريليهات"],
+  ["Batteries & Chargers", "البطاريات والشواحن"],
+  ["Power Supplies & Converters", "مزودات الطاقة والمحولات"],
+  ["Solar", "الطاقة الشمسية"],
+  ["DC Power Supplies", "مزودات طاقة DC"],
+  ["Connectors & Terminals", "الموصلات والترمينالات"],
+  ["Cable Accessories", "ملحقات الكابلات"],
+  ["Wires", "الأسلاك"],
+  ["Wires & Cables & Heat Shrink", "أسلاك وكابلات وشرنك حراري"],
+  ["USB Cable", "كابلات USB"],
+  ["HDMI Cable", "كابلات HDMI"],
+  ["Power Cable", "كابلات باور"],
+  ["Special Cable", "كابلات خاصة"],
+  ["FFC Flexible Flat Cable", "كابلات FFC مرنة"],
+  ["Wire Terminal", "ترمينالات الأسلاك"],
+  ["Heat Shrink", "شرنك حراري"],
+  ["Modules & Boards", "الموديولات والبوردات"],
+  ["Sensors", "الحساسات"],
+  ["Arduino Shields", "شيلدات Arduino"],
+  ["Arduino Accessories", "ملحقات Arduino"],
+  ["Raspberry Pi Accessories", "ملحقات Raspberry Pi"],
+  ["Communication Interface", "وحدات الاتصال"],
+  ["IR & RF Transmitters & Receivers", "مرسلات ومستقبلات IR وRF"],
+  ["Motors & Drivers", "المواتير والدرايفرات"],
+  ["Robotics", "الروبوتات"],
+  ["CNC & 3D Printer & Mechanical Parts", "قطع CNC والطباعة 3D والميكانيكا"],
+  ["3D Printer Filament", "خامات الطباعة 3D"],
+  ["3D Printer Parts", "قطع غيار الطابعات 3D"],
+  ["DC Fan", "مراوح DC"],
+  ["AC Fan", "مراوح AC"],
+  ["Pumps", "المضخات"],
+  ["Nuts and Bolts", "المسامير والصواميل"],
+  ["Machinery", "الماكينات"],
+  ["LEDs & Displays", "الليدات والشاشات"],
+  ["LCD", "شاشات LCD"],
+  ["Speakers", "السماعات"],
+  ["Microphone", "الميكروفونات"],
+  ["Buzzers", "البازرات"],
+  ["Meters & Tools", "أجهزة القياس والأدوات"],
+  ["Digital Oscilloscope", "أوسيلوسكوب رقمي"],
+  ["Thermal Imaging Camera", "كاميرات حرارية"],
+  ["Laser Level", "ميزان ليزر"],
+  ["Heat Sink", "مشتتات حرارية"],
+  ["Thermal Paste", "معجون حراري"],
+  ["Sprays & Adhesives", "بخاخات ومواد لاصقة"],
+  ["Devices", "الأجهزة"],
+  ["Accessories", "الإكسسوارات"],
+  ["Mobile & Computer Accessories", "ملحقات الموبايل والكمبيوتر"],
+  ["Photography Gear", "معدات التصوير"],
+  ["Camera Bag", "حقائب الكاميرا"],
+  ["Tripod", "حوامل ثلاثية"],
+  ["Boxes", "علب وصناديق"],
+  ["Kits \"Packages\"", "أطقم وباقات"]
+]);
 
 
 /* ===== CART ===== */
@@ -1476,9 +1848,15 @@ function getVisibleProductsList(){
 
   if(activeCategoryFilter !== "الكل"){
     return sortProductsList(
-      allProducts.filter((product) =>
-        getCategoryGroupLabel(product.category).toLowerCase() === activeCategoryFilter.trim().toLowerCase()
-      )
+      allProducts.filter((product) => {
+        const targetLabel = activeCategoryFilter.trim().toLowerCase();
+
+        if(activeCategoryLevel === "parent"){
+          return getCategoryParentLabel(product.category).toLowerCase() === targetLabel;
+        }
+
+        return getCategoryGroupLabel(product.category).toLowerCase() === targetLabel;
+      })
     );
   }
 
@@ -1493,9 +1871,13 @@ function updateCategoryTitle(){
     return;
   }
 
+  const activeCategoryDisplayLabel = activeCategoryLevel === "child"
+    ? getCategoryDisplayLabel(activeCategoryFilter)
+    : activeCategoryFilter;
+
   title.innerHTML = activeCategoryFilter === "الكل"
     ? "عرض جميع المنتجات"
-    : `عرض منتجات: <span style="color:var(--accent)">${activeCategoryFilter}</span>`;
+    : `عرض منتجات: <span style="color:var(--accent)">${activeCategoryDisplayLabel}</span>`;
 }
 
 function refreshProductsView(options = {}){
@@ -1512,55 +1894,193 @@ document.getElementById("sortSelect").addEventListener("change", function(){
 
 function renderCategories(){
   const list = document.getElementById("categoryList");
-  const categoriesCountMap = new Map();
+  const categoryTree = new Map();
 
   allProducts.forEach((product) => {
-    const categoryLabel = getCategoryGroupLabel(product.category);
+    const childLabel = getCategoryGroupLabel(product.category);
+    const parentLabel = getCategoryParentLabel(product.category);
 
-    if(!categoryLabel){
+    if(!childLabel || !parentLabel){
       return;
     }
 
-    categoriesCountMap.set(categoryLabel, (categoriesCountMap.get(categoryLabel) || 0) + 1);
-  });
+    if(!categoryTree.has(parentLabel)){
+      categoryTree.set(parentLabel, new Map());
+    }
 
-  const categories = [...categoriesCountMap.entries()]
-    .sort((a,b) => a[0].localeCompare(b[0], undefined, { numeric:true, sensitivity:"base" }));
+    const children = categoryTree.get(parentLabel);
+    children.set(childLabel, (children.get(childLabel) || 0) + 1);
+  });
 
   list.innerHTML = "";
 
-  [
-    ["الكل", allProducts.length],
-    ...categories
-  ].forEach(([cat, count]) => {
-    const li = document.createElement("li");
-    li.dataset.category = cat;
+  const allItem = document.createElement("li");
+  allItem.className = "category-all-item";
 
-    const label = document.createElement("span");
-    label.className = "category-label";
-    label.textContent = cat;
+  const allButton = createCategorySelectButton("الكل", allProducts.length, "all", "كل المنتجات");
+  allButton.classList.add("category-all-button");
+  allButton.addEventListener("click", () => filterCategory("الكل", "all"));
+  allItem.appendChild(allButton);
+  list.appendChild(allItem);
 
-    const countBadge = document.createElement("span");
-    countBadge.className = "category-count";
-    countBadge.textContent = String(count);
+  const parentOrder = new Map(
+    [...CATEGORY_PARENT_RULES.map((rule, index) => [rule.label, index]), ["تصنيفات أخرى", 999]]
+  );
 
-    li.append(label, countBadge);
+  [...categoryTree.entries()]
+    .sort((a,b) => {
+      const orderDifference = (parentOrder.get(a[0]) ?? 998) - (parentOrder.get(b[0]) ?? 998);
+      return orderDifference || a[0].localeCompare(b[0], "ar");
+    })
+    .forEach(([parentLabel, childrenMap]) => {
+      const groupItem = document.createElement("li");
+      groupItem.className = "category-group";
+      groupItem.dataset.parent = parentLabel;
 
-    if(cat === activeCategoryFilter && !activeSearchQuery){
-      li.classList.add("active");
-    }
+      const parentCount = [...childrenMap.values()].reduce((total, count) => total + count, 0);
+      const parentToggle = document.createElement("button");
+      parentToggle.type = "button";
+      parentToggle.className = "category-parent-toggle";
 
-    li.addEventListener("click", function(){
-      filterCategory(cat, li);
+      const childList = document.createElement("ul");
+      childList.className = "category-children";
+      childList.id = `category-group-${slugifyCategoryLabel(parentLabel)}`;
+      parentToggle.setAttribute("aria-controls", childList.id);
+
+      const parentIcon = document.createElement("span");
+      parentIcon.className = "category-parent-icon";
+      parentIcon.setAttribute("aria-hidden", "true");
+      parentIcon.textContent = CATEGORY_PARENT_ICONS.get(parentLabel) || "🗂️";
+
+      const parentName = document.createElement("span");
+      parentName.className = "category-parent-label";
+      parentName.textContent = parentLabel;
+
+      const parentCountBadge = document.createElement("span");
+      parentCountBadge.className = "category-parent-count";
+      parentCountBadge.textContent = String(parentCount);
+
+      const expandIcon = document.createElement("span");
+      expandIcon.className = "category-expand-icon";
+      expandIcon.setAttribute("aria-hidden", "true");
+
+      const isExpanded = expandedCategoryParents.has(parentLabel);
+      groupItem.classList.toggle("expanded", isExpanded);
+      childList.hidden = !isExpanded;
+      parentToggle.setAttribute("aria-expanded", String(isExpanded));
+      parentToggle.setAttribute("aria-label", `${isExpanded ? "إغلاق" : "فتح"} تصنيف ${parentLabel}`);
+      expandIcon.textContent = isExpanded ? "−" : "+";
+      parentToggle.append(parentIcon, parentName, parentCountBadge, expandIcon);
+      parentToggle.addEventListener("click", () => toggleCategoryGroup(parentLabel));
+
+      const parentAllItem = document.createElement("li");
+      parentAllItem.className = "category-child-item";
+
+      const parentAllButton = createCategorySelectButton(
+        parentLabel,
+        parentCount,
+        "parent",
+        `عرض كل ${parentLabel}`
+      );
+      parentAllButton.classList.add("category-child-select", "category-parent-all");
+      parentAllButton.addEventListener("click", () => filterCategory(parentLabel, "parent", parentLabel));
+      parentAllItem.appendChild(parentAllButton);
+      childList.appendChild(parentAllItem);
+
+      [...childrenMap.entries()]
+        .sort((a,b) => a[0].localeCompare(b[0], undefined, { numeric:true, sensitivity:"base" }))
+        .forEach(([childLabel, childCount]) => {
+          const childItem = document.createElement("li");
+          childItem.className = "category-child-item";
+
+          const childButton = createCategorySelectButton(
+            childLabel,
+            childCount,
+            "child",
+            getCategoryDisplayLabel(childLabel)
+          );
+          childButton.classList.add("category-child-select");
+          childButton.addEventListener("click", () => filterCategory(childLabel, "child", parentLabel));
+
+          childItem.appendChild(childButton);
+          childList.appendChild(childItem);
+        });
+
+      groupItem.append(parentToggle, childList);
+      list.appendChild(groupItem);
     });
 
-    list.appendChild(li);
+  setActiveCategory(activeCategoryFilter, activeCategoryLevel);
+}
+
+function createCategorySelectButton(filterLabel, count, level, displayLabel = filterLabel){
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "category-select-button";
+  button.dataset.category = filterLabel;
+  button.dataset.level = level;
+
+  const label = document.createElement("span");
+  label.className = "category-label";
+  label.textContent = displayLabel;
+
+  const countBadge = document.createElement("span");
+  countBadge.className = "category-count";
+  countBadge.textContent = String(count);
+
+  button.append(label, countBadge);
+  return button;
+}
+
+function getCategoryDisplayLabel(label){
+  return CATEGORY_LABEL_TRANSLATIONS.get(label) || label;
+}
+
+function slugifyCategoryLabel(label){
+  return String(label)
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function toggleCategoryGroup(parentLabel){
+  const shouldExpand = !expandedCategoryParents.has(parentLabel);
+  expandedCategoryParents.clear();
+
+  if(shouldExpand){
+    expandedCategoryParents.add(parentLabel);
+  }
+
+  document.querySelectorAll(".category-group").forEach((groupItem) => {
+    const isExpanded = expandedCategoryParents.has(groupItem.dataset.parent);
+    const toggleButton = groupItem.querySelector(".category-parent-toggle");
+    const childList = groupItem.querySelector(".category-children");
+    const expandIcon = groupItem.querySelector(".category-expand-icon");
+
+    groupItem.classList.toggle("expanded", isExpanded);
+    childList.hidden = !isExpanded;
+    toggleButton.setAttribute("aria-expanded", String(isExpanded));
+    toggleButton.setAttribute(
+      "aria-label",
+      `${isExpanded ? "إغلاق" : "فتح"} تصنيف ${groupItem.dataset.parent}`
+    );
+    expandIcon.textContent = isExpanded ? "−" : "+";
   });
 }
 
-function filterCategory(cat){
+function filterCategory(cat, level = "child", parentLabel = ""){
   activeCategoryFilter = cat;
+  activeCategoryLevel = level;
   activeSearchQuery = "";
+
+  if(parentLabel){
+    expandedCategoryParents.clear();
+    expandedCategoryParents.add(parentLabel);
+  }else if(level === "parent"){
+    expandedCategoryParents.clear();
+    expandedCategoryParents.add(cat);
+  }
 
   if(searchInput){
     searchInput.value = "";
@@ -1568,12 +2088,41 @@ function filterCategory(cat){
 
   updateSearchUrl("");
 
-  setActiveCategory(cat);
+  setActiveCategory(cat, level);
   refreshProductsView();
 
   if(window.innerWidth <= 768){
     setSidebarOpen(false);
   }
+}
+
+function getCategoryParentLabel(value){
+  const childLabel = getCategoryGroupLabel(value);
+  const rawCategory = String(value || "").trim();
+  const searchableLabel = `${childLabel} ${rawCategory}`;
+  const matchingRule = CATEGORY_PARENT_RULES.find((rule) => rule.pattern.test(searchableLabel));
+  return matchingRule ? matchingRule.label : "تصنيفات أخرى";
+}
+
+function setActiveCategory(categoryLabel, level = activeCategoryLevel){
+  document.querySelectorAll(".category-select-button")
+    .forEach((button) => {
+      const isActive =
+        !activeSearchQuery &&
+        button.dataset.category === categoryLabel &&
+        button.dataset.level === level;
+
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+}
+
+function clearCategorySelection(){
+  document.querySelectorAll(".category-select-button")
+    .forEach((button) => {
+      button.classList.remove("active");
+      button.setAttribute("aria-pressed", "false");
+    });
 }
 
 /* ===== SEARCH ===== */
@@ -1602,20 +2151,12 @@ function updateSearchUrl(queryText){
   window.history.replaceState({}, "", targetUrl);
 }
 
-function clearCategorySelection(){
-  setActiveCategory("");
-}
-
-function setActiveCategory(categoryLabel){
-  document.querySelectorAll(".sidebar li")
-    .forEach((li) => li.classList.toggle("active", li.dataset.category === categoryLabel));
-}
-
 function applySearch(queryText, options = {}){
   const { syncInput = true, syncUrl = false } = options;
   const cleanQuery = queryText.trim();
   activeSearchQuery = cleanQuery;
   activeCategoryFilter = "الكل";
+  activeCategoryLevel = "all";
 
   if(syncInput && searchInput){
     searchInput.value = cleanQuery;
@@ -1626,7 +2167,7 @@ function applySearch(queryText, options = {}){
   }
 
   if(!cleanQuery){
-    setActiveCategory("الكل");
+    setActiveCategory("الكل", "all");
     refreshProductsView();
     return;
   }
@@ -1638,6 +2179,11 @@ function applySearch(queryText, options = {}){
 searchInput.addEventListener("input", function(){
   applySearch(this.value, { syncInput:false, syncUrl:false });
 });
+
+/* ===== LEGACY CATEGORY BLOCK REMOVED BELOW ===== */
+/*
+  The previous flat category list was replaced with the expandable tree above.
+*/
 
 searchInput.addEventListener("keydown", function(e){
   if(e.key === "Enter"){
@@ -1678,6 +2224,8 @@ function toggleCategories(forceState){
 
   setSidebarOpen(shouldOpen);
 }
+
+window.toggleCategories = toggleCategories;
 
 
 
@@ -1846,7 +2394,7 @@ links.forEach(link => {
 <div id="productPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; width:90%; max-width:500px; border-radius:20px; padding:25px; position:relative; text-align:center;">
     <span onclick="closePopup()" style="position:absolute; top:10px; left:15px; cursor:pointer; font-weight:bold; font-size:18px;">✖</span>
-    <img id="popupImg" style="width:200px; margin-bottom:15px;">
+    <img id="popupImg" src="images/no-image.png" alt="صورة المنتج" style="width:200px; margin-bottom:15px;">
     <h2 id="popupTitle"></h2>
     <p id="popupDesc" style="color:#555; margin:10px 0;"></p>
     <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>

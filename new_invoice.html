@@ -2,210 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#07101f">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="shortcut icon" href="favicon.png">
-<title>Receipt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إنشاء فاتورة | KIMO TECH</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="qrcode.min.js"></script>
-
-<style>
-body{
-  margin:0;
-  font-family:'Cairo',sans-serif;
-  background:linear-gradient(135deg,#1303fa,#fcfcfc);
-}
-
-.container{
-  max-width:1100px;
-  margin:40px auto;
-  padding:20px;
-}
-
-.box{
-  background:white;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 15px 40px rgba(0,0,0,.1);
-}
-
-h2{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-.top-bar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:space-between;
-}
-
-input{
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #ddd;
-}
-
-button{
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.add-btn{background:#16a34a;color:#fff;}
-.print-btn{background:#0ea5e9;color:#fff;}
-.whatsapp-btn{background:#22c55e;color:#fff;}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-}
-
-th{
-  background:#0ea5e9;
-  color:white;
-}
-
-th,td{
-  padding:10px;
-  text-align:center;
-  border:1px solid #eee;
-}
-
-.results{
-  position:absolute;
-  background:white;
-  border:1px solid #ccc;
-  width:200px;
-  z-index:1000;
-}
-
-.results div{
-  padding:5px;
-  cursor:pointer;
-}
-
-.results div:hover{
-  background:#eee;
-}
-.back-btn{
-  background:#6366f1;
-  color:#fff;
-}
-@media print {
-
-  body{
-    background: white !important;
-  }
-
-  .container{
-    margin:0;
-    padding:0;
-  }
-
-  .box{
-    box-shadow:none;
-    border-radius:0;
-    width:100%;
-  }
-
-  button,
-  .back-btn,
-  .add-btn,
-  .whatsapp-btn,
-  .print-btn{
-    display:none !important;
-  }
-
-  input{
-    border:none;
-    text-align:center;
-  }
-
-  table{
-    font-size:14px;
-  }
-
-  h2{
-    margin-top:0;
-  }
-
-}
-@media print {
-
-  table, th, td{
-    border:1px solid black !important;
-  }
-
-  th{
-    background:#ddd !important;
-    color:black !important;
-  }
-
-}
-@media print {
-
-  html, body{
-    width:100%;
-    overflow:hidden;
-  }
-
-  .container{
-    width:100%;
-    margin:0;
-    padding:0;
-  }
-
-  .box{
-    width:100%;
-    margin:0;
-    padding:10px;
-  }
-
-  table{
-    width:100% !important;
-  }
-
-}
-@page {
-  size: A4;
-  margin: 10mm;
-}
-@media print {
-  *{
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-}
-.invoice-header{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-.logo{
-  width:250px;
-  object-fit:contain;
-}
-
-@media print {
-
-  .logo{
-    width:250px;
-    margin-bottom:10px;
-  }
-
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-ui.css">
+<script src="admin-ui.js" defer></script>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="data/makers-electronics-products-lite.js"></script>
 
@@ -219,129 +30,591 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 </script>
 
 </head>
 
-<body>
+<body class="admin-page" data-admin-page="new-invoice">
 
-<div class="container">
-<div class="box">
+<main class="container invoice-page-container">
+  <div class="box invoice-editor-shell">
+    <header class="admin-page-header invoice-editor-header">
+      <div class="invoice-title-group">
+        <div class="invoice-page-brand">
+          <img src="logo.png" class="logo" alt="KIMO TECH" width="1129" height="664">
+        </div>
+        <div>
+          <span class="invoice-page-eyebrow">المبيعات والفواتير</span>
+          <h1 id="invoiceTitle">إنشاء فاتورة جديدة</h1>
+          <p class="admin-page-subtitle">سجّل بيانات العميل، أضف المنتجات، ثم احفظ أو شارك الفاتورة بضغطة واحدة.</p>
+          <div class="invoice-header-meta" role="group" aria-label="حالة الفاتورة">
+            <span id="invoiceNumberBadge" class="invoice-number-badge" dir="ltr"></span>
+            <span id="invoiceSaveState" class="invoice-save-state" data-state="loading" role="status" aria-live="polite">
+              <span class="invoice-state-dot" aria-hidden="true"></span>
+              <span class="invoice-state-label">جاري التحميل</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <button class="back-btn invoice-back-btn" type="button" onclick="goBack()">
+        <span aria-hidden="true">←</span>
+        رجوع للفواتير
+      </button>
+    </header>
 
-<div class="invoice-header">
-  <img src="logo.png" class="logo">
-</div>
-<div style="margin-bottom:15px;">
-  <button class="back-btn" onclick="goBack()">⬅ رجوع</button>
-</div>
-<div class="top-bar">
-<input id="customer" placeholder="اسم العميل">
-<input id="phone" placeholder="رقم الهاتف">
-<button class="add-btn" onclick="add()">➕ إضافة منتج</button>
-</div>
+    <p id="invoiceEditorStatus" class="admin-editor-status" role="status" aria-live="polite">
+      جاري التحقق من الصلاحيات وتحميل البيانات…
+    </p>
 
-<table id="table">
-<tr>
-<th>المنتج</th>
-<th>السعر</th>
-<th>الكمية</th>
-<th>الإجمالي</th>
-</tr>
+    <div class="invoice-workspace">
+      <div class="invoice-editor-main">
+        <section class="invoice-panel" aria-labelledby="customerSectionTitle">
+          <div class="invoice-section-head">
+            <div>
+              <span class="invoice-section-index" aria-hidden="true">١</span>
+              <div>
+                <h2 id="customerSectionTitle">بيانات العميل</h2>
+                <p>الاسم اختياري، ورقم الهاتف مطلوب فقط عند الإرسال عبر WhatsApp.</p>
+              </div>
+            </div>
+          </div>
 
-<tr>
-<td>
-<input class="product" oninput="searchProduct(this)">
-<div class="results"></div>
-</td>
-<td><input class="p" type="number"></td>
-<td><input class="q" type="number" value="1"></td>
-<td class="t">0</td>
-</tr>
+          <div class="invoice-customer-fields">
+            <label>
+              <span>اسم العميل</span>
+              <input id="customer" autocomplete="name" placeholder="مثال: أحمد محمد">
+            </label>
+            <label>
+              <span>رقم الهاتف</span>
+              <input id="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="01xxxxxxxxx">
+            </label>
+          </div>
+        </section>
 
-</table>
+        <section class="invoice-panel invoice-products-panel" aria-labelledby="productsSectionTitle">
+          <div class="invoice-section-head invoice-products-head">
+            <div>
+              <span class="invoice-section-index" aria-hidden="true">٢</span>
+              <div>
+                <h2 id="productsSectionTitle">منتجات الفاتورة</h2>
+                <p>ابحث باسم المنتج أو اكتب منتجًا وسعره يدويًا.</p>
+              </div>
+            </div>
+            <button class="add-btn invoice-add-product" type="button" onclick="add()">
+              <span aria-hidden="true">＋</span>
+              إضافة منتج
+            </button>
+          </div>
 
-<h3>الإجمالي: <span id="grand">0</span> EGP</h3>
+          <div class="invoice-table-shell">
+            <table id="table">
+              <caption class="sr-only">بنود الفاتورة وأسعارها وكمياتها</caption>
+              <thead>
+                <tr>
+                  <th scope="col">المنتج</th>
+                  <th scope="col">سعر الوحدة</th>
+                  <th scope="col">الكمية</th>
+                  <th scope="col">الإجمالي</th>
+                  <th scope="col"><span class="sr-only">حذف</span></th>
+                </tr>
+              </thead>
+              <tbody id="invoiceItemsBody"></tbody>
+            </table>
+          </div>
 
-<div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="invoice-table-footer">
+            <span>اضغط Enter للتنقل السريع بين الخانات وإضافة صف جديد.</span>
+            <span><strong id="invoiceLineCount">0</strong> أصناف · <strong id="invoicePieceCount">0</strong> قطع</span>
+          </div>
+        </section>
+      </div>
 
-<button class="print-btn" onclick="printA4()">🖨️ A4</button>
-<button class="whatsapp-btn" onclick="sendWhatsApp()">📱 WhatsApp</button>
-<button class="whatsapp-btn" onclick="sendPDF()">📄 PDF</button>
+      <aside class="invoice-summary-card" aria-labelledby="invoiceSummaryTitle">
+        <div class="invoice-summary-brand" aria-hidden="true">
+          <span>K</span>
+          <div>
+            <strong>KIMO TECH</strong>
+            <small>Invoice Studio</small>
+          </div>
+        </div>
 
-</div>
+        <div class="invoice-summary-heading">
+          <div>
+            <span>ملخص الفاتورة</span>
+            <h2 id="invoiceSummaryTitle">جاهزة للحفظ والمشاركة</h2>
+          </div>
+        </div>
 
-</div>
-</div>
+        <dl class="invoice-summary-list">
+          <div>
+            <dt>العميل</dt>
+            <dd id="invoiceSummaryCustomer">غير محدد</dd>
+          </div>
+          <div>
+            <dt>عدد الأصناف</dt>
+            <dd id="invoiceSummaryLines">0</dd>
+          </div>
+          <div>
+            <dt>إجمالي القطع</dt>
+            <dd id="invoiceSummaryPieces">0</dd>
+          </div>
+        </dl>
+
+        <div class="invoice-editor-total" aria-live="polite" aria-atomic="true">
+          <span>الإجمالي النهائي</span>
+          <strong><span id="grand">0</span> <small>ج.م</small></strong>
+        </div>
+
+        <div class="invoice-editor-actions">
+          <button class="invoice-save-btn" type="button" onclick="saveInvoice(true).catch(()=>{})">
+            <span class="invoice-action-icon" aria-hidden="true">✓</span>
+            <span class="invoice-action-copy">
+              <strong>حفظ الفاتورة</strong>
+              <small>حفظ التعديلات الآن</small>
+            </span>
+          </button>
+          <button class="pdf-btn" type="button" onclick="sendPDF()">
+            <span class="invoice-action-icon" aria-hidden="true">PDF</span>
+            <span class="invoice-action-copy">
+              <strong>حفظ PDF</strong>
+              <small>تنزيل نسخة A4</small>
+            </span>
+          </button>
+          <button class="whatsapp-btn" type="button" onclick="sendWhatsApp()">
+            <span class="invoice-action-icon" aria-hidden="true">W</span>
+            <span class="invoice-action-copy">
+              <strong>إرسال WhatsApp</strong>
+              <small>مشاركة ملخص الفاتورة</small>
+            </span>
+          </button>
+          <button class="print-btn" type="button" onclick="printA4()">
+            <span class="invoice-action-icon" aria-hidden="true">A4</span>
+            <span class="invoice-action-copy">
+              <strong>طباعة الفاتورة</strong>
+              <small>فتح نافذة الطباعة</small>
+            </span>
+          </button>
+        </div>
+
+        <p class="invoice-summary-note">
+          يتم حفظ الفاتورة تلقائيًا قبل الطباعة أو التنزيل أو الإرسال.
+        </p>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div id="invoiceToast" class="invoice-toast" role="status" aria-live="polite" hidden></div>
+<div id="invoiceRowStatus" class="sr-only" role="status" aria-live="polite"></div>
 
 <script>
 
-let selectedIndex = -1;
+let invoiceEditorReady = false;
+let invoiceDirty = false;
+let invoiceToastTimer = null;
+let productResultCounter = 0;
+const invoiceEditorStatus = document.getElementById("invoiceEditorStatus");
+const invoiceSaveState = document.getElementById("invoiceSaveState");
 
+function setInvoiceEditorReady(isReady, message = "", isError = false){
+  invoiceEditorReady = isReady;
+  document.querySelector(".box").setAttribute("aria-busy", String(!isReady));
+  document.querySelectorAll(
+    ".invoice-customer-fields input, .invoice-add-product, #table input, #table button, .invoice-editor-actions button"
+  ).forEach((control) => {
+    control.disabled = !isReady;
+  });
 
+  invoiceEditorStatus.textContent = message;
+  invoiceEditorStatus.classList.toggle("error", isError);
+  invoiceEditorStatus.hidden = isReady && !message;
+
+  if(isError){
+    setInvoiceSaveState("error", "تعذر التحميل");
+  }
+}
+
+setInvoiceEditorReady(false, "جاري التحقق من الصلاحيات وتحميل البيانات…");
+
+function setInvoiceSaveState(state, label){
+  if(!invoiceSaveState) return;
+  invoiceSaveState.dataset.state = state;
+  const labelElement = invoiceSaveState.querySelector(".invoice-state-label");
+  if(labelElement) labelElement.textContent = label;
+}
+
+function showInvoiceToast(message, type = "info", duration = 3200){
+  const toast = document.getElementById("invoiceToast");
+  if(!toast) return;
+
+  clearTimeout(invoiceToastTimer);
+  toast.textContent = message;
+  toast.className = `invoice-toast ${type}`;
+  toast.hidden = false;
+
+  invoiceToastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, duration);
+}
+
+function announceInvoiceRowChange(message){
+  const status = document.getElementById("invoiceRowStatus");
+  if(!status) return;
+  status.textContent = "";
+  requestAnimationFrame(() => {
+    status.textContent = message;
+  });
+}
+
+function markInvoiceDirty(){
+  if(!invoiceEditorReady || invoiceDirty) return;
+  invoiceDirty = true;
+  setInvoiceSaveState("dirty", "تعديلات غير محفوظة");
+}
+
+function updateInvoiceIdentity(){
+  const badge = document.getElementById("invoiceNumberBadge");
+  if(badge) badge.textContent = currentInvoiceNumber;
+  document.title = `${invoiceId ? "تعديل" : "إنشاء"} فاتورة ${currentInvoiceNumber} | KIMO TECH`;
+}
+
+function normalizeInvoiceQuantity(value){
+  const quantity = Number(value);
+  return Number.isFinite(quantity) && quantity >= 1 ? Math.floor(quantity) : 1;
+}
+
+function normalizeInvoicePrice(value){
+  const price = Number(value);
+  return Number.isFinite(price) && price >= 0
+    ? Math.round((price + Number.EPSILON) * 100) / 100
+    : 0;
+}
+
+function getInvoiceLineTotal(price, quantity){
+  const priceInPiasters = Math.round(normalizeInvoicePrice(price) * 100);
+  const safeQuantity = normalizeInvoiceQuantity(quantity);
+  return (priceInPiasters * safeQuantity) / 100;
+}
+
+function formatInvoiceMoney(value){
+  return (Math.round((Number(value) || 0) * 100) / 100).toLocaleString("ar-EG", {
+    maximumFractionDigits:2
+  });
+}
+
+function createInvoiceRow(item = {}){
+  const row = document.getElementById("invoiceItemsBody").insertRow();
+  row.className = "invoice-product-row";
+  const productCell = row.insertCell();
+  const priceCell = row.insertCell();
+  const quantityCell = row.insertCell();
+  const totalCell = row.insertCell();
+  const actionCell = row.insertCell();
+
+  productCell.className = "invoice-product-cell";
+  productCell.dataset.label = "المنتج";
+  priceCell.dataset.label = "سعر الوحدة";
+  quantityCell.dataset.label = "الكمية";
+  totalCell.dataset.label = "الإجمالي";
+  actionCell.dataset.label = "الحذف";
+
+  const productField = document.createElement("div");
+  productField.className = "product-field";
+
+  const productInput = document.createElement("input");
+  productInput.className = "product";
+  productInput.value = String(item.name || "");
+  productInput.autocomplete = "off";
+  productInput.placeholder = "ابحث باسم المنتج…";
+  productInput.setAttribute("role", "combobox");
+  productInput.setAttribute("aria-autocomplete", "list");
+  productInput.setAttribute("aria-expanded", "false");
+  productInput.setAttribute("dir", "auto");
+  productInput.disabled = !invoiceEditorReady;
+  productInput.addEventListener("input", () => searchProduct(productInput));
+
+  const results = document.createElement("div");
+  results.className = "results";
+  results.id = `product-results-${++productResultCounter}`;
+  results.setAttribute("role", "listbox");
+  results.setAttribute("aria-label", "نتائج البحث عن المنتجات");
+  results.dataset.activeIndex = "-1";
+  productInput.setAttribute("aria-controls", results.id);
+  productField.append(productInput, results);
+  productCell.appendChild(productField);
+
+  const priceInput = document.createElement("input");
+  priceInput.className = "p";
+  priceInput.type = "number";
+  priceInput.min = "0";
+  priceInput.max = "10000000";
+  priceInput.step = "0.01";
+  priceInput.inputMode = "decimal";
+  priceInput.dir = "ltr";
+  priceInput.placeholder = "0.00";
+  priceInput.disabled = !invoiceEditorReady;
+  priceInput.value = item.price ?? "";
+  priceCell.appendChild(priceInput);
+
+  const quantityInput = document.createElement("input");
+  quantityInput.className = "q";
+  quantityInput.type = "number";
+  quantityInput.min = "1";
+  quantityInput.max = "100000";
+  quantityInput.step = "1";
+  quantityInput.inputMode = "numeric";
+  quantityInput.dir = "ltr";
+  quantityInput.disabled = !invoiceEditorReady;
+  quantityInput.value = normalizeInvoiceQuantity(item.qty);
+  quantityCell.appendChild(quantityInput);
+
+  totalCell.className = "t";
+  totalCell.textContent = `${formatInvoiceMoney(getInvoiceLineTotal(item.price, item.qty))} ج.م`;
+
+  const removeButton = document.createElement("button");
+  removeButton.className = "invoice-remove-row";
+  removeButton.type = "button";
+  removeButton.disabled = !invoiceEditorReady;
+  removeButton.textContent = "×";
+  removeButton.title = "حذف المنتج";
+  removeButton.addEventListener("click", () => removeInvoiceRow(removeButton));
+  actionCell.appendChild(removeButton);
+
+  updateInvoiceRowLabels();
+  return row;
+}
 
 function add(){
-let r=document.getElementById("table").insertRow();
-r.innerHTML=`
-<td>
-<input class="product" oninput="searchProduct(this)">
-<div class="results"></div>
-</td>
-<td><input class="p" type="number"></td>
-<td><input class="q" type="number" value="1"></td>
-<td class="t">0</td>
-`;
+  const row = createInvoiceRow();
+  markInvoiceDirty();
+  calc();
+  announceInvoiceRowChange(`تمت إضافة صف المنتج رقم ${document.querySelectorAll("#invoiceItemsBody tr").length}.`);
+  requestAnimationFrame(() => {
+    const input = row.querySelector(".product");
+    row.scrollIntoView({ behavior:"auto", block:"nearest" });
+    input?.focus();
+  });
+  return row;
 }
 
-document.addEventListener("input",calc);
+function removeInvoiceRow(button){
+  const table = document.getElementById("table");
+  const row = button.closest("tr");
+  if(!row) return;
+
+  const nextFocus = row.nextElementSibling?.querySelector(".product")
+    || row.previousElementSibling?.querySelector(".product");
+
+  if(table.rows.length <= 2){
+    row.querySelectorAll("input").forEach((input) => {
+      input.value = input.classList.contains("q") ? "1" : "";
+    });
+    row.querySelector(".results")?.replaceChildren();
+  }else{
+    row.remove();
+  }
+
+  markInvoiceDirty();
+  updateInvoiceRowLabels();
+  calc();
+  announceInvoiceRowChange("تم حذف صف المنتج.");
+  (nextFocus || row.querySelector(".product"))?.focus();
+}
+
+function updateInvoiceRowLabels(){
+  document.querySelectorAll("#invoiceItemsBody tr").forEach((row, index) => {
+    const rowNumber = index + 1;
+    row.querySelector(".product")?.setAttribute("aria-label", `اسم المنتج، الصف ${rowNumber}`);
+    row.querySelector(".p")?.setAttribute("aria-label", `سعر الوحدة، الصف ${rowNumber}`);
+    row.querySelector(".q")?.setAttribute("aria-label", `الكمية، الصف ${rowNumber}`);
+    row.querySelector(".invoice-remove-row")?.setAttribute("aria-label", `حذف المنتج، الصف ${rowNumber}`);
+  });
+}
+
+document.addEventListener("input", (event) => {
+  if(!event.target.matches("#customer, #phone, .product, .p, .q")) return;
+  calc();
+  markInvoiceDirty();
+});
 
 function calc(){
-let q=document.querySelectorAll(".q");
-let p=document.querySelectorAll(".p");
-let t=document.querySelectorAll(".t");
+  const rows = [...document.querySelectorAll("#invoiceItemsBody tr")];
+  let totalInPiasters = 0;
+  let lineCount = 0;
+  let pieceCount = 0;
 
-let g=0;
+  rows.forEach((row) => {
+    const name = row.querySelector(".product")?.value.trim() || "";
+    const rawQuantity = Number(row.querySelector(".q")?.value);
+    const rawPrice = Number(row.querySelector(".p")?.value);
+    const quantity = Number.isInteger(rawQuantity) && rawQuantity >= 1 ? rawQuantity : 0;
+    const priceInPiasters = Number.isFinite(rawPrice) && rawPrice >= 0
+      ? Math.round(rawPrice * 100)
+      : 0;
+    const lineInPiasters = name ? priceInPiasters * quantity : 0;
 
-for(let i=0;i<q.length;i++){
-let v=q[i].value*p[i].value;
-t[i].innerText=v;
-g+=v;
-}
+    row.querySelector(".t").textContent = `${formatInvoiceMoney(lineInPiasters / 100)} ج.م`;
 
-document.getElementById("grand").innerText=g;
+    if(name){
+      lineCount += 1;
+      pieceCount += quantity;
+      totalInPiasters += lineInPiasters;
+    }
+  });
+
+  const total = totalInPiasters / 100;
+  const formattedTotal = formatInvoiceMoney(total);
+  const grandElement = document.getElementById("grand");
+  if(grandElement.textContent !== formattedTotal){
+    grandElement.textContent = formattedTotal;
+  }
+  document.getElementById("invoiceLineCount").textContent = String(lineCount);
+  document.getElementById("invoicePieceCount").textContent = String(pieceCount);
+  document.getElementById("invoiceSummaryLines").textContent = String(lineCount);
+  document.getElementById("invoiceSummaryPieces").textContent = String(pieceCount);
+  document.getElementById("invoiceSummaryCustomer").textContent =
+    document.getElementById("customer").value.trim() || "غير محدد";
 }
 
 function searchProduct(input){
 
-let text = normalizeProductText(input.value);
-let results = input.parentElement.querySelector(".results");
+  const text = normalizeProductText(input.value);
+  const results = input.parentElement.querySelector(".results");
 
-results.innerHTML="";
-selectedIndex = -1;
+  results.replaceChildren();
+  results.dataset.activeIndex = "-1";
+  input.setAttribute("aria-expanded", "false");
+  input.removeAttribute("aria-activedescendant");
 
-if(text.length < 1) return;
+  if(text.length < 1) return;
 
-allProducts
-.filter((d)=> d.name && normalizeProductText(d.name).includes(text))
-.slice(0, 12)
-.forEach((d)=>{
+  const matches = allProducts
+    .filter((product) => product.name && normalizeProductText(product.name).includes(text))
+    .sort((first, second) => {
+      const firstName = normalizeProductText(first.name);
+      const secondName = normalizeProductText(second.name);
+      return Number(secondName.startsWith(text)) - Number(firstName.startsWith(text))
+        || firstName.localeCompare(secondName, "ar");
+    })
+    .slice(0, 12);
 
-let div=document.createElement("div");
-div.innerText=d.name+" - "+d.price+" EGP";
+  if(!matches.length){
+    const emptyResult = document.createElement("div");
+    emptyResult.className = "product-result-empty";
+    emptyResult.setAttribute("role", "status");
+    emptyResult.setAttribute("aria-live", "polite");
+    emptyResult.textContent = "لا توجد منتجات مطابقة — يمكنك كتابة المنتج يدويًا.";
+    results.removeAttribute("role");
+    results.appendChild(emptyResult);
+    input.setAttribute("aria-expanded", "true");
+    positionProductResults(input, results);
+    return;
+  }
 
-div.onclick=function(){
-selectProduct(input, d);
-};
+  matches.forEach((product, index) => {
+    const option = document.createElement("div");
+    option.className = "product-result";
+    option.id = `${results.id}-option-${index}`;
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
 
-results.appendChild(div);
+    const name = document.createElement("strong");
+    name.textContent = product.name;
+
+    const price = document.createElement("span");
+    price.textContent = `${formatInvoiceMoney(product.price)} ج.م`;
+
+    option.append(name, price);
+    option.addEventListener("pointerdown", (event) => event.preventDefault());
+    option.addEventListener("click", () => selectProduct(input, product));
+    option.addEventListener("pointerenter", () => setActiveProductOption(input, index));
+    results.appendChild(option);
+  });
+
+  results.setAttribute("role", "listbox");
+  input.setAttribute("aria-expanded", "true");
+  positionProductResults(input, results);
+}
+
+function positionProductResults(input, results){
+  const rect = input.getBoundingClientRect();
+  const visualViewport = window.visualViewport;
+  const viewportPadding = 12;
+  const viewportWidth = visualViewport?.width || window.innerWidth;
+  const viewportHeight = visualViewport?.height || window.innerHeight;
+  const viewportLeft = visualViewport?.offsetLeft || 0;
+  const viewportTop = visualViewport?.offsetTop || 0;
+  const navBottom = document.querySelector(".admin-global-nav")?.getBoundingClientRect().bottom || 0;
+  const safeTop = Math.max(viewportTop + viewportPadding, navBottom + 8);
+  const safeBottom = viewportTop + viewportHeight - viewportPadding;
+  const safeLeft = viewportLeft + viewportPadding;
+  const safeRight = viewportLeft + viewportWidth - viewportPadding;
+  const width = Math.min(Math.max(rect.width, 260), safeRight - safeLeft);
+  let left = Math.min(
+    Math.max(safeLeft, rect.left),
+    safeRight - width
+  );
+  const availableBelow = Math.max(0, safeBottom - rect.bottom - 6);
+  const availableAbove = Math.max(0, rect.top - safeTop - 6);
+  const openBelow = availableBelow >= Math.min(results.scrollHeight, 220)
+    || availableBelow >= availableAbove;
+  const availableSpace = openBelow ? availableBelow : availableAbove;
+  const maxHeight = Math.max(60, Math.min(290, availableSpace));
+  let top = openBelow
+    ? rect.bottom + 6
+    : rect.top - maxHeight - 6;
+
+  top = Math.max(safeTop, Math.min(top, safeBottom - maxHeight));
+
+  Object.assign(results.style, {
+    position:"fixed",
+    left:`${left}px`,
+    right:"auto",
+    top:`${top}px`,
+    width:`${width}px`,
+    maxHeight:`${maxHeight}px`
+  });
+}
+
+document.addEventListener("pointerdown", (event) => {
+  if(event.target.closest(".product") || event.target.closest(".results")) return;
+  document.querySelectorAll(".results").forEach((results) => {
+    results.replaceChildren();
+    const input = results.parentElement.querySelector(".product");
+    input?.setAttribute("aria-expanded", "false");
+    input?.removeAttribute("aria-activedescendant");
+  });
 });
-}
-function highlight(items){
 
-items.forEach(el => el.style.background="white");
-
-if(items[selectedIndex]){
-items[selectedIndex].style.background="#dfefff";
+function getProductOptions(results){
+  return [...results.querySelectorAll('[role="option"]')];
 }
+
+function setActiveProductOption(input, requestedIndex){
+  const results = input.parentElement.querySelector(".results");
+  const options = getProductOptions(results);
+  if(!options.length) return;
+
+  const index = (requestedIndex + options.length) % options.length;
+  results.dataset.activeIndex = String(index);
+
+  options.forEach((option, optionIndex) => {
+    const isActive = optionIndex === index;
+    option.classList.toggle("active", isActive);
+    option.setAttribute("aria-selected", String(isActive));
+  });
+
+  input.setAttribute("aria-activedescendant", options[index].id);
+  options[index].scrollIntoView({ block:"nearest" });
+}
+
+function closeProductResults(input){
+  const results = input.parentElement.querySelector(".results");
+  results.replaceChildren();
+  results.dataset.activeIndex = "-1";
+  input.setAttribute("aria-expanded", "false");
+  input.removeAttribute("aria-activedescendant");
 }
 
 function normalizeProductText(value){
@@ -358,27 +631,48 @@ function getEmbeddedImportedProducts(){
 return getCatalogPayloadProducts(globalThis[IMPORTED_CATALOG_GLOBAL]);
 }
 
-function mergeProducts(...groups){
-let merged = [];
-let seen = new Set();
+function getProductStableKey(product){
+  const sourceSite = String(product?.sourceSite || "").trim().toLowerCase();
+  const sourceProductId = String(product?.sourceProductId ?? "").trim();
 
-groups.flat().forEach((product)=>{
-if(!product) return;
+  if(sourceSite && sourceProductId) return `source:${sourceSite}:${sourceProductId}`;
+  if(product?.sourceUrl) return `url:${String(product.sourceUrl).trim().toLowerCase()}`;
+  if(product?.sku) return `sku:${String(product.sku).trim().toLowerCase()}`;
+  if(product?.id) return `id:${String(product.id).trim().toLowerCase()}`;
+  if(product?.firestoreId) return `firestore:${String(product.firestoreId)}`;
+  return `name:${normalizeProductText(product?.name)}`;
+}
 
-let key = [
-String(product.sourceSite || ""),
-String(product.sourceProductId || ""),
-normalizeProductText(product.name),
-Number(product.price) || 0
-].join("__");
+function mergeProducts(importedProducts, firestoreProducts){
+  const productsByKey = new Map();
 
-if(seen.has(key)) return;
+  importedProducts.forEach((product) => {
+    if(!product) return;
+    productsByKey.set(getProductStableKey(product), product);
+  });
 
-seen.add(key);
-merged.push(product);
-});
+  firestoreProducts.forEach((product) => {
+    if(!product) return;
+    const key = getProductStableKey(product);
 
-return merged;
+    if(product.deleted === true || product.hiddenFromImport === true){
+      productsByKey.delete(key);
+      return;
+    }
+
+    productsByKey.set(key, product);
+  });
+
+  return [...productsByKey.values()]
+    .filter((product) => (
+      product?.name
+      && Number(product.price) > 0
+      && product.inStock !== false
+      && product.deleted !== true
+    ))
+    .sort((first, second) => (
+      normalizeProductText(first.name).localeCompare(normalizeProductText(second.name), "ar")
+    ));
 }
 
 async function fetchImportedProducts(){
@@ -396,42 +690,79 @@ return [];
 }
 
 
-let invoiceId = localStorage.getItem("invoiceId");
-const invoiceHeading = document.querySelector("h2");
+const invoiceParams = new URLSearchParams(window.location.search);
+const requestedInvoiceId = invoiceParams.get("id");
+let invoiceId = requestedInvoiceId && requestedInvoiceId.length <= 1500 && !requestedInvoiceId.includes("/")
+  ? requestedInvoiceId
+  : null;
+localStorage.removeItem("invoiceId");
+
+const invoiceHeading = document.getElementById("invoiceTitle");
 if(invoiceId && invoiceHeading){
-document.querySelector("h2").innerText = "✏️ تعديل فاتورة";
+  invoiceHeading.innerText = "تعديل فاتورة";
 }
 function selectProduct(input, product){
+  input.value = product.name;
 
-input.value = product.name;
+  const row = input.closest("tr");
+  row.querySelector(".p").value = normalizeInvoicePrice(product.price);
 
-let row = input.closest("tr");
-row.querySelector(".p").value = product.price;
-
-calc();
-
-let results = input.parentElement.querySelector(".results");
-results.innerHTML="";
+  closeProductResults(input);
+  markInvoiceDirty();
+  calc();
 }
 
 
 let invoice = "INV-"+Date.now();
 let currentInvoiceNumber = invoice;
+let invoiceOriginalDate = "";
 const IMPORTED_CATALOG_URL = "data/makers-electronics-products-lite.json";
 const IMPORTED_CATALOG_GLOBAL = "__MAKERS_ELECTRONICS_PRODUCTS_LITE__";
 
+updateInvoiceIdentity();
+createInvoiceRow();
+calc();
+
 function getInvoiceRowsData(){
-  let rows = document.querySelectorAll("#table tr");
-  let items = [];
+  const rows = document.querySelectorAll("#invoiceItemsBody tr");
+  const items = [];
 
-  rows.forEach((row, index)=>{
-    if(index === 0) return;
-
-    let name = row.querySelector(".product")?.value.trim();
-    let price = Number(row.querySelector(".p")?.value) || 0;
-    let qty = Number(row.querySelector(".q")?.value) || 1;
+  rows.forEach((row) => {
+    const name = row.querySelector(".product")?.value.trim();
+    const priceInput = row.querySelector(".p");
+    const quantityInput = row.querySelector(".q");
+    const rawPriceText = String(priceInput?.value || "").trim();
+    const rawPrice = Number(priceInput?.value);
+    const rawQuantity = Number(quantityInput?.value);
+    const price = normalizeInvoicePrice(rawPrice);
+    const qty = normalizeInvoiceQuantity(rawQuantity);
 
     if(name){
+      if(!rawPriceText || !Number.isFinite(rawPrice) || rawPrice <= 0 || rawPrice > 10000000){
+        showInvoiceToast(`راجع سعر المنتج: ${name}. السعر يجب أن يكون أكبر من صفر.`, "error", 5000);
+        priceInput?.focus();
+        const validationError = new Error("Invalid invoice price");
+        validationError.code = "invoice/validation";
+        throw validationError;
+      }
+
+      if(!Number.isSafeInteger(rawQuantity) || rawQuantity < 1 || rawQuantity > 100000){
+        showInvoiceToast(`راجع كمية المنتج: ${name}. اكتب رقمًا صحيحًا يبدأ من 1.`, "error", 5000);
+        quantityInput?.focus();
+        const validationError = new Error("Invalid invoice quantity");
+        validationError.code = "invoice/validation";
+        throw validationError;
+      }
+
+      const lineInPiasters = Math.round(price * 100) * qty;
+      if(!Number.isSafeInteger(lineInPiasters)){
+        showInvoiceToast(`قيمة المنتج ${name} أكبر من الحد المسموح.`, "error", 5000);
+        priceInput?.focus();
+        const validationError = new Error("Invoice line total is too large");
+        validationError.code = "invoice/validation";
+        throw validationError;
+      }
+
       items.push({ name, price, qty });
     }
   });
@@ -459,7 +790,16 @@ function getGroupedInvoiceItems(items){
 function collectInvoiceState(){
   const items = getInvoiceRowsData();
   const groupedItems = getGroupedInvoiceItems(items);
-  const total = groupedItems.reduce((sum,item)=> sum + (item.price * item.qty), 0);
+  const totalInPiasters = groupedItems.reduce(
+    (sum, item) => sum + (Math.round(item.price * 100) * item.qty),
+    0
+  );
+  if(!Number.isSafeInteger(totalInPiasters)){
+    showInvoiceToast("إجمالي الفاتورة أكبر من الحد المسموح.", "error", 5000);
+    const validationError = new Error("Invoice total is too large");
+    validationError.code = "invoice/validation";
+    throw validationError;
+  }
   const now = new Date();
 
   return {
@@ -467,8 +807,8 @@ function collectInvoiceState(){
     number: currentInvoiceNumber,
     customer: document.getElementById("customer").value.trim(),
     phone: document.getElementById("phone").value.trim(),
-    total,
-    date: now.toLocaleDateString("ar-EG"),
+    total:totalInPiasters / 100,
+    date:invoiceOriginalDate || now.toLocaleDateString("ar-EG"),
     printDateTime: now.toLocaleString("ar-EG",{ dateStyle:"medium", timeStyle:"short" }),
     items,
     groupedItems,
@@ -476,18 +816,33 @@ function collectInvoiceState(){
   };
 }
 
-function buildPrintableInvoiceMarkup(state){
+function escapeInvoiceHtml(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeInvoiceHtmlWithSpacing(value){
+  return escapeInvoiceHtml(value).replace(/\s+/g, "&nbsp;");
+}
+
+function buildPrintableInvoiceMarkup(state, { forPdf = false } = {}){
   const logoUrl = new URL("logo.png", window.location.href).href;
+  const logoMarkup = forPdf
+    ? `<span class="invoice-brand-mark" aria-hidden="true">K</span>`
+    : `<img src="${logoUrl}" alt="KIMO TECH" width="1129" height="664" onerror="this.style.display='none'">`;
   const itemsMarkup = state.groupedItems.map(item=>{
-    const lineTotal = item.price * item.qty;
+    const lineTotal = getInvoiceLineTotal(item.price, item.qty);
 
     return `
       <div class="invoice-item">
-        <div class="invoice-item-main">
-          <strong>${item.name}</strong>
-          <span class="invoice-qty">x${item.qty}</span>
-        </div>
-        <span class="invoice-price">${lineTotal} EGP</span>
+        <strong class="invoice-item-name" dir="auto">${escapeInvoiceHtml(item.name)}</strong>
+        <span class="invoice-unit-price"><bdi dir="ltr">${escapeInvoiceHtml(formatInvoiceMoney(item.price))}</bdi> ج.م</span>
+        <span class="invoice-qty"><bdi dir="ltr">${escapeInvoiceHtml(item.qty)}</bdi></span>
+        <span class="invoice-price"><bdi dir="ltr">${escapeInvoiceHtml(formatInvoiceMoney(lineTotal))}</bdi> ج.م</span>
       </div>
     `;
   }).join("") || `<div class="invoice-empty">لا توجد منتجات في هذه الفاتورة.</div>`;
@@ -498,11 +853,14 @@ function buildPrintableInvoiceMarkup(state){
         <div class="invoice-head">
           <div>
             <span class="invoice-eyebrow">KIMO TECH</span>
-            <h1>فاتورة بيع</h1>
-            <p>رقم الفاتورة: ${state.number}</p>
+            <h1>فاتورة&nbsp;بيع</h1>
+            <p class="invoice-number-line">
+              <span>رقم&nbsp;الفاتورة:</span>
+              <bdi dir="ltr">${escapeInvoiceHtml(state.number)}</bdi>
+            </p>
           </div>
           <div class="invoice-brand">
-            <img src="${logoUrl}" alt="KIMO TECH" onerror="this.style.display='none'">
+            ${logoMarkup}
             <div>
               <strong>KIMO TECH</strong>
               <span>Electronics & Robotics</span>
@@ -511,54 +869,84 @@ function buildPrintableInvoiceMarkup(state){
         </div>
 
         <div class="invoice-chip-row">
-          <span class="invoice-chip date">${state.printDateTime}</span>
-          <span class="invoice-chip status">جاهزة للطباعة</span>
+          <span class="invoice-chip date">
+            <span>تاريخ&nbsp;الفاتورة:</span>
+            <bdi dir="rtl">${escapeInvoiceHtmlWithSpacing(state.date)}</bdi>
+          </span>
+          <span class="invoice-chip status">kimo-techlab.com</span>
         </div>
 
         <div class="invoice-meta">
           <div class="invoice-meta-card">
-            <span>اسم العميل</span>
-            <strong>${state.customer || "بدون اسم"}</strong>
+            <span>اسم&nbsp;العميل</span>
+            <strong>${escapeInvoiceHtmlWithSpacing(state.customer || "بدون اسم")}</strong>
           </div>
           <div class="invoice-meta-card">
-            <span>رقم الهاتف</span>
-            <strong>${state.phone || "-"}</strong>
+            <span>رقم&nbsp;الهاتف</span>
+            <strong><bdi dir="ltr">${escapeInvoiceHtml(state.phone || "-")}</bdi></strong>
           </div>
           <div class="invoice-meta-card">
-            <span>عدد الأنواع</span>
-            <strong>${state.groupedItems.length} نوع</strong>
+            <span>عدد&nbsp;الأنواع</span>
+            <strong>${escapeInvoiceHtml(state.groupedItems.length)}&nbsp;نوع</strong>
           </div>
           <div class="invoice-meta-card">
-            <span>إجمالي القطع</span>
-            <strong>${state.totalPieces} قطعة</strong>
+            <span>إجمالي&nbsp;القطع</span>
+            <strong>${escapeInvoiceHtml(state.totalPieces)}&nbsp;قطعة</strong>
           </div>
         </div>
 
         <div class="invoice-section">
-          <h2>المنتجات</h2>
-          <div class="invoice-items">${itemsMarkup}</div>
+          <h2>تفاصيل&nbsp;المنتجات</h2>
+          <div class="invoice-items">
+            <div class="invoice-items-head" aria-hidden="true">
+              <span>المنتج</span>
+              <span>سعر&nbsp;الوحدة</span>
+              <span>الكمية</span>
+              <span>الإجمالي</span>
+            </div>
+            ${itemsMarkup}
+          </div>
         </div>
 
         <div class="invoice-total">
-          <span>الإجمالي النهائي</span>
-          <strong>${state.total} EGP</strong>
+          <span>الإجمالي&nbsp;النهائي</span>
+          <strong><bdi dir="ltr">${escapeInvoiceHtml(formatInvoiceMoney(state.total))}</bdi>&nbsp;ج.م</strong>
+        </div>
+
+        <div class="invoice-footer">
+          <strong class="invoice-footer-thanks">
+            <span>شكرًا&nbsp;لتعاملكم&nbsp;مع</span>
+            <bdi dir="ltr">KIMO TECH</bdi>
+          </strong>
+          <span class="invoice-footer-time">
+            <span>تم&nbsp;تجهيز&nbsp;النسخة:</span>
+            <bdi dir="rtl">${escapeInvoiceHtmlWithSpacing(state.printDateTime)}</bdi>
+          </span>
         </div>
       </div>
     </div>
   `;
 }
 
-function buildPrintableInvoiceDocument(state){
+function buildPrintableInvoiceDocument(state, { forPdf = false } = {}){
+  const pdfLibraryUrl = new URL("scripts/html2pdf.bundle.min.js", window.location.href).href;
+  const pdfLibraryMarkup = forPdf
+    ? `<script src="${escapeInvoiceHtml(pdfLibraryUrl)}"><\/script>`
+    : "";
+  const fontMarkup = '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">';
+
   return `
+    <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>فاتورة ${state.number}</title>
+      <title>فاتورة ${escapeInvoiceHtml(state.number)}</title>
+      ${fontMarkup}
       <style>
         @page{
           size:A4;
-          margin:12mm;
+          margin:0;
         }
 
         *{
@@ -567,25 +955,25 @@ function buildPrintableInvoiceDocument(state){
 
         body{
           margin:0;
-          font-family:"Cairo",Arial,sans-serif;
-          background:#eef4fb;
+          font-family:"Cairo","Segoe UI",Tahoma,Arial,sans-serif;
+          background:#ffffff;
           color:#0f172a;
           -webkit-print-color-adjust:exact;
           print-color-adjust:exact;
         }
 
         .print-page{
-          max-width:820px;
+          width:210mm;
           margin:0 auto;
-          padding:22px;
+          padding:10mm;
+          background:#ffffff;
         }
 
         .invoice-sheet{
           background:#ffffff;
           border:1px solid #dbe4f0;
-          border-radius:30px;
-          padding:28px;
-          box-shadow:0 18px 48px rgba(15,23,42,.12);
+          border-radius:6mm;
+          padding:7.5mm;
         }
 
         .invoice-head{
@@ -606,14 +994,22 @@ function buildPrintableInvoiceDocument(state){
 
         .invoice-head h1{
           margin:8px 0 6px;
-          font-size:30px;
+          font-size:28px;
           line-height:1.2;
+          word-spacing:.14em;
         }
 
         .invoice-head p{
           margin:0;
           color:#64748b;
           font-size:14px;
+        }
+
+        .invoice-number-line{
+          display:flex;
+          flex-wrap:wrap;
+          align-items:baseline;
+          gap:5px;
         }
 
         .invoice-brand{
@@ -628,6 +1024,18 @@ function buildPrintableInvoiceDocument(state){
           width:84px;
           height:auto;
           object-fit:contain;
+        }
+
+        .invoice-brand-mark{
+          width:54px;
+          height:54px;
+          display:grid;
+          place-items:center;
+          color:#052e16;
+          background:linear-gradient(135deg,#4ade80,#22c55e);
+          border-radius:17px;
+          font-size:23px;
+          font-weight:900;
         }
 
         .invoice-brand strong{
@@ -652,6 +1060,7 @@ function buildPrintableInvoiceDocument(state){
           display:inline-flex;
           align-items:center;
           justify-content:center;
+          gap:5px;
           padding:8px 14px;
           border-radius:999px;
           font-size:13px;
@@ -671,15 +1080,15 @@ function buildPrintableInvoiceDocument(state){
         .invoice-meta{
           display:grid;
           grid-template-columns:repeat(2,minmax(0,1fr));
-          gap:14px;
-          margin-bottom:24px;
+          gap:10px;
+          margin-bottom:20px;
         }
 
         .invoice-meta-card{
           background:#f8fbff;
           border:1px solid #dbe4f0;
-          border-radius:18px;
-          padding:14px 16px;
+          border-radius:14px;
+          padding:11px 13px;
         }
 
         .invoice-meta-card span{
@@ -691,9 +1100,10 @@ function buildPrintableInvoiceDocument(state){
 
         .invoice-meta-card strong{
           display:block;
-          font-size:15px;
+          font-size:14px;
           line-height:1.65;
           word-break:break-word;
+          word-spacing:.1em;
         }
 
         .invoice-section{
@@ -701,52 +1111,73 @@ function buildPrintableInvoiceDocument(state){
         }
 
         .invoice-section h2{
-          margin:0 0 14px;
-          font-size:24px;
+          margin:0 0 11px;
+          font-size:20px;
+          word-spacing:.12em;
         }
 
         .invoice-items{
-          display:flex;
-          flex-direction:column;
+          overflow:hidden;
+          border:1px solid #dbe4f0;
+          border-radius:15px;
+        }
+
+        .invoice-items-head,
+        .invoice-item{
+          display:grid;
+          grid-template-columns:minmax(0,1fr) 95px 58px 105px;
+          align-items:center;
           gap:10px;
+        }
+
+        .invoice-items-head{
+          padding:9px 12px;
+          color:#64748b;
+          background:#f8fafc;
+          border-bottom:1px solid #dbe4f0;
+          font-size:10px;
+          font-weight:800;
+        }
+
+        .invoice-items-head span:not(:first-child),
+        .invoice-item > span{
+          text-align:center;
         }
 
         .invoice-item{
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          gap:16px;
           background:#fff;
-          border:1px solid #dbe4f0;
-          border-radius:18px;
-          padding:14px 16px;
+          padding:11px 12px;
+          border-bottom:1px solid #edf2f7;
+          break-inside:avoid;
+          page-break-inside:avoid;
         }
 
-        .invoice-item-main{
-          display:flex;
-          align-items:center;
-          gap:10px;
+        .invoice-item:last-child{border-bottom:0}
+
+        .invoice-item-name{
           min-width:0;
-        }
-
-        .invoice-item-main strong{
-          font-size:15px;
+          font-size:12px;
           line-height:1.5;
+          word-break:break-word;
         }
 
         .invoice-qty{
-          background:#dff0ff;
           color:#0284c7;
-          border-radius:999px;
-          padding:5px 10px;
-          font-size:12px;
+          font-size:11px;
+          font-weight:900;
+          white-space:nowrap;
+        }
+
+        .invoice-unit-price{
+          color:#475569;
+          font-size:11px;
           font-weight:700;
           white-space:nowrap;
         }
 
         .invoice-price{
-          color:#16a34a;
-          font-size:22px;
+          color:#15803d;
+          font-size:13px;
           font-weight:900;
           white-space:nowrap;
         }
@@ -767,17 +1198,50 @@ function buildPrintableInvoiceDocument(state){
           gap:12px;
           background:#0f172a;
           color:#fff;
-          border-radius:22px;
-          padding:18px 20px;
+          margin-top:14px;
+          border-radius:16px;
+          padding:15px 17px;
+          break-inside:avoid;
+          page-break-inside:avoid;
         }
 
         .invoice-total span{
           color:#cbd5e1;
-          font-size:14px;
+          font-size:12px;
+          word-spacing:.12em;
         }
 
         .invoice-total strong{
-          font-size:32px;
+          font-size:27px;
+          white-space:nowrap;
+        }
+
+        .invoice-footer{
+          margin-top:15px;
+          padding-top:11px;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+          color:#64748b;
+          border-top:1px dashed #dbe4f0;
+          font-size:9px;
+          break-inside:avoid;
+          page-break-inside:avoid;
+        }
+
+        .invoice-footer strong{
+          color:#334155;
+          font-size:10px;
+          word-spacing:.1em;
+        }
+
+        .invoice-footer-thanks,
+        .invoice-footer-time{
+          display:inline-flex;
+          flex-wrap:wrap;
+          align-items:baseline;
+          gap:4px;
         }
 
         @media print{
@@ -786,55 +1250,217 @@ function buildPrintableInvoiceDocument(state){
           }
 
           .print-page{
-            max-width:none;
-            padding:0;
+            margin:0;
           }
 
           .invoice-sheet{
-            border:none;
-            border-radius:0;
             box-shadow:none;
-            padding:0;
           }
         }
       </style>
     </head>
     <body>
-      ${buildPrintableInvoiceMarkup(state)}
+      ${buildPrintableInvoiceMarkup(state, { forPdf })}
+      ${pdfLibraryMarkup}
     </body>
     </html>
   `;
 }
 
-// استبدل دالة saveInvoice بالكامل بهذا الكود
+let invoiceSaving = false;
+
+function setInvoiceActionsBusy(isBusy){
+  document.querySelectorAll(
+    ".invoice-customer-fields input, .invoice-add-product, #table input, #table button, .invoice-editor-actions button"
+  ).forEach((control) => {
+    control.disabled = isBusy || !invoiceEditorReady;
+  });
+}
+
+function setInvoiceActionButtonText(button, title, subtitle){
+  if(!button) return;
+  const titleElement = button.querySelector(".invoice-action-copy strong");
+  const subtitleElement = button.querySelector(".invoice-action-copy small");
+  if(titleElement) titleElement.textContent = title;
+  if(subtitleElement) subtitleElement.textContent = subtitle;
+}
+
+function getInvoiceSaveErrorMessage(error){
+  const code = String(error?.code || "");
+
+  if(code === "permission-denied"){
+    return "ليس لديك صلاحية لحفظ الفاتورة بهذا الحساب.";
+  }
+  if(code === "unavailable" || code === "deadline-exceeded" || code === "network-request-failed"){
+    return "تعذر الاتصال الآن. تأكد من الإنترنت ثم جرّب الحفظ مرة أخرى.";
+  }
+  if(code === "unauthenticated"){
+    return "انتهت جلسة الدخول. سجّل الدخول ثم جرّب مرة أخرى.";
+  }
+
+  return "تعذر حفظ الفاتورة. جرّب مرة أخرى.";
+}
+
 async function saveInvoice(showSuccess = true){
   const state = collectInvoiceState();
+
+  if(!state.items.length){
+    showInvoiceToast("أضف منتجًا واحدًا على الأقل قبل حفظ الفاتورة.", "warning", 4500);
+    document.querySelector(".product")?.focus();
+    const validationError = new Error("Invoice has no items");
+    validationError.code = "invoice/validation";
+    throw validationError;
+  }
+
+  if(invoiceId && !invoiceDirty){
+    setInvoiceSaveState("saved", "تم الحفظ");
+    if(showSuccess) showInvoiceToast("لا توجد تعديلات جديدة — الفاتورة محفوظة.", "success");
+    return { ...state, id:invoiceId };
+  }
+
+  if(invoiceSaving){
+    const busyError = new Error("Invoice save already in progress");
+    busyError.code = "invoice/busy";
+    throw busyError;
+  }
+
+  invoiceSaving = true;
+  setInvoiceActionsBusy(true);
+  setInvoiceSaveState("saving", "جاري الحفظ");
+  const saveButton = document.querySelector(".invoice-save-btn");
+  setInvoiceActionButtonText(saveButton, "جاري الحفظ…", "لحظات من فضلك");
+
   const data = {
     customer: state.customer,
     phone: state.phone,
     total: state.total,
     date: state.date,
     number: state.number,
-    items: state.items
+    items: state.items,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try{
     if(invoiceId){
-      await db.collection("invoices").doc(invoiceId).set(data, { merge: true });
-      if(showSuccess) alert("تم التحديث بنجاح ✅");
-      return { ...state, id: invoiceId };
+      await db.collection("invoices").doc(invoiceId).update(data);
+    }else{
+      const createdSortTimestamp = Date.now();
+      const docRef = await db.collection("invoices").add({
+        ...data,
+        sortTimestamp:createdSortTimestamp,
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      invoiceId = docRef.id;
+      window.history.replaceState({}, "", `new_invoice.html?id=${encodeURIComponent(invoiceId)}`);
+      invoiceHeading.textContent = "تعديل فاتورة";
     }
 
-    const docRef = await db.collection("invoices").add(data);
-    invoiceId = docRef.id;
-    localStorage.setItem("invoiceId", invoiceId);
-    if(showSuccess) alert("تم الحفظ بنجاح ✅");
-    return { ...state, id: invoiceId };
+    invoiceOriginalDate = state.date;
+    invoiceDirty = false;
+    updateInvoiceIdentity();
+    setInvoiceSaveState("saved", "تم الحفظ");
+    if(showSuccess) showInvoiceToast("تم حفظ الفاتورة بنجاح.", "success");
+    return { ...state, id:invoiceId };
   }catch(e){
     console.error("خطأ في حفظ الفاتورة:", e);
-    alert("حصل خطأ في حفظ الفاتورة ❌");
+    setInvoiceSaveState("error", "فشل الحفظ");
+    showInvoiceToast(getInvoiceSaveErrorMessage(e), "error", 5200);
     throw e;
+  }finally{
+    invoiceSaving = false;
+    setInvoiceActionsBusy(false);
+    setInvoiceActionButtonText(saveButton, "حفظ الفاتورة", "حفظ التعديلات الآن");
   }
+}
+
+async function waitForPrintableAssets(targetDocument){
+  if(targetDocument.readyState !== "complete"){
+    await new Promise((resolve) => {
+      const timeoutId = setTimeout(resolve, 8000);
+      targetDocument.defaultView?.addEventListener("load", () => {
+        clearTimeout(timeoutId);
+        resolve();
+      }, { once:true });
+    });
+  }
+
+  if(targetDocument.fonts?.ready){
+    await Promise.race([
+      targetDocument.fonts.ready.catch(()=>{}),
+      new Promise((resolve) => setTimeout(resolve, 5000))
+    ]);
+  }
+
+  await Promise.all(
+    [...targetDocument.images].map((image) => {
+      if(image.complete) return Promise.resolve();
+      return Promise.race([
+        new Promise((resolve) => {
+          image.addEventListener("load", resolve, { once:true });
+          image.addEventListener("error", resolve, { once:true });
+        }),
+        new Promise((resolve) => setTimeout(resolve, 6000))
+      ]);
+    })
+  );
+}
+
+async function waitForFramePdfLibrary(frameWindow, timeout = 12000){
+  const startedAt = Date.now();
+
+  while(typeof frameWindow.html2pdf !== "function"){
+    if(Date.now() - startedAt > timeout){
+      throw new Error("PDF library did not load");
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+  }
+}
+
+function getInvoicePdfFilename(invoiceNumber){
+  const safeNumber = String(invoiceNumber || "KIMO-invoice")
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
+    .replace(/\s+/g, "-")
+    .slice(0, 100);
+
+  return `${safeNumber || "KIMO-invoice"}.pdf`;
+}
+
+function downloadInvoicePdfBlob(pdfBlob, filename){
+  if(!pdfBlob || !Number.isFinite(Number(pdfBlob.size)) || pdfBlob.size <= 0){
+    throw new Error("PDF blob is empty");
+  }
+
+  if(typeof navigator.msSaveOrOpenBlob === "function"){
+    navigator.msSaveOrOpenBlob(pdfBlob, filename);
+    return;
+  }
+
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+  const downloadLink = document.createElement("a");
+  downloadLink.href = pdfUrl;
+  downloadLink.download = filename;
+  downloadLink.style.position = "fixed";
+  downloadLink.style.left = "-10000px";
+  downloadLink.style.top = "0";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  setTimeout(() => URL.revokeObjectURL(pdfUrl), 30000);
+}
+
+function getPdfExportErrorMessage(error){
+  const message = String(error?.message || "");
+
+  if(message.includes("PDF library did not load")){
+    return "تعذر تحميل أداة إنشاء PDF المحلية. أعد تحميل الصفحة ثم جرّب مرة أخرى.";
+  }
+  if(error?.name === "SecurityError" || /taint|canvas|toDataURL/i.test(message)){
+    return "تعذر تجهيز صورة الفاتورة للـPDF. جرّب إعادة تحميل الصفحة.";
+  }
+
+  return "تعذر إنشاء ملف PDF. جرّب مرة أخرى أو استخدم طباعة A4.";
 }
 
 
@@ -844,69 +1470,165 @@ async function saveInvoice(showSuccess = true){
 
 async function printA4(){
   const printWindow = window.open("", "", "width=900,height=700");
+  const printButton = document.querySelector(".print-btn");
+  let printStage = "saving";
 
   if(!printWindow){
-    alert("اسمح بفتح نافذة الطباعة أولاً");
+    showInvoiceToast("اسمح بفتح نافذة الطباعة من إعدادات المتصفح ثم جرّب مرة أخرى.", "warning", 5000);
     return;
   }
 
   try{
     const state = await saveInvoice(false);
+    printStage = "rendering";
+    setInvoiceActionsBusy(true);
+    setInvoiceActionButtonText(printButton, "جاري تجهيز الطباعة…", "لحظات من فضلك");
 
     printWindow.document.write(buildPrintableInvoiceDocument(state));
     printWindow.document.close();
+    await waitForPrintableAssets(printWindow.document);
     printWindow.focus();
     printWindow.onafterprint = () => {
       printWindow.close();
-      localStorage.removeItem("invoiceId");
-      location.reload();
     };
 
-    setTimeout(() => {
-      printWindow.print();
-    }, 300);
+    printWindow.print();
   }catch(e){
     printWindow.close();
+    if(e?.code !== "invoice/validation"){
+      console.error("تعذر تجهيز الطباعة:", e);
+      if(printStage === "rendering"){
+        showInvoiceToast("تعذر تجهيز نافذة الطباعة. جرّب مرة أخرى.", "error", 5000);
+      }
+    }
+  }finally{
+    setInvoiceActionsBusy(false);
+    setInvoiceActionButtonText(printButton, "طباعة الفاتورة", "فتح نافذة الطباعة");
   }
 }
 
 
-async function sendWhatsApp(){
-  const whatsappWindow = window.open("about:blank", "_blank");
+function normalizeEgyptianWhatsAppPhone(value){
+  let digits = String(value || "").replace(/\D/g, "");
 
-  if(!whatsappWindow){
-    alert("اسمح بفتح واتساب أولاً");
+  if(digits.startsWith("0020")) digits = digits.slice(2);
+  if(/^01[0125]\d{8}$/.test(digits)) digits = `20${digits.slice(1)}`;
+  if(/^1[0125]\d{8}$/.test(digits)) digits = `20${digits}`;
+
+  return /^201[0125]\d{8}$/.test(digits) ? digits : "";
+}
+
+async function sendWhatsApp(){
+  const normalizedPhone = normalizeEgyptianWhatsAppPhone(
+    document.getElementById("phone").value
+  );
+  const whatsappButton = document.querySelector(".whatsapp-btn");
+
+  if(!normalizedPhone){
+    showInvoiceToast("اكتب رقم موبايل مصري صحيحًا لإرسال الفاتورة على WhatsApp.", "warning", 5000);
+    document.getElementById("phone").focus();
     return;
   }
 
-  const state = await saveInvoice(false);
-  
-  let msg = `فاتورتك من Kimo Tech\nرقم الفاتورة: ${state.number}\nTotal: ${state.total} EGP`;
-  let phone = document.getElementById("phone").value.replace(/^0/,"20");
-  
-  // فتح رابط الواتساب
-  whatsappWindow.location.href = "https://wa.me/"+phone+"?text="+encodeURIComponent(msg);
+  const whatsappWindow = window.open("about:blank", "_blank");
 
-  // التصفير التلقائي بعد ثانية
-  setTimeout(() => { 
-    localStorage.removeItem("invoiceId"); 
-    location.reload(); 
-  }, 1000);
+  if(!whatsappWindow){
+    showInvoiceToast("اسمح بفتح WhatsApp من إعدادات المتصفح ثم جرّب مرة أخرى.", "warning", 5000);
+    return;
+  }
+
+  try{
+    const state = await saveInvoice(false);
+    setInvoiceActionsBusy(true);
+    setInvoiceActionButtonText(whatsappButton, "جاري تجهيز الرسالة…", "لحظات من فضلك");
+    const itemLines = state.groupedItems.map((item, index) => (
+      `${index + 1}) ${item.name} × ${item.qty} = ${formatInvoiceMoney(getInvoiceLineTotal(item.price, item.qty))} ج.م`
+    )).join("\n");
+    const msg = [
+      "فاتورتك من KIMO TECH",
+      `رقم الفاتورة: ${state.number}`,
+      "",
+      itemLines,
+      "",
+      `الإجمالي النهائي: ${formatInvoiceMoney(state.total)} ج.م`,
+      "شكرًا لتعاملك معنا."
+    ].join("\n");
+    whatsappWindow.location.href = "https://wa.me/"+normalizedPhone+"?text="+encodeURIComponent(msg);
+    showInvoiceToast("تم تجهيز رسالة WhatsApp.", "success");
+  }catch(error){
+    whatsappWindow.close();
+    console.error("تعذر تجهيز رسالة WhatsApp:", error);
+  }finally{
+    setInvoiceActionsBusy(false);
+    setInvoiceActionButtonText(whatsappButton, "إرسال WhatsApp", "مشاركة ملخص الفاتورة");
+  }
 }
 
+let pdfExportInProgress = false;
+
 async function sendPDF(){
-  await saveInvoice(false);
-  
-  let element = document.querySelector(".box");
-  
-  // توليد وحفظ ملف PDF
-  html2pdf().from(element).save().then(() => {
-    // التصفير التلقائي بعد انتهاء التحميل
-    setTimeout(() => { 
-      localStorage.removeItem("invoiceId"); 
-      location.reload(); 
-    }, 1000);
-  });
+  if(pdfExportInProgress) return;
+
+  pdfExportInProgress = true;
+  let frame = null;
+  const pdfButton = document.querySelector(".pdf-btn");
+  let pdfStage = "saving";
+
+  try{
+    const state = await saveInvoice(false);
+    pdfStage = "generating";
+    setInvoiceActionsBusy(true);
+    setInvoiceActionButtonText(pdfButton, "جاري تجهيز PDF…", "لحظات من فضلك");
+
+    frame = document.createElement("iframe");
+    frame.className = "invoice-pdf-frame";
+    frame.setAttribute("aria-hidden", "true");
+    frame.tabIndex = -1;
+    frame.inert = true;
+    document.body.appendChild(frame);
+
+    const frameDocument = frame.contentDocument;
+    frameDocument.open();
+    frameDocument.write(buildPrintableInvoiceDocument(state, { forPdf:true }));
+    frameDocument.close();
+    await waitForPrintableAssets(frameDocument);
+    await waitForFramePdfLibrary(frame.contentWindow);
+
+    const printableElement = frameDocument.querySelector(".print-page");
+    if(!printableElement){
+      throw new Error("Printable invoice element was not found");
+    }
+
+    const pdfBlob = await frame.contentWindow.html2pdf()
+      .set({
+        margin:0,
+        image:{ type:"jpeg", quality:.98 },
+        html2canvas:{
+          scale:2,
+          useCORS:false,
+          allowTaint:false,
+          logging:false,
+          imageTimeout:0
+        },
+        pagebreak:{ mode:["css","legacy"], avoid:[".invoice-item",".invoice-total"] },
+        jsPDF:{ unit:"mm", format:"a4", orientation:"portrait" }
+      })
+      .from(printableElement)
+      .outputPdf("blob");
+
+    downloadInvoicePdfBlob(pdfBlob, getInvoicePdfFilename(state.number));
+    showInvoiceToast("تم تنزيل ملف PDF بنجاح.", "success");
+  }catch(error){
+    console.error("تعذر إنشاء ملف PDF:", error);
+    if(pdfStage === "generating"){
+      showInvoiceToast(getPdfExportErrorMessage(error), "error", 5500);
+    }
+  }finally{
+    frame?.remove();
+    pdfExportInProgress = false;
+    setInvoiceActionsBusy(false);
+    setInvoiceActionButtonText(pdfButton, "حفظ PDF", "تنزيل نسخة A4");
+  }
 }
 
 
@@ -914,33 +1636,47 @@ async function sendPDF(){
 let allProducts = [];
 
 async function loadProducts(){
-  try{
-    let [snapshot, importedProducts] = await Promise.all([
-      db.collection("products").get(),
-      fetchImportedProducts()
-    ]);
+  const [firestoreResult, importedResult] = await Promise.allSettled([
+    db.collection("products").get(),
+    fetchImportedProducts()
+  ]);
+  const localProducts = [];
 
-    let localProducts = [];
-
-    snapshot.forEach(doc=>{
-      localProducts.push(doc.data());
+  if(firestoreResult.status === "fulfilled"){
+    firestoreResult.value.forEach((productDoc) => {
+      localProducts.push({
+        firestoreId:productDoc.id,
+        ...productDoc.data()
+      });
     });
-
-    allProducts = mergeProducts(localProducts, importedProducts);
-
-  }catch(e){
-    console.error("Error loading products:", e);
+  }else{
+    console.error("تعذر تحميل منتجات Firestore:", firestoreResult.reason);
+    showInvoiceToast(
+      "تم فتح الكتالوج المحلي فقط؛ تعذر تحميل أحدث أسعار المنتجات الآن.",
+      "warning",
+      5500
+    );
   }
-}
 
-loadProducts();
+  const importedProducts = importedResult.status === "fulfilled"
+    ? importedResult.value
+    : [];
+
+  if(importedResult.status === "rejected"){
+    console.error("تعذر تحميل الكتالوج المحلي:", importedResult.reason);
+  }
+
+  allProducts = mergeProducts(importedProducts, localProducts);
+}
 
 async function loadInvoice(){
   if(!invoiceId) return;
+
   let docRef = await db.collection("invoices").doc(invoiceId).get();
   if(docRef.exists){
     let data = docRef.data();
     currentInvoiceNumber = data.number || currentInvoiceNumber;
+    invoiceOriginalDate = String(data.date || "");
     document.getElementById("customer").value = data.customer || "";
     document.getElementById("phone").value = data.phone || "";
 
@@ -948,125 +1684,174 @@ async function loadInvoice(){
     // مسح الصفوف القديمة مع الحفاظ على العنوان
     while(table.rows.length > 1) { table.deleteRow(1); }
 
-    if(data.items){
-      data.items.forEach(item => {
-        let r = table.insertRow();
-        r.innerHTML = `
-          <td>
-            <input class="product" value="${item.name}" oninput="searchProduct(this)">
-            <div class="results"></div>
-          </td>
-          <td><input class="p" type="number" value="${item.price}"></td>
-          <td><input class="q" type="number" value="${item.qty}"></td>
-          <td class="t">${item.price * item.qty}</td>
-        `;
-      });
+    if(Array.isArray(data.items) && data.items.length){
+      data.items.forEach((item) => createInvoiceRow({
+        name:String(item?.name || ""),
+        price:normalizeInvoicePrice(item?.price),
+        qty:normalizeInvoiceQuantity(item?.qty)
+      }));
+    }else{
+      createInvoiceRow();
     }
-    calc(); // تحديث الإجمالي النهائي
+
+    calc();
+    updateInvoiceIdentity();
+    return;
   }
+
+  const notFoundError = new Error("Invoice not found");
+  notFoundError.code = "invoice/not-found";
+  throw notFoundError;
 }
 
-loadInvoice();
+auth.onAuthStateChanged(async (user) => {
+  if(!user){
+    window.location.replace("admin-login.html");
+    return;
+  }
 
-document.addEventListener("keydown", function(e){
+  try{
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const role = userDoc.exists
+      ? String(userDoc.data().role || "").trim().toLowerCase()
+      : null;
 
-let current = document.activeElement;
+    if(role !== "owner" && role !== "admin"){
+      window.location.replace("admin-login.html");
+      return;
+    }
 
-// ===== navigation فوق =====
-if(e.key === "Enter"){
-
-// اسم → رقم
-if(current.id === "customer"){
-  e.preventDefault();
-  document.getElementById("phone").focus();
-  return;
-}
-
-// رقم → جدول
-if(current.id === "phone"){
-  e.preventDefault();
-  document.querySelector(".product").focus();
-  return;
-}
-
-}
-
-// ===== لو في product input =====
-if(current.classList.contains("product")){
-
-let results = current.parentElement.querySelector(".results");
-let items = results.querySelectorAll("div");
-
-if(items.length){
-
-// ⬇️
-if(e.key === "ArrowDown"){
-e.preventDefault();
-
-selectedIndex++;
-if(selectedIndex >= items.length) selectedIndex = 0;
-
-highlight(items);
-}
-
-// ⬆️
-if(e.key === "ArrowUp"){
-e.preventDefault();
-
-selectedIndex--;
-if(selectedIndex < 0) selectedIndex = items.length - 1;
-
-highlight(items);
-}
-
-// ⏎ اختيار
-if(e.key === "Enter"){
-e.preventDefault();
-
-if(selectedIndex >= 0){
-items[selectedIndex].click();
-selectedIndex = -1;
-return;
-}
-}
-
-}
-
-}
-
-// ===== جدول الفاتورة =====
-if(e.key === "Enter"){
-
-let row = current.closest("tr");
-if(!row) return;
-
-let inputs = Array.from(row.querySelectorAll("input"));
-let index = inputs.indexOf(current);
-
-// جوه الصف
-if(index < inputs.length - 1){
-e.preventDefault();
-inputs[index + 1].focus();
-}
-
-// آخر خانة → صف جديد
-else{
-e.preventDefault();
-
-add();
-
-let table = document.getElementById("table");
-let newRow = table.rows[table.rows.length - 1];
-
-newRow.querySelector("input").focus();
-}
-
-}
-
+    window.setAdminNavigationRole?.(role);
+    await Promise.all([loadProducts(), loadInvoice()]);
+    invoiceDirty = false;
+    setInvoiceSaveState(invoiceId ? "saved" : "draft", invoiceId ? "تم الحفظ" : "مسودة جديدة");
+    setInvoiceEditorReady(true);
+    calc();
+  }catch(error){
+    console.error("تعذر تجهيز صفحة الفاتورة:", error);
+    setInvoiceEditorReady(
+      false,
+      error?.code === "invoice/not-found"
+        ? "الفاتورة المطلوبة غير موجودة. ارجع إلى قائمة الفواتير واختر فاتورة صحيحة."
+        : "تعذر تحميل بيانات الفاتورة. تأكد من الاتصال ثم أعد تحميل الصفحة.",
+      true
+    );
+  }
 });
+
+function closeAllProductResults(){
+  document.querySelectorAll(".product").forEach((input) => closeProductResults(input));
+}
+
+let productResultsPositionFrame = 0;
+function repositionOpenProductResults(){
+  cancelAnimationFrame(productResultsPositionFrame);
+  productResultsPositionFrame = requestAnimationFrame(() => {
+    document.querySelectorAll('.product[aria-expanded="true"]').forEach((input) => {
+      const results = input.parentElement.querySelector(".results");
+      if(results?.children.length) positionProductResults(input, results);
+    });
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  const current = document.activeElement;
+
+  if((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s"){
+    event.preventDefault();
+    if(invoiceEditorReady && !invoiceSaving) saveInvoice(true).catch(()=>{});
+    return;
+  }
+
+  if(current?.classList?.contains("product")){
+    const results = current.parentElement.querySelector(".results");
+    const options = getProductOptions(results);
+    const activeIndex = Number(results.dataset.activeIndex || -1);
+
+    if(event.key === "ArrowDown" && options.length){
+      event.preventDefault();
+      setActiveProductOption(current, activeIndex + 1);
+      return;
+    }
+
+    if(event.key === "ArrowUp" && options.length){
+      event.preventDefault();
+      setActiveProductOption(current, activeIndex <= 0 ? options.length - 1 : activeIndex - 1);
+      return;
+    }
+
+    if(event.key === "Escape"){
+      event.preventDefault();
+      closeProductResults(current);
+      return;
+    }
+
+    if(event.key === "Tab"){
+      closeProductResults(current);
+    }
+
+    if(event.key === "Enter" && options.length){
+      event.preventDefault();
+      const selectedOption = options[activeIndex >= 0 ? activeIndex : 0];
+      selectedOption.click();
+      current.closest("tr")?.querySelector(".p")?.focus();
+      return;
+    }
+
+    if(event.key === "Enter" && current.getAttribute("aria-expanded") === "true"){
+      closeProductResults(current);
+    }
+  }
+
+  if(event.key !== "Enter") return;
+
+  if(current?.id === "customer"){
+    event.preventDefault();
+    document.getElementById("phone").focus();
+    return;
+  }
+
+  if(current?.id === "phone"){
+    event.preventDefault();
+    document.querySelector(".product")?.focus();
+    return;
+  }
+
+  const row = current?.closest?.("tr");
+  if(!row) return;
+
+  const inputs = [...row.querySelectorAll("input")];
+  const index = inputs.indexOf(current);
+  if(index < 0) return;
+
+  event.preventDefault();
+  if(index < inputs.length - 1){
+    inputs[index + 1].focus();
+    return;
+  }
+
+  add();
+});
+
+window.addEventListener("resize", repositionOpenProductResults);
+window.addEventListener("scroll", repositionOpenProductResults, { passive:true });
+document.querySelector(".invoice-table-shell")?.addEventListener(
+  "scroll",
+  repositionOpenProductResults,
+  { passive:true }
+);
+window.addEventListener("beforeunload", (event) => {
+  if(!invoiceDirty) return;
+  event.preventDefault();
+  event.returnValue = "";
+});
+
 function goBack(){
-  localStorage.removeItem("invoiceId"); // مسح الـ ID المخزن
-  window.location.href = "dashboard.html"; // الرجوع للوحة التحكم
+  if(invoiceDirty && !window.confirm("لديك تعديلات غير محفوظة. هل تريد الرجوع بدون حفظها؟")){
+    return;
+  }
+  invoiceDirty = false;
+  window.location.href = "dashboard.html";
 }
 </script>
 

@@ -1661,6 +1661,90 @@ body{
     margin-top:56px;
   }
 }
+/* ===== 2026 UI polish: responsive header, readable hero and loading states ===== */
+.loading-state{
+  width:100%;
+  min-height:230px;
+  display:grid;
+  place-items:center;
+  gap:14px;
+  color:#64748b;
+  background:linear-gradient(135deg,#fff,#f8fafc);
+  border:1px solid #e5e7eb;
+  border-radius:22px;
+  font-weight:700;
+}
+.loading-state::before{
+  content:"";
+  width:42px;
+  height:42px;
+  border:4px solid #d1fae5;
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:kimo-spin .8s linear infinite;
+}
+@keyframes kimo-spin{to{transform:rotate(360deg)}}
+.services-page-link{
+  width:max-content;
+  max-width:100%;
+  margin:30px auto 0;
+  padding:13px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#04130a;
+  background:var(--accent);
+  border-radius:14px;
+  font-weight:900;
+  box-shadow:0 12px 28px rgba(34,197,94,.22);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.services-page-link:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 34px rgba(34,197,94,.3);
+}
+
+@media(max-width:768px){
+  .main-header{
+    padding:18px 14px 14px;
+    gap:14px;
+    overflow:hidden;
+  }
+  .header-left{order:1;width:100%;justify-content:center}
+  .header-center{order:2;width:100%;min-width:0}
+  .header-right{order:3;width:100%;display:flex;gap:10px;align-items:center}
+  .nav-links{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+    overflow:visible;
+  }
+  .nav-links a{
+    min-width:0;
+    padding:10px 6px;
+    font-size:11.5px;
+    text-align:center;
+    white-space:nowrap;
+    border-radius:14px;
+    background:rgba(255,255,255,.06);
+  }
+  .nav-links a:nth-child(n+5){display:none}
+  .brand{font-size:12px;margin-top:10px}
+  .header-right input{min-width:0;flex:1}
+  .cart-box{flex:0 0 48px}
+  .hero{min-height:545px;height:62vh}
+  .hero-content{width:90%;padding:0 14px;top:55%}
+  .hero h1{font-size:clamp(30px,9vw,42px);line-height:1.35;text-wrap:balance}
+  .hero p{font-size:16px;min-height:32px}
+  .main{padding-inline:14px}
+  .section-header{gap:12px;align-items:center}
+  .section-header h2{font-size:22px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
 </style>
 
 </head>
@@ -1682,7 +1766,7 @@ body{
       <a href="index.html" class="active">الرئيسية</a>
       <a href="products.html">المنتجات</a>
       <a href="projects.html">المشروعات</a>
-      <a href="#services">الخدمات</a>
+      <a href="services.html">الخدمات</a>
       <a href="#why">من نحن</a>
       <a href="#contact">تواصل معنا</a>
     </div>
@@ -1740,13 +1824,17 @@ body{
   <h2>🔥 أهم المنتجات</h2>
   <a href="products.html">عرض الكل</a>
 </div>
-<div class="home-grid" id="productGrid"></div>
+<div class="home-grid" id="productGrid">
+  <div class="loading-state" role="status" aria-live="polite">جاري تحميل أهم المنتجات...</div>
+</div>
 
 <div class="section-header center">
   <h2>🚀 مشاريع مميزة</h2>
   <a href="projects.html">عرض الكل</a>
 </div>
-<div class="home-grid" id="projectGrid"></div>
+<div class="home-grid" id="projectGrid">
+  <div class="loading-state" role="status" aria-live="polite">جاري تحميل المشروعات المميزة...</div>
+</div>
 
 <section class="services" id="services">
 
@@ -1758,28 +1846,29 @@ body{
   <div class="services-grid">
 
     <div class="service-card">
-      <div class="icon"><i class="fas fa-microchip"></i></div>
-      <h3>تصنيع مشاريع</h3>
-      <p>تنفيذ مشاريع أردوينو والروبوتات من الصفر حتى التشغيل.</p>
+      <div class="icon"><i class="fas fa-cube"></i></div>
+      <h3>الطباعة ثلاثية الأبعاد</h3>
+      <p>طباعة نماذج أولية وقطع مخصصة بخامات مناسبة لاستخدام مشروعك.</p>
+      <a href="services.html#printing" aria-label="تفاصيل الطباعة ثلاثية الأبعاد">اعرف التفاصيل</a>
     </div>
 
 <div class="service-card">
-  <div class="icon"><i class="fas fa-robot"></i></div>
-  <h3>AI & Smart Systems</h3>
-  <p>
-    بنبني أنظمة ذكية باستخدام الذكاء الاصطناعي والرؤية الحاسوبية 
-    وربطها بالهاردوير علشان تعمل Detection + Automation + Control 
-    في مشاريع حقيقية تقيلة.
-  </p>
+  <div class="icon"><i class="fas fa-drafting-compass"></i></div>
+  <h3>التصميمات الهندسية</h3>
+  <p>تصميم موديلات ثلاثية الأبعاد ورسومات وتجهيز ملفات قابلة للتصنيع.</p>
+  <a href="services.html#engineering-design" aria-label="تفاصيل التصميمات الهندسية">اعرف التفاصيل</a>
 </div>
 
     <div class="service-card">
-      <div class="icon"><i class="fas fa-box-open"></i></div>
-      <h3>توريد مكونات</h3>
-      <p>توفير جميع قطع الإلكترونيات بأفضل سعر في مصر.</p>
+      <div class="icon"><i class="fas fa-bolt"></i></div>
+      <h3>القطع بالليزر</h3>
+      <p>قص وحفر جميع الخامات بالليزر، بما فيها الأكريليك، مع مراجعة الملف والسُمك.</p>
+      <a href="services.html#laser-cutting" aria-label="تفاصيل القطع بالليزر">اعرف التفاصيل</a>
     </div>
 
   </div>
+
+  <a class="services-page-link" href="services.html">عرض خدمات التصنيع والتصميم ←</a>
 
 </section>
 
@@ -2543,7 +2632,7 @@ window.addEventListener("scroll", () => {
 <div id="productPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; width:90%; max-width:500px; border-radius:20px; padding:25px; position:relative; text-align:center;">
     <span onclick="closePopup()" style="position:absolute; top:10px; left:15px; cursor:pointer; font-weight:bold; font-size:18px;">✖</span>
-    <img id="popupImg" style="width:200px; margin-bottom:15px;">
+    <img id="popupImg" src="images/no-image.png" alt="صورة المنتج" style="width:200px; margin-bottom:15px;">
     <h2 id="popupTitle"></h2>
     <p id="popupDesc" style="color:#555; margin:10px 0;"></p>
     <div id="popupPrice" style="font-weight:900; color:#22c55e; font-size:18px;"></div>

@@ -4,4 +4,8 @@
     <loc>https://kimo-techlab.com/</loc>
     <priority>1.00</priority>
   </url>
+  <url>
+    <loc>https://kimo-techlab.com/services.html</loc>
+    <priority>0.90</priority>
+  </url>
 </urlset>

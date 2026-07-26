@@ -1,0 +1,93 @@
+{
+  "id": "/kimo-admin-mobile",
+  "name": "KIMO TECH Admin",
+  "short_name": "KIMO Admin",
+  "description": "إدارة طلبات وفواتير ومنتجات KIMO TECH من الموبايل.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/mobile-admin.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait-primary",
+  "background_color": "#f3f6fb",
+  "theme_color": "#07101f",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/images/pwa/admin-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa/admin-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa/admin-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الطلبات",
+      "short_name": "الطلبات",
+      "url": "/admin.html?source=pwa",
+      "icons": [
+        {
+          "src": "/images/pwa/admin-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "فاتورة جديدة",
+      "short_name": "فاتورة",
+      "url": "/new_invoice.html?mode=new&source=pwa",
+      "icons": [
+        {
+          "src": "/images/pwa/admin-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "الفواتير",
+      "short_name": "الفواتير",
+      "url": "/dashboard.html?source=pwa",
+      "icons": [
+        {
+          "src": "/images/pwa/admin-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "المخزون",
+      "short_name": "المخزون",
+      "url": "/inventory-dashboard.html?source=pwa",
+      "icons": [
+        {
+          "src": "/images/pwa/admin-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

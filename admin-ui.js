@@ -8,6 +8,7 @@
   }
 
   const pages = [
+    { href:"mobile-admin.html", label:"تطبيق الموبايل", icon:"📱" },
     { href:"admin.html", label:"الطلبات", icon:"📋" },
     { href:"products-admin.html", label:"المنتجات", icon:"📦", ownerOnly:true },
     { href:"projects-admin.html", label:"المشروعات", icon:"🧠", ownerOnly:true },

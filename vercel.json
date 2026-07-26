@@ -1,4 +1,28 @@
 {
+  "headers": [
+    {
+      "source": "/admin-sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/admin.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    }
+  ],
   "routes": [
     {
       "src": "/",
@@ -8,7 +32,7 @@
           "value": "admin.kimo-techlab.com"
         }
       ],
-      "dest": "/admin.html"
+      "dest": "/mobile-admin.html"
     }
   ]
 }

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#07101f">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KIMO Admin">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="KIMO Admin">
+<title>تطبيق إدارة KIMO TECH</title>
+
+<link rel="manifest" href="admin.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/pwa/apple-touch-icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-pwa.css">
+<link rel="stylesheet" href="mobile-admin.css">
+<script src="admin-pwa.js" defer></script>
+</head>
+
+<body class="mobile-admin-page" data-admin-page="mobile-home">
+
+<a class="mobile-skip-link" href="#mobileMain">تخطي إلى المحتوى</a>
+
+<div id="offlineBanner" class="admin-pwa-connectivity" role="status" hidden>
+  مفيش اتصال — التعديلات متوقفة لحد رجوع الإنترنت
+</div>
+
+<header class="mobile-app-header">
+  <a class="mobile-app-brand" href="mobile-admin.html" aria-label="الرئيسية في KIMO Admin">
+    <img src="favicon.png" alt="" width="372" height="407">
+    <span>
+      <strong>KIMO <b>ADMIN</b></strong>
+      <small>Mobile Control</small>
+    </span>
+  </a>
+
+  <div class="mobile-header-actions">
+    <button id="installAppButton" type="button" class="mobile-header-button install" hidden>
+      <span aria-hidden="true">↓</span>
+      <span>تثبيت</span>
+    </button>
+    <button id="logoutAppButton" type="button" class="mobile-header-button" aria-label="تسجيل الخروج">
+      <span aria-hidden="true">⇥</span>
+    </button>
+  </div>
+</header>
+
+<main id="mobileMain" class="mobile-app-main">
+  <section class="mobile-welcome-card" aria-labelledby="mobileWelcomeTitle">
+    <div class="mobile-welcome-copy">
+      <span class="mobile-eyebrow">لوحة التحكم اللحظية</span>
+      <h1 id="mobileWelcomeTitle">أهلاً بك في KIMO Admin</h1>
+      <p id="appDataStatus">جاري الاتصال ببيانات الإدارة…</p>
+      <div class="mobile-sync-row">
+        <span class="mobile-connection-pill">
+          <i aria-hidden="true"></i>
+          <span id="connectionLabel">متصل لحظيًا</span>
+        </span>
+        <span id="syncTime">في انتظار أول مزامنة</span>
+      </div>
+    </div>
+
+    <a class="mobile-primary-action" href="new_invoice.html?mode=new">
+      <span aria-hidden="true">＋</span>
+      <span>
+        <strong>إنشاء فاتورة</strong>
+        <small>فاتورة بيع جديدة</small>
+      </span>
+    </a>
+  </section>
+
+  <section id="mobileAppLoading" class="mobile-loading-card" role="status" aria-live="polite">
+    <span class="mobile-spinner" aria-hidden="true"></span>
+    <strong>جاري تجهيز التطبيق</strong>
+    <p>بنتحقق من حساب الإدارة ونوصل البيانات اللحظية.</p>
+    <button id="retryMobileData" type="button" hidden>إعادة المحاولة</button>
+  </section>
+
+  <div id="mobileDashboardContent" hidden aria-busy="true">
+    <section class="mobile-stats-grid" aria-label="ملخص اليوم">
+      <article class="mobile-stat-card pending">
+        <span class="mobile-stat-icon" aria-hidden="true">▤</span>
+        <div>
+          <span>طلبات منتظرة</span>
+          <strong id="statPendingOrders">—</strong>
+          <small>تحتاج متابعة</small>
+        </div>
+      </article>
+
+      <article class="mobile-stat-card sales">
+        <span class="mobile-stat-icon" aria-hidden="true">↗</span>
+        <div>
+          <span>مبيعات اليوم</span>
+          <strong id="statTodaySales">—</strong>
+          <small>طلبات مكتملة</small>
+        </div>
+      </article>
+
+      <article class="mobile-stat-card invoices">
+        <span class="mobile-stat-icon" aria-hidden="true">▧</span>
+        <div>
+          <span>فواتير اليوم</span>
+          <strong id="statTodayInvoices">—</strong>
+          <small>فواتير بيع</small>
+        </div>
+      </article>
+
+      <article class="mobile-stat-card stock" data-mobile-owner-only hidden>
+        <span class="mobile-stat-icon" aria-hidden="true">!</span>
+        <div>
+          <span>مخزون منخفض</span>
+          <strong id="statLowStock">—</strong>
+          <small>5 قطع أو أقل</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="mobile-quick-section" aria-labelledby="quickActionsTitle">
+      <header class="mobile-section-heading">
+        <div>
+          <span>اختصارات</span>
+          <h2 id="quickActionsTitle">إجراءات سريعة</h2>
+        </div>
+        <span id="mobileRoleLabel" class="mobile-role-pill">إدارة</span>
+      </header>
+
+      <div class="mobile-quick-grid">
+        <a href="admin.html">
+          <span class="mobile-quick-icon orders" aria-hidden="true">▤</span>
+          <strong>الطلبات</strong>
+          <small>متابعة وتغيير الحالة</small>
+        </a>
+        <a href="dashboard.html">
+          <span class="mobile-quick-icon invoices" aria-hidden="true">▧</span>
+          <strong>الفواتير</strong>
+          <small>بحث وتعديل وتنزيل</small>
+        </a>
+        <a href="products-admin.html" data-mobile-owner-only hidden>
+          <span class="mobile-quick-icon products" aria-hidden="true">□</span>
+          <strong>المنتجات</strong>
+          <small>الأسعار والتصنيفات</small>
+        </a>
+        <a href="inventory-dashboard.html" data-mobile-owner-only hidden>
+          <span class="mobile-quick-icon stock" aria-hidden="true">▥</span>
+          <strong>المخزون</strong>
+          <small>الكميات والتنبيهات</small>
+        </a>
+        <a href="projects-admin.html" data-mobile-owner-only hidden>
+          <span class="mobile-quick-icon projects" aria-hidden="true">◆</span>
+          <strong>المشروعات</strong>
+          <small>إضافة وتعديل المشاريع</small>
+        </a>
+        <a href="https://community.kimo-techlab.com/admin.html" target="_blank" rel="noopener">
+          <span class="mobile-quick-icon community" aria-hidden="true">♟</span>
+          <strong>المجتمع</strong>
+          <small>يفتح إدارة المجتمع</small>
+        </a>
+      </div>
+    </section>
+
+    <div class="mobile-live-layout">
+      <section class="mobile-panel orders-panel" aria-labelledby="recentOrdersTitle">
+        <header class="mobile-panel-head">
+          <div>
+            <span>Live</span>
+            <h2 id="recentOrdersTitle">أحدث الطلبات</h2>
+          </div>
+          <a href="admin.html">عرض الكل</a>
+        </header>
+        <div id="recentOrders" class="mobile-live-list" aria-live="polite">
+          <div class="mobile-inline-loading">جاري تحميل الطلبات…</div>
+        </div>
+      </section>
+
+      <section class="mobile-panel invoices-panel" aria-labelledby="recentInvoicesTitle">
+        <header class="mobile-panel-head">
+          <div>
+            <span>Invoices</span>
+            <h2 id="recentInvoicesTitle">آخر الفواتير</h2>
+          </div>
+          <a href="dashboard.html">عرض الكل</a>
+        </header>
+        <div id="recentInvoices" class="mobile-live-list">
+          <div class="mobile-inline-loading">جاري تحميل الفواتير…</div>
+        </div>
+      </section>
+
+      <section class="mobile-panel stock-panel" data-mobile-owner-only hidden aria-labelledby="lowStockTitle">
+        <header class="mobile-panel-head">
+          <div>
+            <span>Stock alerts</span>
+            <h2 id="lowStockTitle">تنبيهات المخزون</h2>
+          </div>
+          <a href="inventory-dashboard.html">فتح المخزون</a>
+        </header>
+        <div id="lowStockProducts" class="mobile-live-list">
+          <div class="mobile-inline-loading">جاري فحص المخزون…</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<dialog id="installGuide" class="mobile-install-dialog" aria-labelledby="installGuideTitle">
+  <div class="mobile-dialog-mark" aria-hidden="true">↓</div>
+  <h2 id="installGuideTitle">تثبيت KIMO Admin</h2>
+  <p id="installGuideText">افتح قائمة المتصفح واختر تثبيت التطبيق.</p>
+  <button id="closeInstallGuide" type="button">تمام</button>
+</dialog>
+
+<div id="mobileAdminToast" class="mobile-admin-toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+</body>
+</html>

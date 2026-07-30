@@ -695,6 +695,9 @@ img{
 <input type="number" id="pPrice" min="0.01" max="1000000" step="0.01" inputmode="decimal" placeholder="السعر">
 <input type="text" id="pCategory" placeholder="التصنيف">
 <input type="text" id="pImage" placeholder="رابط الصورة">
+<label for="pImageFile" style="display:block;margin-top:10px;font-weight:700;">أو اختر صورة من جهازك</label>
+<input type="file" id="pImageFile" accept="image/*">
+<small style="display:block;margin:-4px 0 10px;color:#666;">تُصغّر الصورة تلقائيًا وتُحفظ مع المنتج. أقصى ملف أصلي 12 ميجابايت، وحجم الحفظ المستهدف أقل من 300 كيلوبايت.</small>
 <input type="text" id="pUse" placeholder="وصف قصير">
 
 <select id="pBadge">
@@ -708,6 +711,11 @@ img{
 <label style="display:flex;align-items:center;gap:8px;">
   <input type="checkbox" id="pStock" checked>
   متاح في المخزون
+</label>
+
+<label style="display:flex;align-items:center;gap:8px;">
+  <input type="checkbox" id="pFeatured">
+  عرض ضمن المنتجات المميزة في الصفحة الرئيسية
 </label>
 
 <button class="add-btn" id="productSaveBtn" type="button" onclick="saveProduct()">حفظ</button>
@@ -758,7 +766,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyA2ff2ZaA-Xb_zQcVSUDaERS-glaFFR0TY",
   authDomain: "kimo-tech-store-962df.firebaseapp.com",
   projectId: "kimo-tech-store-962df",
-  storageBucket: "kimo-tech-store-962df.firebasestorage.app",
   messagingSenderId: "845478890277",
   appId: "1:845478890277:web:3cdd3328bde1b5b9dda8cc"
 };
@@ -776,6 +783,10 @@ const IMPORT_BATCH_SIZE = 400;
 const ADMIN_PAGE_SIZE = 60;
 const PRICE_HISTORY_LIMIT = 5;
 const MAX_PRODUCT_PRICE = 1000000;
+const MAX_SOURCE_IMAGE_SIZE = 12 * 1024 * 1024;
+const MAX_SOURCE_IMAGE_PIXELS = 40_000_000;
+const MAX_EMBEDDED_IMAGE_LENGTH = 300 * 1024;
+const MAX_EMBEDDED_IMAGE_DIMENSION = 1200;
 const CATEGORY_LABELS = {
   arduino: "Arduino",
   battery: "Battery",
@@ -964,6 +975,93 @@ function getPriceSaveErrorMessage(error){
   }
 
   return `تعذر حفظ السعر${code ? ` (${code})` : ""}. جرّب مرة أخرى.`;
+}
+
+function getProductSaveErrorMessage(error){
+  const code = String(error?.code || "");
+
+  if(code === "image/too-large"){
+    return "تعذر ضغط الصورة إلى الحجم الآمن لـ Firestore. اختر صورة أبسط أو أصغر.";
+  }
+  if(code === "image/decode-failed"){
+    return "تعذر قراءة ملف الصورة. جرّب JPG أو PNG أو WebP صالحًا.";
+  }
+  if(code === "resource-exhausted" || code === "invalid-argument"){
+    return "بيانات المنتج أكبر من الحد المسموح في Firestore. اختر صورة أصغر أو استخدم رابط صورة.";
+  }
+
+  return getPriceSaveErrorMessage(error);
+}
+
+function loadImageFile(file){
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const imageElement = new Image();
+
+    imageElement.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(imageElement);
+    };
+    imageElement.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(Object.assign(new Error("Image could not be decoded"), {
+        code:"image/decode-failed"
+      }));
+    };
+    imageElement.src = objectUrl;
+  });
+}
+
+async function compressProductImage(file){
+  const sourceImage = await loadImageFile(file);
+  const sourceWidth = sourceImage.naturalWidth || sourceImage.width;
+  const sourceHeight = sourceImage.naturalHeight || sourceImage.height;
+
+  if(!sourceWidth || !sourceHeight || sourceWidth * sourceHeight > MAX_SOURCE_IMAGE_PIXELS){
+    throw Object.assign(new Error("Image dimensions are too large"), {
+      code:"image/too-large"
+    });
+  }
+
+  const initialScale = Math.min(
+    1,
+    MAX_EMBEDDED_IMAGE_DIMENSION / Math.max(sourceWidth, sourceHeight)
+  );
+  let width = Math.max(1, Math.round(sourceWidth * initialScale));
+  let height = Math.max(1, Math.round(sourceHeight * initialScale));
+  let quality = 0.82;
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { alpha:true });
+
+  if(!context){
+    throw Object.assign(new Error("Canvas is unavailable"), {
+      code:"image/decode-failed"
+    });
+  }
+
+  for(let attempt = 0; attempt < 12; attempt += 1){
+    canvas.width = width;
+    canvas.height = height;
+    context.clearRect(0, 0, width, height);
+    context.drawImage(sourceImage, 0, 0, width, height);
+
+    const dataUrl = canvas.toDataURL("image/webp", quality);
+
+    if(dataUrl.length <= MAX_EMBEDDED_IMAGE_LENGTH){
+      return dataUrl;
+    }
+
+    if(quality > 0.46){
+      quality = Math.max(0.46, quality - 0.09);
+    }else{
+      width = Math.max(1, Math.round(width * 0.82));
+      height = Math.max(1, Math.round(height * 0.82));
+    }
+  }
+
+  throw Object.assign(new Error("Compressed image is still too large"), {
+    code:"image/too-large"
+  });
 }
 
 async function persistProductPrice(productRef, product, nextPrice, source, basePayload = {}){
@@ -1930,6 +2028,7 @@ function renderProducts(list){
 
         <div>
           <button class="action-btn toggle" type="button" onclick='toggleStock(${productId})'>تبديل الحالة</button>
+          <button class="action-btn toggle" type="button" onclick='toggleFeatured(${productId})'>${p.featured === true ? "إلغاء التمييز" : "تمييز"}</button>
           <button class="action-btn edit" type="button" onclick='editProduct(${productId})'>تعديل</button>
           <button class="action-btn delete" type="button" onclick='deleteProduct(${productId})'>حذف</button>
         </div>
@@ -1970,6 +2069,26 @@ window.toggleStock = async function(id){
   }
 }
 
+window.toggleFeatured = async function(id){
+  const product = allProducts.find(item => item.id === id);
+
+  if(!product){
+    showToast("تعذر العثور على المنتج","error");
+    return;
+  }
+
+  try{
+    await updateDoc(doc(db,"products",id),{
+      featured:product.featured !== true,
+      updatedAt:serverTimestamp()
+    });
+    showToast(product.featured === true ? "تم إلغاء تمييز المنتج" : "تم تمييز المنتج","success");
+  }catch(error){
+    console.error(error);
+    showToast(getProductSaveErrorMessage(error),"error");
+  }
+}
+
 
 
 
@@ -1988,10 +2107,15 @@ window.editProduct = function(id){
   document.getElementById("pName").value = p.name || "";
   document.getElementById("pPrice").value = p.price || "";
   document.getElementById("pCategory").value = p.category || "";
-  document.getElementById("pImage").value = p.image || "";
+  const imageInput = document.getElementById("pImage");
+  const hasEmbeddedImage = String(p.image || "").startsWith("data:image/");
+  imageInput.value = hasEmbeddedImage ? "" : (p.image || "");
+  imageInput.dataset.hasEmbeddedImage = hasEmbeddedImage ? "true" : "false";
+  document.getElementById("pImageFile").value = "";
   document.getElementById("pUse").value = p.use || "";
   document.getElementById("pBadge").value = p.badge || "";
   document.getElementById("pStock").checked = getProductInStock(p);
+  document.getElementById("pFeatured").checked = p.featured === true;
 
   document.getElementById("productModal").style.display = "flex";
 }
@@ -2227,6 +2351,7 @@ window.bulkUpload = async function(){
   use: p.use || "",
   description: p.description || p.use || "",
   badge: p.badge || "",
+  featured: p.featured === true,
   inStock,
   stockQty,
   order: getOrderValue(p.order),
@@ -2273,13 +2398,21 @@ window.saveProduct = async function(){
   const name = document.getElementById("pName").value.trim();
   const price = normalizePrice(document.getElementById("pPrice").value);
   const category = document.getElementById("pCategory").value.trim();
-  const image = document.getElementById("pImage").value.trim();
+  const imageInput = document.getElementById("pImage");
+  let image = imageInput.value.trim();
+  const imageFile = document.getElementById("pImageFile").files[0] || null;
   const use = document.getElementById("pUse").value.trim();
   const badge = document.getElementById("pBadge").value.trim();
   const inStock = document.getElementById("pStock").checked;
+  const featured = document.getElementById("pFeatured").checked;
 
   if(!name || price === null){
     alert(`الاسم مطلوب والسعر لازم يكون من 0.01 إلى ${MAX_PRODUCT_PRICE.toLocaleString("ar-EG")} ج.م`);
+    return;
+  }
+
+  if(imageFile && (!imageFile.type.startsWith("image/") || imageFile.size > MAX_SOURCE_IMAGE_SIZE)){
+    alert("اختر ملف صورة صالحًا لا يتجاوز 12 ميجابايت");
     return;
   }
 
@@ -2291,7 +2424,26 @@ window.saveProduct = async function(){
     const currentProduct = editId
       ? allProducts.find((product) => product.id === editId) || null
       : null;
-    const nextFullImage = image
+
+    if(
+      currentProduct &&
+      imageInput.dataset.hasEmbeddedImage === "true" &&
+      !image &&
+      !imageFile
+    ){
+      image = currentProduct.image || "";
+    }
+
+    if(imageFile){
+      saveButton.textContent = "جاري ضغط الصورة...";
+      image = await compressProductImage(imageFile);
+      saveButton.textContent = "جاري الحفظ...";
+    }
+
+    const isEmbeddedImage = image.startsWith("data:image/");
+    const nextFullImage = isEmbeddedImage
+      ? ""
+      : image
       ? (currentProduct?.image === image ? (currentProduct.fullImage || image) : image)
       : LOCAL_FALLBACK_IMAGE;
     const currentStockQty = normalizeStockQuantity(currentProduct?.stockQty);
@@ -2336,6 +2488,7 @@ window.saveProduct = async function(){
           use,
           description:use,
           badge,
+          featured,
           ...stockUpdate
         }
       );
@@ -2354,10 +2507,11 @@ window.saveProduct = async function(){
         price,
         category,
         image,
-        fullImage: image || LOCAL_FALLBACK_IMAGE,
+        fullImage: image.startsWith("data:image/") ? "" : (image || LOCAL_FALLBACK_IMAGE),
         use,
         description: use,
         badge,
+        featured,
         inStock,
         stockQty: null,
         deleted: false,
@@ -2387,7 +2541,7 @@ window.saveProduct = async function(){
       );
     }else{
       console.error(error);
-      showToast(getPriceSaveErrorMessage(error),"error");
+      showToast(getProductSaveErrorMessage(error),"error");
     }
   }finally{
     saveButton.disabled = false;
@@ -2400,9 +2554,12 @@ function resetForm(){
   document.getElementById("pPrice").value = "";
   document.getElementById("pCategory").value = "";
   document.getElementById("pImage").value = "";
+  document.getElementById("pImage").dataset.hasEmbeddedImage = "false";
+  document.getElementById("pImageFile").value = "";
   document.getElementById("pUse").value = "";
   document.getElementById("pBadge").value = "";
   document.getElementById("pStock").checked = true;
+  document.getElementById("pFeatured").checked = false;
 }
 
 fetchLocalImageCatalog();

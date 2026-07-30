@@ -2475,12 +2475,6 @@ setTimeout(()=>{
 }
 
 loadProducts();
-document.querySelectorAll(".home-grid").forEach(slider=>{
-  slider.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    slider.scrollLeft += e.deltaY;
-  });
-});
 
 function showHeroProducts(){
   const container = document.querySelector(".product-cards-container");

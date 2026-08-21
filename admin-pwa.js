@@ -33,7 +33,11 @@
     }
 
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/admin-sw.js", { scope:"/" })
+      navigator.serviceWorker.register("/admin-sw.js", {
+        scope:"/",
+        updateViaCache:"none"
+      })
+        .then((registration) => registration.update())
         .catch((error) => console.error("Admin PWA registration failed:", error));
     }, { once:true });
   }

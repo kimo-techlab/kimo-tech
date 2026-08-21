@@ -1,4 +1,4 @@
-const CACHE_VERSION = "kimo-admin-pwa-v2";
+const CACHE_VERSION = "kimo-admin-pwa-v3";
 const APP_HOME = "/mobile-admin.html";
 const OFFLINE_PAGE = "/offline-admin.html";
 

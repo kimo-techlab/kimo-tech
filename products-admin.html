@@ -843,7 +843,7 @@ img{
 <h3 id="modalTitle">إضافة منتج</h3>
 
 <input type="text" id="pName" placeholder="اسم المنتج">
-<input type="number" id="pPrice" min="0.01" max="1000000" step="0.01" inputmode="decimal" placeholder="السعر">
+<input type="number" id="pPrice" min="1" max="1000000" step="1" inputmode="numeric" placeholder="السعر بالجنيه بدون كسور">
 <input type="text" id="pCategory" placeholder="التصنيف">
 <input type="text" id="pImage" placeholder="رابط الصورة">
 <label for="pImageFile" style="display:block;margin-top:10px;font-weight:700;">أو اختر صورة من جهازك</label>
@@ -995,18 +995,26 @@ function getProductInStock(product){
   return quantity === null ? product?.inStock !== false : quantity > 0;
 }
 
+function roundUpToWholePrice(value){
+  return Math.ceil(Number(Number(value).toFixed(8)));
+}
+
+function roundDownToWholePrice(value){
+  return Math.floor(Number(Number(value).toFixed(8)));
+}
+
 function normalizePrice(value){
   const price = Number(value);
   if(!Number.isFinite(price) || price <= 0 || price > MAX_PRODUCT_PRICE){
     return null;
   }
-  return Math.round(price * 100) / 100;
+  return roundUpToWholePrice(price);
 }
 
 function formatPrice(value){
   const price = normalizePrice(value);
   if(price === null) return "—";
-  return `${price.toLocaleString("ar-EG", { maximumFractionDigits:2 })} ج.م`;
+  return `${price.toLocaleString("ar-EG", { maximumFractionDigits:0 })} ج.م`;
 }
 
 function normalizePriceHistory(product){
@@ -1701,10 +1709,10 @@ function buildPriceEditorMarkup(product, serializedProductId){
         <input
           class="price-input"
           type="number"
-          min="0.01"
+          min="1"
           max="${MAX_PRODUCT_PRICE}"
-          step="0.01"
-          inputmode="decimal"
+          step="1"
+          inputmode="numeric"
           value="${escapeHtml(displayedPrice)}"
           data-base-price="${basePrice ?? ""}"
           aria-label="السعر الجديد لـ${escapeHtml(product.name || "المنتج")}"
@@ -1840,7 +1848,7 @@ window.increaseSelectedPagesByPercent = async function(){
     const multiplier = 1 + (config.percentage / 100);
     const nextPrice = currentPrice === null
       ? null
-      : normalizePrice(Math.round((currentPrice * multiplier) * 100) / 100);
+      : normalizePrice(currentPrice * multiplier);
 
     if(currentPrice === null || nextPrice === null || nextPrice <= currentPrice){
       invalidPrice += 1;
@@ -2200,8 +2208,10 @@ window.adjustInlinePrice = function(id, percentage, trigger){
   const nextPrice = Math.min(
     MAX_PRODUCT_PRICE,
     Math.max(
-      .01,
-      Math.round((currentPrice * (1 + (Number(percentage) / 100))) * 100) / 100
+      1,
+      Number(percentage) >= 0
+        ? roundUpToWholePrice(currentPrice * (1 + (Number(percentage) / 100)))
+        : roundDownToWholePrice(currentPrice * (1 + (Number(percentage) / 100)))
     )
   );
 
@@ -2228,7 +2238,7 @@ window.saveInlinePrice = async function(id, trigger){
     : normalizePrice(input?.dataset.basePrice);
 
   if(!editor || !input || !saveButton || nextPrice === null){
-    showToast(`السعر لازم يكون من 0.01 إلى ${MAX_PRODUCT_PRICE.toLocaleString("ar-EG")} ج.م`,"error");
+    showToast(`السعر لازم يكون رقمًا صحيحًا من 1 إلى ${MAX_PRODUCT_PRICE.toLocaleString("ar-EG")} ج.م`,"error");
     input?.focus();
     return;
   }
@@ -2468,7 +2478,7 @@ window.editProduct = function(id){
   document.getElementById("modalTitle").innerText = "تعديل منتج";
 
   document.getElementById("pName").value = p.name || "";
-  document.getElementById("pPrice").value = p.price || "";
+  document.getElementById("pPrice").value = normalizePrice(p.price) || "";
   document.getElementById("pCategory").value = p.category || "";
   const imageInput = document.getElementById("pImage");
   const hasEmbeddedImage = String(p.image || "").startsWith("data:image/");
@@ -2770,7 +2780,7 @@ window.saveProduct = async function(){
   const featured = document.getElementById("pFeatured").checked;
 
   if(!name || price === null){
-    alert(`الاسم مطلوب والسعر لازم يكون من 0.01 إلى ${MAX_PRODUCT_PRICE.toLocaleString("ar-EG")} ج.م`);
+    alert(`الاسم مطلوب والسعر لازم يكون رقمًا صحيحًا من 1 إلى ${MAX_PRODUCT_PRICE.toLocaleString("ar-EG")} ج.م`);
     return;
   }
 

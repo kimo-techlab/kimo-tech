@@ -37,8 +37,22 @@ h1{
 .top-bar{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   margin-bottom:20px;
   gap:10px;
+  padding:12px;
+  background:rgba(255,255,255,.78);
+  border:1px solid #dfe7f1;
+  border-radius:18px;
+  box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+.top-bar > div{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex:1 1 auto;
 }
 
 button{
@@ -60,7 +74,8 @@ button:disabled{
 .table{
   background:#ffffff;
   border-radius:20px;
-  overflow:hidden;
+  overflow-x:auto;
+  overflow-y:hidden;
   box-shadow:0 15px 40px rgba(0,0,0,.08);
 }
 
@@ -116,8 +131,20 @@ img{
 .search{
   padding:10px;
   border-radius:10px;
-  border:none;
-  width:250px;
+  border:1px solid #d7e0eb;
+  width:min(250px,100%);
+  min-height:42px;
+  color:#0f172a;
+  background:#fff;
+  font-family:inherit;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+
+.search:focus{
+  border-color:#38bdf8;
+  box-shadow:0 0 0 3px rgba(14,165,233,.14);
+}
 }
 
 .price-monitor{
@@ -155,6 +182,64 @@ img{
   background:#f8fafc;
   border:1px solid #e2e8f0;
   border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.price-monitor-tools{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.bulk-price-settings{
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.bulk-price-field{
+  display:grid;
+  gap:4px;
+  color:#64748b;
+  font-size:10px;
+  font-weight:900;
+}
+
+.bulk-price-field input{
+  width:78px;
+  min-height:38px;
+  padding:6px 8px;
+  color:#0f172a;
+  background:#fff;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  font:800 13px "Cairo",sans-serif;
+  text-align:center;
+}
+
+.bulk-price-field input:focus{
+  outline:none;
+  border-color:#38bdf8;
+  box-shadow:0 0 0 3px rgba(14,165,233,.14);
+}
+
+.bulk-price-btn{
+  color:#fff;
+  background:linear-gradient(135deg,#d97706,#f59e0b);
+  box-shadow:0 8px 18px rgba(217,119,6,.2);
+}
+
+.bulk-price-status{
+  margin:0 0 14px;
+  padding:10px 12px;
+  color:#475569;
+  background:#fffbeb;
+  border:1px solid #fde68a;
+  border-radius:12px;
   font-size:12px;
   font-weight:800;
 }
@@ -313,6 +398,10 @@ img{
 @media(max-width:520px){
   .price-monitor-grid{grid-template-columns:1fr}
   .price-monitor-last{width:100%;border-radius:12px}
+  .price-monitor-tools{width:100%;justify-content:stretch}
+  .price-monitor-tools > *{width:100%}
+  .bulk-price-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .bulk-price-field input{width:100%}
 }
 
 .modal{
@@ -348,6 +437,22 @@ img{
   padding:10px;
   border-radius:10px;
   border:1px solid #ddd;
+}
+
+.modal-content input:not([type="checkbox"]),
+.modal-content select{
+  width:100%;
+  min-height:44px;
+  font:inherit;
+  background:#fff;
+}
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus{
+  outline:none;
+  border-color:#38bdf8;
+  box-shadow:0 0 0 3px rgba(14,165,233,.14);
 }
 
 .toast{
@@ -542,6 +647,19 @@ img{
 }
 
 @media(max-width:768px){
+  .top-bar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .top-bar > div{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .top-bar > div > *{width:100%}
+  .top-bar .add-btn{grid-column:1/-1}
+
   .assistant-header{
     flex-direction:column;
   }
@@ -562,6 +680,12 @@ img{
   .pagination{
     justify-content:space-between;
   }
+}
+
+@media(max-width:520px){
+  .top-bar > div{grid-template-columns:1fr}
+  .top-bar .add-btn{grid-column:auto}
+  .modal-content{width:calc(100vw - 24px);padding:20px}
 }
 </style>
 <link rel="stylesheet" href="admin-ui.css">
@@ -606,8 +730,35 @@ img{
       <h2 id="priceMonitorTitle">متابعة حركة الأسعار</h2>
       <p>اضغط على أي بطاقة للفلترة، وعدّل السعر من الجدول ثم اضغط «حفظ».</p>
     </div>
-    <span id="priceLastUpdate" class="price-monitor-last">لا توجد تغييرات مسجلة بعد</span>
+    <div class="price-monitor-tools">
+      <span id="priceLastUpdate" class="price-monitor-last">لا توجد تغييرات مسجلة بعد</span>
+      <div class="bulk-price-settings" aria-label="إعدادات زيادة الأسعار">
+        <label class="bulk-price-field">
+          من صفحة
+          <input id="bulkPriceStartPage" type="number" min="1" step="1" value="8" inputmode="numeric">
+        </label>
+        <label class="bulk-price-field">
+          إلى صفحة
+          <input id="bulkPriceEndPage" type="number" min="1" step="1" value="137" inputmode="numeric">
+        </label>
+        <label class="bulk-price-field">
+          الزيادة %
+          <input id="bulkPricePercent" type="number" min="0.1" max="100" step="0.1" value="10" inputmode="decimal">
+        </label>
+      </div>
+      <button
+        class="bulk-price-btn"
+        id="bulkPriceIncreaseBtn"
+        type="button"
+        onclick="increaseSelectedPagesByPercent()"
+        disabled
+      >تنفيذ زيادة الأسعار</button>
+    </div>
   </div>
+
+  <p class="bulk-price-status" id="bulkPriceStatus" aria-live="polite">
+    سيتم احتساب النطاق بعد تحميل المنتجات.
+  </p>
 
   <div class="price-monitor-grid">
     <button class="price-stat increase" type="button" data-price-stat="increase" onclick="applyPriceChangeFilter('increase')">
@@ -781,6 +932,7 @@ const LOCAL_FALLBACK_IMAGE = "images/no-image.png";
 const MAKERS_SOURCE_SITE = "makerselectronics.com";
 const IMPORT_BATCH_SIZE = 400;
 const ADMIN_PAGE_SIZE = 60;
+const BULK_PRICE_WRITE_BATCH_SIZE = 400;
 const PRICE_HISTORY_LIMIT = 5;
 const MAX_PRODUCT_PRICE = 1000000;
 const MAX_SOURCE_IMAGE_SIZE = 12 * 1024 * 1024;
@@ -811,10 +963,14 @@ let filteredProducts = [];
 const priceDrafts = new Map();
 let currentProductsPage = 1;
 let makersImportInProgress = false;
+let bulkPriceUpdateInProgress = false;
 let makersCatalogLoadPromise = null;
 let productsLoaded = false;
 let productsLoadFailed = false;
 document.getElementById("searchInput").addEventListener("keyup", () => filterProducts({ resetPage:true }));
+["bulkPriceStartPage", "bulkPriceEndPage", "bulkPricePercent"].forEach((id) => {
+  document.getElementById(id).addEventListener("input", () => syncBulkPriceControl());
+});
 
 function escapeHtml(text){
   return String(text ?? "")
@@ -1568,6 +1724,211 @@ function buildPriceEditorMarkup(product, serializedProductId){
   `;
 }
 
+function getBulkPriceConfig(){
+  const totalPages = Math.max(1, Math.ceil(allProducts.length / ADMIN_PAGE_SIZE));
+  const startInput = document.getElementById("bulkPriceStartPage");
+  const endInput = document.getElementById("bulkPriceEndPage");
+  const percentInput = document.getElementById("bulkPricePercent");
+  const startPage = Number(startInput.value);
+  const endPage = Number(endInput.value);
+  const percentage = Math.round(Number(percentInput.value) * 100) / 100;
+
+  startInput.max = String(totalPages);
+  endInput.max = String(totalPages);
+
+  let error = "";
+  if(!Number.isInteger(startPage) || startPage < 1 || startPage > totalPages){
+    error = `صفحة البداية يجب أن تكون من 1 إلى ${totalPages}.`;
+  }else if(!Number.isInteger(endPage) || endPage < startPage || endPage > totalPages){
+    error = `صفحة النهاية يجب أن تكون من ${startPage} إلى ${totalPages}.`;
+  }else if(!Number.isFinite(percentage) || percentage <= 0 || percentage > 100){
+    error = "نسبة الزيادة يجب أن تكون أكبر من 0 وحتى 100%.";
+  }
+
+  const startIndex = error ? 0 : (startPage - 1) * ADMIN_PAGE_SIZE;
+  const endIndex = error ? 0 : Math.min(endPage * ADMIN_PAGE_SIZE, allProducts.length);
+  const storageKey = error
+    ? ""
+    : `bulk-price-operation:${startPage}:${endPage}:${percentage}`;
+
+  return {
+    error,
+    totalPages,
+    startPage,
+    endPage,
+    percentage,
+    startIndex,
+    endIndex,
+    storageKey,
+    products:error || endIndex <= startIndex ? [] : allProducts.slice(startIndex, endIndex)
+  };
+}
+
+function getBulkPriceOperationId(config, createIfMissing = false){
+  let operationId = sessionStorage.getItem(config.storageKey) || "";
+  if(!operationId && createIfMissing){
+    operationId = `${config.storageKey}:${Date.now()}`;
+    sessionStorage.setItem(config.storageKey, operationId);
+  }
+  return operationId;
+}
+
+function syncBulkPriceControl(options = {}){
+  const button = document.getElementById("bulkPriceIncreaseBtn");
+  const status = document.getElementById("bulkPriceStatus");
+  const { preserveStatus = false } = options;
+
+  if(!button || !status) return;
+
+  const config = getBulkPriceConfig();
+  button.textContent = config.error
+    ? "تنفيذ زيادة الأسعار"
+    : `زيادة ${config.percentage}% — صفحات ${config.startPage} إلى ${config.endPage}`;
+
+  if(bulkPriceUpdateInProgress){
+    button.disabled = true;
+    return;
+  }
+
+  button.disabled = !productsLoaded || productsLoadFailed || Boolean(config.error) || !config.products.length;
+  if(preserveStatus) return;
+
+  if(!productsLoaded){
+    status.textContent = "سيتم احتساب النطاق بعد تحميل المنتجات.";
+  }else if(config.error){
+    status.textContent = config.error;
+  }else if(!config.products.length){
+    status.textContent = "لا توجد منتجات ضمن نطاق الصفحات المحدد.";
+  }else{
+    const operationId = getBulkPriceOperationId(config);
+    const alreadyUpdated = operationId
+      ? config.products.filter((product) => product.lastBulkPriceOperationId === operationId).length
+      : 0;
+    const pending = config.products.length - alreadyUpdated;
+    status.textContent = alreadyUpdated
+      ? `النطاق يحتوي ${config.products.length} منتجًا؛ تم ${alreadyUpdated} والمتبقي ${pending} منتجًا.`
+      : `سيتم رفع أسعار ${config.products.length} منتج بنسبة ${config.percentage}%.`;
+  }
+}
+
+window.increaseSelectedPagesByPercent = async function(){
+  if(!productsLoaded || productsLoadFailed || bulkPriceUpdateInProgress){
+    showToast("انتظر حتى يكتمل تحميل المنتجات", "error");
+    return;
+  }
+
+  const config = getBulkPriceConfig();
+  if(config.error){
+    showToast(config.error, "error");
+    syncBulkPriceControl();
+    return;
+  }
+
+  const operationId = getBulkPriceOperationId(config, true);
+  const source = `bulk-pages-${config.startPage}-${config.endPage}-plus-${config.percentage}`;
+  const updates = [];
+  let alreadyUpdated = 0;
+  let invalidPrice = 0;
+
+  config.products.forEach((product) => {
+    if(product.lastBulkPriceOperationId === operationId){
+      alreadyUpdated += 1;
+      return;
+    }
+
+    const currentPrice = normalizePrice(product.price);
+    const multiplier = 1 + (config.percentage / 100);
+    const nextPrice = currentPrice === null
+      ? null
+      : normalizePrice(Math.round((currentPrice * multiplier) * 100) / 100);
+
+    if(currentPrice === null || nextPrice === null || nextPrice <= currentPrice){
+      invalidPrice += 1;
+      return;
+    }
+
+    updates.push({ product, currentPrice, nextPrice });
+  });
+
+  if(!updates.length){
+    sessionStorage.removeItem(config.storageKey);
+    syncBulkPriceControl();
+    showToast("لا توجد أسعار متبقية للتحديث في هذا النطاق", "success");
+    return;
+  }
+
+  const details = [
+    `سيتم رفع أسعار ${updates.length} منتج بنسبة ${config.percentage}%.`,
+    `النطاق: صفحة ${config.startPage} إلى ${config.endPage} (من المنتج ${config.startIndex + 1} إلى ${config.endIndex}).`,
+    alreadyUpdated ? `${alreadyUpdated} منتج سبق تحديثه في هذه العملية وسيتم تخطيه.` : "",
+    invalidPrice ? `${invalidPrice} منتج بسعر غير صالح سيُتخطى.` : "",
+    "هل تريد تنفيذ الزيادة الآن؟"
+  ].filter(Boolean).join("\n");
+
+  if(!confirm(details)){
+    if(!alreadyUpdated) sessionStorage.removeItem(config.storageKey);
+    return;
+  }
+
+  const button = document.getElementById("bulkPriceIncreaseBtn");
+  const status = document.getElementById("bulkPriceStatus");
+  const settingInputs = document.querySelectorAll("#bulkPriceStartPage, #bulkPriceEndPage, #bulkPricePercent");
+  let updatedCount = 0;
+
+  try{
+    bulkPriceUpdateInProgress = true;
+    button.disabled = true;
+    button.textContent = "جاري زيادة الأسعار...";
+    settingInputs.forEach((input) => { input.disabled = true; });
+
+    for(let start = 0; start < updates.length; start += BULK_PRICE_WRITE_BATCH_SIZE){
+      const chunk = updates.slice(start, start + BULK_PRICE_WRITE_BATCH_SIZE);
+      const batch = writeBatch(db);
+      const changedAt = Date.now();
+
+      chunk.forEach(({ product, nextPrice }) => {
+        const tracking = buildPriceTrackingUpdate(product, nextPrice, changedAt, source);
+        const payload = {
+          price:nextPrice,
+          updatedAt:serverTimestamp(),
+          priceChangedAt:serverTimestamp(),
+          priceUpdatedAt:serverTimestamp(),
+          priceChangeSource:source,
+          priceManuallyEdited:true,
+          lastBulkPriceOperationId:operationId,
+          lastBulkPriceOperationAt:serverTimestamp(),
+          lastBulkPriceIncreasePercent:config.percentage,
+          lastBulkPriceStartPage:config.startPage,
+          lastBulkPriceEndPage:config.endPage
+        };
+
+        if(tracking) Object.assign(payload, tracking);
+        batch.update(doc(db, "products", product.id), payload);
+      });
+
+      await batch.commit();
+      updatedCount += chunk.length;
+      chunk.forEach(({ product, nextPrice }) => {
+        product.price = nextPrice;
+        product.lastBulkPriceOperationId = operationId;
+      });
+      status.textContent = `تم تحديث ${updatedCount} من ${updates.length} منتج...`;
+    }
+
+    sessionStorage.removeItem(config.storageKey);
+    status.textContent = `تمت زيادة أسعار ${updatedCount} منتج بنسبة ${config.percentage}% بنجاح.`;
+    showToast(`تمت زيادة ${updatedCount} سعر بنسبة ${config.percentage}%`, "success");
+  }catch(error){
+    console.error(error);
+    status.textContent = `توقفت العملية بعد تحديث ${updatedCount} منتج. شغّلها مرة أخرى بنفس الإعدادات لاستكمال الباقي بدون تكرار الزيادة.`;
+    showToast("توقفت زيادة الأسعار؛ أعد المحاولة لاستكمال المتبقي", "error");
+  }finally{
+    bulkPriceUpdateInProgress = false;
+    settingInputs.forEach((input) => { input.disabled = false; });
+    syncBulkPriceControl({ preserveStatus:true });
+  }
+};
+
 function updatePriceMonitorStats(){
   let increased = 0;
   let decreased = 0;
@@ -1721,6 +2082,7 @@ function showProductsState(message){
   document.getElementById("prevProductsPageBtn").disabled = true;
   document.getElementById("nextProductsPageBtn").disabled = true;
   document.getElementById("importMakersBtn").disabled = true;
+  document.getElementById("bulkPriceIncreaseBtn").disabled = true;
 }
 
 function startProductsListener(){
@@ -1746,6 +2108,7 @@ function startProductsListener(){
     document.getElementById("importMakersBtn").disabled = false;
     populateCategories();
     filterProducts();
+    syncBulkPriceControl();
     syncLocalImageAssistant();
   }, error=>{
     console.error(error);
